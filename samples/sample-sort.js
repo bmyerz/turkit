@@ -36,7 +36,7 @@ var a = sort([4, 2, 3, 1], function (a, b) {
     var h = {title : "Compare Two Items", desc : "Compare two items, and decide which comes first.", question : getQuestion(a, b),  reward : 0.01, maxAssignments : 2}
     
     var hit = createHit(h)
-    if (vote(hit, function (a) {return a.vote[0]}) == "a") {
+    if (vote(hit, function (a) {return a.vote[0]}).bestOption == "a") {
         return -1
     } else {
         return 1
