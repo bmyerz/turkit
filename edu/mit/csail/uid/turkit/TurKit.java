@@ -15,7 +15,7 @@ import com.amazonaws.mturk.service.axis.RequesterService;
 import com.amazonaws.mturk.util.ClientConfig;
 
 public class TurKit {
-	public String version = "0.1.12";
+	public String version = "0.1.13";
 	
 	public File jsFile;
 	public JavaScriptBobble jsBobble;
