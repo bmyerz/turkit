@@ -11,5 +11,9 @@ input = input.replace(/(=[ \t]+)([^\r\n]+)/g, function(s, a, b) {
 		})
 
 eval(input)
-Packages.edu.mit.csail.uid.turkit.gui.Main(new Packages.java.io.File(jsFile),
+var jsFile = new Packages.java.io.File(filename)
+if (!jsFile.exists()) {
+	Packages.edu.mit.csail.uid.turkit.util.U.saveString(jsFile, "print(\"Hello World\")\nprint(\"Your balance is: \" + getAccountBalance())")
+}
+Packages.edu.mit.csail.uid.turkit.gui.Main(jsFile,
 		awsAccessKey, awsSecretAccessKey, sandbox, maxMoney, maxHits)

@@ -602,7 +602,11 @@ function vote(hit, extractVoteFromAnswer) {
 						approveAssignment(assignment)
 					})
 			deleteHit(hit)
-			return winner
+			return {
+				bestOption : winner,
+				totalVoteCount : hit.assignments.length,
+				voteCounts : votes
+			}
 		} else {
 			extendHit(hit, necessaryVoteCount - winnerVotes, null)
 		}

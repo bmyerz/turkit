@@ -90,7 +90,7 @@ public class NewWindow {
 				JavaScriptException je = (JavaScriptException) e;
 				JOptionPane.showMessageDialog(f, je.details());
 			} else {
-				throw new Error(e);
+				JOptionPane.showMessageDialog(f, e.getMessage());
 			}
 		}
 	}
