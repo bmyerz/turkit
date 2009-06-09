@@ -14,10 +14,10 @@ for (var i = 0; i < 5; i++) {
     // verify improvement
     if (vote(text, newText, 0.01)) {
         text = newText
-        mturk.approveAssignment(assignment)
+        mturk.approveAssignment(hit.assignments[0])
         print("\nvote = keep\n")
     } else {
-        mturk.rejectAssignment(assignment)
+        mturk.rejectAssignment(hit.assignments[0])
         print("\nvote = reject\n")
     }    
 }
