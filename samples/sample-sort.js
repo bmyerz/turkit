@@ -1,5 +1,5 @@
 
-setTrace(1)
+setTrace(2)
 
 function getQuestion(numA, numB) {
     default xml namespace = "http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionForm.xsd";
@@ -35,7 +35,7 @@ function getQuestion(numA, numB) {
 var a = mturk.sort([4, 2, 3, 1], function (a, b) {
     var h = {title : "Compare Two Items", desc : "Compare two items, and decide which comes first.", question : getQuestion(a, b),  reward : 0.01, maxAssignments : 2}
     
-    var hit = mturk.createHit(h)
+    var hit = mturk.createHIT(h)
     if (mturk.vote(hit, function (a) {return a.vote[0]}).bestOption == "a") {
         return -1
     } else {

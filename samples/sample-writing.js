@@ -63,13 +63,13 @@ var voteCost = 0.01
 
 while (money > 0) {
 	// improve text
-    var hitId = mturk.createHit({title : "Improve Text", desc : "Improve a small paragraph toward a goal.", question : createImproveQuestion(text),  reward : improveCost})
-    var hit = mturk.waitForHit(hitId)
+    var hitId = mturk.createHIT({title : "Improve Text", desc : "Improve a small paragraph toward a goal.", question : createImproveQuestion(text),  reward : improveCost})
+    var hit = mturk.waitForHIT(hitId)
     var assignment = hit.assignments[0]
     var newText = assignment.answer.newText
     
     // verify improvement
-    var voteHitId = mturk.createHit({title : "Vote on Text Improvement", desc : "Decide which two small paragraphs is closer to a goal.", question : createVoteQuestion(text, newText),  reward : voteCost, maxAssignments : 2})
+    var voteHitId = mturk.createHIT({title : "Vote on Text Improvement", desc : "Decide which two small paragraphs is closer to a goal.", question : createVoteQuestion(text, newText),  reward : voteCost, maxAssignments : 2})
     var voteResults = mturk.vote(voteHitId, function (answer) {return answer.vote[0]})
     
     money -= voteResults.totalVoteCount * voteCost

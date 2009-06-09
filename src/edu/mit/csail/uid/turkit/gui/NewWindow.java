@@ -60,7 +60,7 @@ public class NewWindow {
 		f.getContentPane().add(ok, BorderLayout.SOUTH);
 
 		f.pack();
-		f.setSize(500, (int) (1.1 * f.getHeight()));
+		f.setSize(640, (int) (1.1 * f.getHeight()));
 		f.setVisible(true);
 	}
 

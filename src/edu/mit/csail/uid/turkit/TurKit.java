@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
@@ -21,17 +23,17 @@ public class TurKit {
 	 * The version number for this release of TurKit.
 	 */
 	public String version = null;
-	
+
 	/**
 	 * A reference to the current JavaScript file being executed.
 	 */
 	public File jsFile;
-	
+
 	/**
 	 * A reference to the {@link JavaScriptBobble} associated with this TurKit program.
 	 */
 	public JavaScriptBobble bobble;
-	
+
 	/**
 	 * A reference to a RequesterService--part of the MTurk Java API.
 	 */
@@ -41,27 +43,27 @@ public class TurKit {
 	 * True iff we are using the MTurk sandbox.
 	 */
 	public boolean sandbox = false;
-	
+
 	/**
 	 * True iff we want to see verbose output from the TurKit program.
 	 */
 	public boolean verbose = true;
-	
+
 	/**
 	 * True iff the safety values {@link TurKit#maxMoney} and {@link TurKit#maxHITs} should be used.
 	 */
 	public boolean safety = true;
-	
+
 	/**
 	 * TurKit will try to ensure that no more money than this is spend over <i>all</i> runs of the program.
 	 */
 	public double maxMoney = 10;
-	
+
 	/**
 	 * TurKit will try to ensure that no more than this many HITs will be created over <i>all</i> runs of the program.
 	 */
 	public int maxHITs = 100;
-	
+
 	/**
 	 * True if the TurKit program threw the "stop" exception by calling <code>stop()</code> on the most recent run of the program.
 	 */
@@ -97,27 +99,34 @@ public class TurKit {
 	 * @param conf a ClientConfig object with the necessary information to create a RequesterService.
 	 * @throws Exception
 	 */
-	public TurKit(File jsFile, ClientConfig conf)
-			throws Exception {
+	public TurKit(File jsFile, ClientConfig conf) throws Exception {
 		init(jsFile, conf);
 	}
 
-	private void init(File jsFile, ClientConfig conf)
-			throws Exception {
-		version = U.slurp(this.getClass().getResource("/resources/version.properties"));
-		
+	private void init(File jsFile, ClientConfig conf) throws Exception {
+
+		version = U.slurp(this.getClass().getResource(
+				"/resources/version.properties"));
+		{
+			Matcher m = Pattern.compile("=\\s*([0-9\\.]+)").matcher(version);
+			if (m.find()) {
+				version = m.group(1);
+			}
+		}
+
 		this.jsFile = jsFile;
 		bobble = new JavaScriptBobble(new File(jsFile.getAbsolutePath()
-				+ ".bobble"), new File(jsFile.getAbsolutePath() + ".bobble.tmp"));
-		requesterService = new RequesterService(conf);		
+				+ ".bobble"),
+				new File(jsFile.getAbsolutePath() + ".bobble.tmp"));
+		requesterService = new RequesterService(conf);
 		sandbox = conf.getServiceURL().contains("sandbox");
 	}
-	
+
 	/**
 	 * Call this when you are done using this TurKit object. It will release any resources it is using,
 	 * including a {@link JavaScriptBobble}.
 	 */
-	
+
 	public void close() {
 		bobble.close();
 	}
@@ -133,7 +142,8 @@ public class TurKit {
 		if (maxMoney < 0 && maxHITs < 0) {
 			safety = false;
 		} else if (maxMoney < 0 || maxHITs < 0) {
-			throw new Exception("if maxMoney or maxHITs is 0, then they must both be 0.");
+			throw new Exception(
+					"if maxMoney or maxHITs is 0, then they must both be 0.");
 		}
 		try {
 			Context cx = Context.enter();
@@ -142,20 +152,23 @@ public class TurKit {
 
 			scope.put("javaTurKit", scope, this);
 
-			URL util = this.getClass().getResource("/resources/js_libs/util.js");
+			URL util = this.getClass()
+					.getResource("/resources/js_libs/util.js");
 			cx.evaluateReader(scope, new InputStreamReader(util.openStream()),
 					util.toString(), 1, null);
 
-			URL turkit = this.getClass().getResource("/resources/js_libs/turkit.js");
-			cx.evaluateReader(scope, new InputStreamReader(turkit.openStream()),
-					turkit.toString(), 1, null);
-			
-			stopped = false;			
+			URL turkit = this.getClass().getResource(
+					"/resources/js_libs/turkit.js");
+			cx.evaluateReader(scope,
+					new InputStreamReader(turkit.openStream()), turkit
+							.toString(), 1, null);
+
+			stopped = false;
 			cx.evaluateReader(scope, new FileReader(jsFile), jsFile
 					.getAbsolutePath(), 1, null);
 		} catch (Exception e) {
 			if (e instanceof JavaScriptException) {
-				JavaScriptException je = (JavaScriptException)e;
+				JavaScriptException je = (JavaScriptException) e;
 				if (je.details().equals("stop")) {
 					if (verbose) {
 						System.out.println("stopped");
@@ -170,7 +183,7 @@ public class TurKit {
 		}
 		return !stopped;
 	}
-	
+
 	/**
 	 * Calls {@link TurKit#runOnce(double, int)} repeatedly, with a delay of <code>retryAfterSeconds</code> between runs.
 	 * @param retryAfterSeconds number of seconds delay between calling {@link TurKit#runOnce(double, int)}.

@@ -334,7 +334,7 @@ function getMax(a, test) {
  */
 function convertJavaArray(ja) {
 	var a = []
-	for (var i = 0; i < js.length; i++) {
+	for (var i = 0; i < ja.length; i++) {
 		a.push(ja[i])
 	}
 	return a

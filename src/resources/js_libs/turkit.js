@@ -456,7 +456,7 @@ MTurk.prototype.createHITRaw = function(params) {
 		if (params.hitTypeId) {
 			ensure(params, 'responseGroup', []).push('HITDetail')
 		} else {
-			assertWeCanSpend(params.reward * params.maxAssignments,
+			this.assertWeCanSpend(params.reward * params.maxAssignments,
 					params.maxAssignments)
 		}
 	}
@@ -483,10 +483,10 @@ MTurk.prototype.createHITRaw = function(params) {
 
 	if (javaTurKit.safety) {
 		if (params.hitTypeId) {
-			assertWeCanSpend(parseFloat(hit.getReward().getAmount())
+			this.assertWeCanSpend(parseFloat(hit.getReward().getAmount())
 							* params.maxAssignments, params.maxAssignments,
 					function() {
-						disableHITRaw(hit)
+						mturk.disableHITRaw(hit)
 					})
 		} else {
 		}
@@ -507,7 +507,7 @@ MTurk.prototype.createHITRaw = function(params) {
  */
 MTurk.prototype.createHIT = function(params) {
 	return once(function() {
-				return createHITRaw(params)
+				return mturk.createHITRaw(params)
 			})
 }
 
@@ -565,7 +565,7 @@ MTurk.prototype.tryToGetAssignmentId = function(assignment) {
  * Returns an array of assignments for the given <code>hit</code>.
  */
 MTurk.prototype.getAssignmentsForHIT = function(hit) {
-	var hitId = tryToGetHITId(hit)
+	var hitId = this.tryToGetHITId(hit)
 	return convertJavaArray(this.keepTrying(function() {
 				return mturk.requesterService.getAllAssignmentsForHIT(hitId)
 			}))
@@ -580,14 +580,14 @@ MTurk.prototype.extendHITRaw = function(hit, moreAssignments, moreSeconds) {
 		if (moreAssignments != null) {
 			if ((typeof hit == "object") && ("reward" in hit)) {
 			} else {
-				hit = getHIT(hit)
+				hit = this.getHIT(hit)
 			}
-			assertWeCanSpend(parseFloat(hit.reward) * moreAssignments,
+			this.assertWeCanSpend(parseFloat(hit.reward) * moreAssignments,
 					moreAssignments)
 		}
 	}
 
-	var hitId = tryToGetHITId(hit)
+	var hitId = this.tryToGetHITId(hit)
 	this.keepTrying(function() {
 				mturk.requesterService.extendHIT(hitId, moreAssignments,
 						moreSeconds)
@@ -600,7 +600,7 @@ MTurk.prototype.extendHITRaw = function(hit, moreAssignments, moreSeconds) {
  */
 MTurk.prototype.extendHIT = function(hit, moreAssignments, moreSeconds) {
 	return once(function() {
-				return extendHITRaw(hit, moreAssignments, moreSeconds)
+				return mturk.extendHITRaw(hit, moreAssignments, moreSeconds)
 			})
 }
 
@@ -611,10 +611,10 @@ MTurk.prototype.extendHIT = function(hit, moreAssignments, moreSeconds) {
 MTurk.prototype.deleteHITsRaw = function(hits) {
 	if ((typeof hits) == "object" && (hits instanceof Array)) {
 		var hitIds = map(hits, function(h) {
-					return tryToGetHITId(h)
+					return mturk.tryToGetHITId(h)
 				})
 	} else {
-		var hitIds = [tryToGetHITId(hits)]
+		var hitIds = [this.tryToGetHITId(hits)]
 	}
 	this.keepTrying(function() {
 				mturk.requesterService.deleteHITs(hitIds, true, true, null)
@@ -626,7 +626,7 @@ MTurk.prototype.deleteHITsRaw = function(hits) {
  */
 MTurk.prototype.deleteHITs = function(hits) {
 	once(function() {
-				deleteHITRaw(hits)
+				mturk.deleteHITsRaw(hits)
 			})
 }
 
@@ -635,7 +635,7 @@ MTurk.prototype.deleteHITs = function(hits) {
  * better when deleting a single HIT.
  */
 MTurk.prototype.deleteHIT = function(hit) {
-	deleteHITs(hit)
+	this.deleteHITs(hit)
 }
 
 /**
@@ -656,7 +656,7 @@ MTurk.prototype.grantBonusRaw = function(assignment, amount, reason) {
  */
 MTurk.prototype.grantBonus = function(assignment, amount, reason) {
 	return once(function() {
-				return grantBonusRaw(assignment, amount, reason)
+				return mturk.grantBonusRaw(assignment, amount, reason)
 			})
 }
 
@@ -665,7 +665,7 @@ MTurk.prototype.grantBonus = function(assignment, amount, reason) {
  * <code>reason</code>.
  */
 MTurk.prototype.approveAssignmentRaw = function(assignment, reason) {
-	assignmentId = tryToGetAssignmentId(assignment)
+	assignmentId = this.tryToGetAssignmentId(assignment)
 	this.keepTrying(function() {
 				mturk.requesterService.approveAssignment(assignmentId, reason)
 			})
@@ -677,7 +677,7 @@ MTurk.prototype.approveAssignmentRaw = function(assignment, reason) {
  */
 MTurk.prototype.approveAssignment = function(assignment, reason) {
 	return once(function() {
-				return approveAssignmentRaw(assignment, reason)
+				return mturk.approveAssignmentRaw(assignment, reason)
 			})
 }
 
@@ -687,7 +687,7 @@ MTurk.prototype.approveAssignment = function(assignment, reason) {
  */
 MTurk.prototype.approveAssignments = function(assignments, reason) {
 	foreach(assignments, function(assignment) {
-				approveAssignment(assignment, reason)
+				mturk.approveAssignment(assignment, reason)
 			})
 }
 
@@ -696,7 +696,7 @@ MTurk.prototype.approveAssignments = function(assignments, reason) {
  * <code>reason</code>.
  */
 MTurk.prototype.rejectAssignmentRaw = function(assignment, reason) {
-	assignmentId = tryToGetAssignmentId(assignment)
+	assignmentId = this.tryToGetAssignmentId(assignment)
 	this.keepTrying(function() {
 				mturk.requesterService.rejectAssignment(assignmentId, reason)
 			})
@@ -708,7 +708,7 @@ MTurk.prototype.rejectAssignmentRaw = function(assignment, reason) {
  */
 MTurk.prototype.rejectAssignment = function(assignment, reason) {
 	return once(function() {
-				return rejectAssignmentRaw(assignment, reason)
+				return mturk.rejectAssignmentRaw(assignment, reason)
 			})
 }
 
@@ -718,7 +718,7 @@ MTurk.prototype.rejectAssignment = function(assignment, reason) {
  */
 MTurk.prototype.rejectAssignments = function(assignments, reason) {
 	foreach(assignments, function(assignment) {
-				rejectAssignment(assignment, reason)
+				mturk.rejectAssignment(assignment, reason)
 			})
 }
 
@@ -745,7 +745,7 @@ MTurk.prototype.getHITs = function() {
  * </p>
  */
 MTurk.prototype.getHIT = function(hit) {
-	var hitId = tryToGetHITId(hit)
+	var hitId = this.tryToGetHITId(hit)
 	var hit = this.keepTrying(function() {
 				return mturk.requesterService.getHIT(hitId)
 			})
@@ -767,7 +767,7 @@ MTurk.prototype.getHIT = function(hit) {
 		expiration : hit.getExpiration().getTimeInMillis(),
 		assignments : []
 	}
-	foreach(getAssignmentsForHIT(hitId), function(javaAssignment) {
+	foreach(this.getAssignmentsForHIT(hitId), function(javaAssignment) {
 				function getTime(t) {
 					if (t != null)
 						return t.getTimeInMillis()
@@ -842,9 +842,9 @@ MTurk.prototype.getHIT = function(hit) {
  * progress.
  */
 MTurk.prototype.waitForHIT = function(hit) {
-	var hitId = tryToGetHITId(hit)
+	var hitId = this.tryToGetHITId(hit)
 	return once(function() {
-				var hit = getHIT(hitId);
+				var hit = mturk.getHIT(hitId);
 				if (!hit.done) {
 					stop()
 				};
@@ -878,9 +878,9 @@ MTurk.prototype.waitForHIT = function(hit) {
  */
 MTurk.prototype.vote = function(hit, extractVoteFromAnswer) {
 	var necessaryVoteCount = null
-	var hitId = tryToGetHITId(hit)
+	var hitId = this.tryToGetHITId(hit)
 	while (true) {
-		var hit = waitForHIT(hitId)
+		var hit = this.waitForHIT(hitId)
 
 		if (necessaryVoteCount == null) {
 			necessaryVoteCount = hit.maxAssignments
@@ -896,16 +896,16 @@ MTurk.prototype.vote = function(hit, extractVoteFromAnswer) {
 
 		if (winnerVotes >= necessaryVoteCount) {
 			foreach(hit.assignments, function(assignment) {
-						approveAssignment(assignment)
+						mturk.approveAssignment(assignment)
 					})
-			deleteHIT(hit)
+			this.deleteHIT(hit)
 			return {
 				bestOption : winner,
 				totalVoteCount : hit.assignments.length,
 				voteCounts : votes
 			}
 		} else {
-			extendHIT(hit, necessaryVoteCount - winnerVotes, null)
+			this.extendHIT(hit, necessaryVoteCount - winnerVotes, null)
 		}
 	}
 }
@@ -918,7 +918,7 @@ MTurk.prototype.vote = function(hit, extractVoteFromAnswer) {
 MTurk.prototype.sort = function(a, comparator) {
 	traceManager.pushFrame()
 	try {
-		var sortTree = getFrameValue("sortTree")
+		var sortTree = traceManager.getFrameValue("sortTree")
 		if (!sortTree)
 			sortTree = {}
 
@@ -940,7 +940,7 @@ MTurk.prototype.sort = function(a, comparator) {
 					if (attempt(function() {
 								insertIntoTree(i, sortTree)
 							})) {
-						setFrameValue("sortTree", sortTree)
+						traceManager.setFrameValue("sortTree", sortTree)
 					} else {
 						done = false
 					}
