@@ -1,14 +1,17 @@
 
+setTrace(3)
+
 var text = ""
 
 for (var i = 0; i < 5; i++) {
-	// improve text
+    // improve text
     var hitId = createImproveHIT(text, 0.02)
     var hit = mturk.waitForHIT(hitId)
     
     var newText = hit.assignments[0].answer.newText
     print("-------------------")
     print(newText)
+    print("-------------------")
     
     // verify improvement
     if (vote(text, newText, 0.01)) {
@@ -30,24 +33,11 @@ function createImproveHIT(oldText, improveCost) {
             <IsRequired>true</IsRequired>
             <QuestionContent>
                 <FormattedContent><![CDATA[
-<p><b>Please improve the description for this sonnet.</b></p>
-<p>Sweet love, renew thy force; be it not said<br/>
-Thy edge should blunter be than appetite,<br/>
-Which but to-day by feeding is allay'd,<br/>
-To-morrow sharpened in his former might:<br/>
-So, love, be thou, although to-day thou fill<br/>
-Thy hungry eyes, even till they wink with fulness,<br/>
-To-morrow see again, and do not kill<br/>
-The spirit of love, with a perpetual dulness.<br/>
-Let this sad interim like the ocean be<br/>
-
-Which parts the shore, where two contracted new<br/>
-Come daily to the banks, that when they see<br/>
-Return of love, more blest may be the view;</p>
-<dl>
-<dd>Or call it winter, which being full of care,</dd>
-<dd>Makes summer's welcome, thrice more wished, more rare.</dd>
-</dl>
+<ul>
+<li>Please improve the description for this image.</li>
+<li>People will vote whether to approve your work.</li>
+</ul>
+<img src="http://groups.csail.mit.edu/uid/turkit/www/nut_people.jpg" alt="description not available"></img>
 ]]></FormattedContent>
             </QuestionContent>
             <AnswerSpecification>
@@ -63,7 +53,7 @@ Return of love, more blest may be the view;</p>
         </Question>
     </QuestionForm>
     
-    return mturk.createHIT({title : "Improve Text", desc : "Improve a small paragraph toward a goal.", question : "" + q, reward : improveCost})
+    return mturk.createHIT({title : "Improve Text", desc : "Improve a small paragraph toward a goal.", question : "" + q, reward : improveCost, assignmentDurationInSeconds : 5 * 60})
 }
 
 
@@ -74,7 +64,12 @@ function vote(textA, textB, voteCost) {
             <QuestionIdentifier>vote</QuestionIdentifier>
             <IsRequired>true</IsRequired>
             <QuestionContent>
-                <Text>Which is a better description of the taste of salt?</Text>
+                <FormattedContent><![CDATA[
+<ul>
+<li>Please select the better description for this image.</li>
+</ul>
+<img src="http://groups.csail.mit.edu/uid/turkit/www/nut_people.jpg" alt="description not available"></img>
+]]></FormattedContent>
             </QuestionContent>
             <AnswerSpecification>
                 <SelectionAnswer>
