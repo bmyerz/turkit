@@ -1,6 +1,4 @@
 
-setTrace(3)
-
 var text = ""
 
 for (var i = 0; i < 5; i++) {
