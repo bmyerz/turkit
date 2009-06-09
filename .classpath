@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path=""/>
+	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="libs/velocity-tools-1.4/velocity-tools-1.4.jar"/>
 	<classpathentry kind="lib" path="libs/ws-jaxme-0.5.2/jaxme2-0.5.2.jar"/>
@@ -42,5 +42,6 @@
 	<classpathentry kind="lib" path="libs/opencsv-1.8/opencsv-1.8.jar"/>
 	<classpathentry kind="lib" path="libs/rhino1_7R2/js.jar"/>
 	<classpathentry kind="lib" path="libs/velocity-1.5/velocity-1.5.jar"/>
-	<classpathentry kind="output" path=""/>
+	<classpathentry kind="lib" path="libs/javadocking1.4.1/javadocking.jar"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

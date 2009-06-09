@@ -1,0 +1,90 @@
+<project name="turkit" default="build" basedir=".">
+
+	<property file="src/resources/version.properties" />
+	<property name="run_jar_file" value="TurKit-${version.value}.jar" />
+	<property name="output_dir" value="build" />
+
+	<target name="jsdocs" description="build JavaScript documentation">
+		<exec executable="java" dir="jsdoc-toolkit">
+			<arg value="-jar" />
+			<arg value="jsrun.jar" />
+			<arg value="app/run.js" />
+			<arg value="-a" />
+			<arg value="-t=templates/jsdoc" />
+			<arg value="-d=../jsdocs" />
+			<arg value="../src/resources/turkit.js" />
+			<arg value="../src/resources/util.js" />
+		</exec>
+	</target>
+
+	<target name="javadoc" description="build Java documentation">
+		<exec executable="javadoc">
+			<arg value="-d" />
+			<arg value="javadocs" />
+			<arg value="-sourcepath" />
+			<arg value="src" />
+			<arg value="-subpackages" />
+			<arg value="edu" />
+			<arg value="-exclude" />
+			<arg value="edu.mit.csail.uid.turkit.util:edu.mit.csail.uid.turkit.gui" />
+		</exec>
+	</target>
+
+	<target name="create_run_jar">
+		<copy file="${output_dir}/latest-template.html" tofile="${output_dir}/latest.html" />
+		<replace file="${output_dir}/latest.html" token="@@@" value="${run_jar_file}" />
+		<jar destfile="${output_dir}/${run_jar_file}" filesetmanifest="mergewithoutmain">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
+				<attribute name="Main-Class" value="edu.mit.csail.uid.turkit.gui.NewWindow" />
+				<attribute name="Class-Path" value="." />
+			</manifest>
+			<fileset dir="C:/EclipseWorkspace/TurKit/bin" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/velocity-tools-1.4/velocity-tools-1.4.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/ws-jaxme-0.5.2/jaxme2-0.5.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/ws-jaxme-0.5.2/jaxme2-rt-0.5.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/ws-jaxme-0.5.2/jaxmeapi-0.5.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/ws-jaxme-0.5.2/jaxmejs-0.5.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/ws-jaxme-0.5.2/jaxmepm-0.5.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/ws-jaxme-0.5.2/jaxmexs-0.5.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/wsdl4j-1.5.1/wsdl4j.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/wstx-asl-3.2.3/wstx-asl-3.2.3.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/xerces-2.9.1/resolver.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/xerces-2.9.1/xercesImpl.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/xerces-2.9.1/xml-apis.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/apache-log4j-1.2.15/log4j-1.2.15.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/axis-1.4/axis-ant.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/axis-1.4/axis.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/axis-1.4/commons-discovery-0.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/axis-1.4/jaxrpc.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/axis-1.4/saaj.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-beanutils-1.7.0/commons-beanutils.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-codec-1.3/commons-codec-1.3.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-collections-3.2/commons-collections-3.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-collections-3.2/commons-collections-testframework-3.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-dbcp-1.2.2/commons-dbcp-1.2.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-digester-1.8/commons-digester-1.8.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-httpclient-3.1/commons-httpclient-3.1.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-lang-2.3/commons-lang-2.3.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-logging-1.0.4/commons-logging-api.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-logging-1.0.4/commons-logging.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-logging-1.1.1/commons-logging-1.1.1.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/commons-pool-1.3/commons-pool-1.3.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/dom4j-1.6.1/dom4j-1.6.1.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/geronimo-activation-1.0.2/geronimo-activation_1.0.2_spec-1.2.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/geronimo-javamail-1.3.1/geronimo-javamail_1.3.1_spec-1.3.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/jets3t-0.7.0/jets3t-0.7.0.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/mturk-java-sdk-1.2.1/aws-mturk-dataschema.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/mturk-java-sdk-1.2.1/aws-mturk-wsdl.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/mturk-java-sdk-1.2.1/java-aws-mturk.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/opencsv-1.8/opencsv-1.8.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/rhino1_7R2/js.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/velocity-1.5/velocity-1.5.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="C:/EclipseWorkspace/TurKit/libs/javadocking1.4.1/javadocking.jar" />
+		</jar>
+	</target>
+
+	<target name="build" depends="jsdocs,javadoc,create_run_jar" description="build everything">
+	</target>
+
+</project>
