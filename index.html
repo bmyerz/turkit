@@ -3,53 +3,84 @@
 <title>TurKit Homepage</title>
 <style>
 
+body {
+	font-family:sans-serif;
+}
+#head {
+	padding:10px;
+	text-align:right;
+}
+#content {
+	width:90%;
+	max-width:900px;
+}
 .main td {
+	vertical-align:top;
     padding-left : 20px;
     padding-right : 20px;
     padding-bottom : 20px;
+}
+#videohere {
+	text-align:center;
+	padding-bottom:1.5em;
+}
+a {
+	text-decoration:none;
+}
+a:hover {
+	text-decoration:underline;
+}
+h4#dl a {
+	padding:.4em;
+	background:#cfc;
+	border:1px solid #9c9;
+}
+h4 a {
+	padding:.4em;
+	background:#ffc;
+	border:1px solid #cc9;
+}
+ul li {
+	padding-bottom:.2em;
+}
+#foot {
+	padding:10px;
+	font-size:smaller;
 }
 
 </style>
 </head>
 <body>
-<table width="100%">
-<tr><td align="right"><a href="http://groups.csail.mit.edu/uid/">User Interface Design Group</a></td></tr>
-</table>
+<div id="head"><a href="http://groups.csail.mit.edu/uid/">User Interface Design Group</a></div>
+<div id="content">
 <table class="main">
     <tr valign="top">
-        <td>
-            <img src="www/logo-140.png"></img>
+        <td rowspan="2">
+            <img src="www/logo-140.png" width="140" height="55" alt="TurKit" />
         </td>
-        <td>
+        <td colspan="2">
 
-<h3>Overview</h3>
-<p>TurKit may be viewed as a Java/JavaScript API for running iterative tasks on Mechanical Turk. The primary feature of TurKit is the ability to safely reexecute TurKit programs without reexecuting costly side effecting functions on Mechanical Turk (like creating new HITs), while still allowing the programmer to write in a straight-line imperative manner&mdash;there is no need to unravel the program into a state machine. </p>
-<ul>
-<li>
-    For a more detailed overview, <a href="http://glittle.org/Papers/TurKitUIST2009.pdf">please see this paper</a>.
-</li>
-</ul>
+<h3>Iterative Tasks on Mechanical Turk</h3>
+<p>TurKit is a Java/JavaScript API for running iterative tasks on Mechanical Turk. You can safely re-execute TurKit programs without re-running costly side effects on Mechanical Turk, like creating new HITs, but still write your program in a straightforward imperative manner&mdash;there is no need to unravel the program into a state machine. For a detailed description, please <a href="http://glittle.org/Papers/TurKit.pdf">read the paper</a>.
+</p>
 
-<h3>Resources</h3>
-<p>TurKit is open source under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>, and is hosted on <a href="http://code.google.com/p/turkit">Google Code</a>.</p>
-<ul>
-<li>
-<a href="http://code.google.com/p/turkit/downloads/list">Download</a>
-</li>
-<li>
-<a href="http://code.google.com/p/turkit/source/checkout">SourceCode</a>
-</li>
-</ul>
+<div id="videohere">
 
-<ul>
-<li>
-<a href="http://groups.google.com/group/turkit-discussion">Mailing list</a>
-</li>
-</ul>
+<object width="436" height="240"><param name="allowfullscreen" value="true" /><param name="allowscriptaccess" value="always" /><param name="movie" value="http://vimeo.com/moogaloop.swf?clip_id=5088261&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=c9ff23&amp;fullscreen=1" /><embed src="http://vimeo.com/moogaloop.swf?clip_id=5088261&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=0&amp;show_portrait=0&amp;color=c9ff23&amp;fullscreen=1" type="application/x-shockwave-flash" allowfullscreen="true" allowscriptaccess="always" width="436" height="240"></embed></object>
+
+</div>
+
+</td></tr><tr><td>
+
+<h3>Get Started</h3>
+<h4 id="dl">
+<a href="http://code.google.com/p/turkit/downloads/list">Download TurKit</a>
+</h4>
+<p>TurKit is open source under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>, and is hosted on <a href="http://code.google.com/p/turkit">Google Code</a>&mdash;you can <a href="http://code.google.com/p/turkit/source/checkout">download the source code</a>.</p>
+
+<p><a href="http://groups.google.com/group/turkit-discussion">Join the TurKit Discussion on Google Groups</a>.</p>
 
 <h3>Tutorials</h3>
-More to come here...
-
 <ul>
 <li>
 <a href="samples/sample-writing.js">Sample Program: Iterative Text Improvement</a>
@@ -57,54 +88,44 @@ More to come here...
 <li>
 <a href="samples/sample-sort.js">Sample Program: Subjective Sorting</a>
 </li>
+<li>And more to come...</li>
 </ul>
 
+</td><td>
 
 <h3>Documentation</h3>
 
-<ul>
-<li>
-<a href="jsdocs">TurKit JavaScript API</a>
-</li>
-<li>
-<a href="javadocs">TurKit Java API</a>
-</li>
-</ul>
-
-<ul><li> <a href="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/" class="external text" title="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/">MTurk REST API</a>.<br>From the sidebar, open API Reference, and then Operations
-</li><li> <a href="http://people.csail.mit.edu/glittle/MTurkJavaAPI/index.html" class="external text" title="http://people.csail.mit.edu/glittle/MTurkJavaAPI/index.html">MTurk Java API</a><br>NOTE: the TurKit JavaScript API provides a variable called <code>mturk.requesterService</code> which is a reference to a <a href="http://people.csail.mit.edu/glittle/MTurkJavaAPI/index.html?com/amazonaws/mturk/service/axis/RequesterService.html" class="external text" title="http://people.csail.mit.edu/glittle/MTurkJavaAPI/index.html?com/amazonaws/mturk/service/axis/RequesterService.html">RequesterService</a> object.
-</li><li><a href="http://jets3t.s3.amazonaws.com/api/index.html" class="external text" title="http://jets3t.s3.amazonaws.com/api/index.html">JetS3t API</a> (Java API for S3)
-<ul><li> <a href="http://jets3t.s3.amazonaws.com/toolkit/code-samples.html" class="external text" title="http://jets3t.s3.amazonaws.com/toolkit/code-samples.html">Code Samples</a>
-</li><li> <a href="http://jets3t.s3.amazonaws.com/index.html" class="external text" title="http://jets3t.s3.amazonaws.com/index.html">JetS3t Home Page</a> 
-</li></ul>
-</li><li><a href="http://www.mozilla.org/rhino/apidocs/" class="external text" title="http://www.mozilla.org/rhino/apidocs/">Rhino Java API</a><br>This is the JavaScript engine used to execute JavaScript code from Java, as well as JavaScript code in the <a href="javadocs/index.html?edu/mit/csail/uid/turkit/JavaScriptBobble.html" title="JavaScript Bobble">JavaScript Bobble</a>
-<li> <a href="http://www.mozilla.org/rhino/" class="external text" title="http://www.mozilla.org/rhino/">Rhino Home Page</a>
-</li><li> <a href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Guide:Processing_XML_with_E4X" class="external text" title="https://developer.mozilla.org/En/Core_JavaScript_1.5_Guide:Processing_XML_with_E4X">Processing XML</a>
-</li><li> <a href="http://www.javadocking.com/" class="external text" title="http://www.javadocking.com/">Sanaware Java Docking API</a>
-</li></ul>
+<h4><a href="jsdocs">TurKit JavaScript API</a></h4>
+<h4><a href="javadocs">TurKit Java API</a></h4>
 
 <h3>External Links</h3>
 
 <ul><li> <a href="https://aws-portal.amazon.com/gp/aws/developer/account/index.html?ie=UTF8&amp;action=access-key" class="external text" title="https://aws-portal.amazon.com/gp/aws/developer/account/index.html?ie=UTF8&amp;action=access-key">View your Amazon AWS access keys</a>
 </li></ul>
 
-<h3>Acknowledgements</h3>
-TurKit was supported in part by the National Science Foundation (award number IIS-0447800) and by Quanta Computer, Inc as part of the T-Party project. Any opinions, findings, conclusions or recommendations expressed herein are those of the authors and do not necessarily reflect the views of the sponsors. 
+<ul><li> <a href="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/" class="external text" title="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/">MTurk REST API</a><br/><small>From the sidebar, open API Reference, then Operations</small>
+</li><li> <a href="http://people.csail.mit.edu/glittle/MTurkJavaAPI/index.html" class="external text" title="http://people.csail.mit.edu/glittle/MTurkJavaAPI/index.html">MTurk Java API</a><br/><small>Note: the TurKit JavaScript API provides a variable called <code>mturk.requesterService</code> which is a reference to a <a href="http://people.csail.mit.edu/glittle/MTurkJavaAPI/index.html?com/amazonaws/mturk/service/axis/RequesterService.html" class="external text" title="http://people.csail.mit.edu/glittle/MTurkJavaAPI/index.html?com/amazonaws/mturk/service/axis/RequesterService.html">RequesterService</a> object</small>
+</li><li><a href="http://jets3t.s3.amazonaws.com/api/index.html" class="external text" title="http://jets3t.s3.amazonaws.com/api/index.html">JetS3t API</a> (Java API for S3)
+<ul><li> <a href="http://jets3t.s3.amazonaws.com/toolkit/code-samples.html" class="external text" title="http://jets3t.s3.amazonaws.com/toolkit/code-samples.html">Code Samples</a>
+</li><li> <a href="http://jets3t.s3.amazonaws.com/index.html" class="external text" title="http://jets3t.s3.amazonaws.com/index.html">JetS3t Home Page</a> 
+</li></ul>
+</li><li><a href="http://www.mozilla.org/rhino/apidocs/" class="external text" title="http://www.mozilla.org/rhino/apidocs/">Rhino Java API</a><br/><small>This is the JavaScript engine used to execute JavaScript code from Java, as well as JavaScript code in the <a href="javadocs/index.html?edu/mit/csail/uid/turkit/JavaScriptBobble.html" title="JavaScript Bobble">JavaScript Bobble</a></small></li>
+<li> <a href="http://www.mozilla.org/rhino/" class="external text" title="http://www.mozilla.org/rhino/">Rhino Home Page</a>
+</li><li> <a href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Guide:Processing_XML_with_E4X" class="external text" title="https://developer.mozilla.org/En/Core_JavaScript_1.5_Guide:Processing_XML_with_E4X">Processing XML</a>
+</li><li> <a href="http://www.javadocking.com/" class="external text" title="http://www.javadocking.com/">Sanaware Java Docking API</a>
+</li></ul>
+
 
         </td>
     </tr>
 </table>
+</div>
 <hr/> 
 
-<table width="100%">
-  <tbody>
-    <tr>
-       <td align="left">
-         &copy;2009 Massachusetts Institute of Technology 
-       </td>
-    </tr>
-
-</table> 
+<div id="foot">
+		<p>TurKit was supported in part by the National Science Foundation (award number IIS-0447800) and by Quanta Computer, Inc as part of the T-Party project. Any opinions, findings, conclusions or recommendations expressed herein are those of the authors and do not necessarily reflect the views of the sponsors.</p>
+         <p>&copy;2009 Massachusetts Institute of Technology</p>
+</div>
 
 </body>
 </html>
