@@ -339,3 +339,48 @@ function convertJavaArray(ja) {
 	}
 	return a
 }
+
+/**
+	Escape the string for use inside XML, e.g., convert characters like &amp; into &amp;amp;.
+ */
+escapeXml = function (s) {
+    s = s.replace(/&/g, "&amp;")
+    s = s.replace(/</g, "&lt;").
+        replace(/>/g, "&gt;").
+        replace(/'/g, "&apos;").
+        replace(/"/g, "&quot;").
+//            replace(/[\u0000-\u001F]|[\u0080-\uFFFF]/g, function (c) {
+        replace(/[\u0080-\uFFFF]/g, function (c) {
+            var code = c.charCodeAt(0)
+            return '&#' + code + ';'
+            // if we want hex:
+            var hex = code.toString(16)
+            return '&#x' + hex + ';'
+        })
+    return s;
+}
+
+/**
+	Unescape a string with XML escape codes, e.g., convert sequences like &amp;amp; into &amp;.
+ */
+unescapeXml = function (s) {
+    return s.replace(/&[^;]+;/g, function (s) {
+        switch(s.substring(1, s.length - 1)) {
+            case "amp":  return "&";
+            case "lt":   return "<";
+            case "gt":   return ">";
+            case "apos": return "'";
+            case "quot": return '"';
+            default:
+                if (s.charAt(1) == "#") {
+                    if (s.charAt(2) == "x") {
+                        return String.fromCharCode(parseInt(s.substring(3, s.length - 1), 16));
+                    } else {
+                        return String.fromCharCode(parseInt(s.substring(2, s.length - 1)));
+                    }
+                } else {
+                    throw "unknown XML escape sequence: " + s
+                }
+        }
+    })
+}

@@ -72,7 +72,7 @@
 			<zipfileset excludes="META-INF/*.SF" src="libs/dom4j-1.6.1/dom4j-1.6.1.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="libs/geronimo-activation-1.0.2/geronimo-activation_1.0.2_spec-1.2.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="libs/geronimo-javamail-1.3.1/geronimo-javamail_1.3.1_spec-1.3.jar" />
-			<zipfileset excludes="META-INF/*.SF" src="libs/jets3t-0.7.0/jets3t-0.7.0.jar" />
+			<zipfileset excludes="META-INF/*.SF" src="libs/jets3t-0.7.1/jets3t-0.7.1.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="libs/mturk-java-sdk-1.2.1/aws-mturk-dataschema.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="libs/mturk-java-sdk-1.2.1/aws-mturk-wsdl.jar" />
 			<zipfileset excludes="META-INF/*.SF" src="libs/mturk-java-sdk-1.2.1/java-aws-mturk.jar" />

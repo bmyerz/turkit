@@ -288,9 +288,6 @@ var traceManager = new TraceManager()
  * </p>
  */
 function MTurk() {
-	/*
-	 * A reference to a RequesterService object in the Java MTurk API.
-	 */
 	this.requesterService = javaTurKit.requesterService
 }
 
@@ -372,7 +369,16 @@ MTurk.prototype.getAccountBalance = function() {
  * description of the HIT, also shown in the list of HITs on MTurk</li>
  * <li><b>question</b>: a string of XML specifying what will be shown. <a
  * href="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/index.html?ApiReference_QuestionFormDataStructureArticle.html">See
- * documentation here</a>.</li>
+ * documentation here</a>. Instead of <i>question</i>, you may use either of the following special parameters native to TurKit:
+ <ul>
+ <li><b>url</b>: assumes an external question</li>
+ <li><b>html</b>: this HTML will be injected into a template, uploaded to a bucket in your S3 account, and the URL will be supplied as an external question.</li>
+ <li><b>height</b>: (optional) height of the iFrame embedded in MTurk, in pixels (default is 600).</li>
+ <li><b>bucket</b>: (optional) S3 bucket to put the generated HTML page in (default is <code>&lt;your-aws-access-key-id&gt;-turkit</code>).</li>
+ <li><b>blockWorkers</b>: (optional) <i> only work with <b>html</b>, not <b>url</b></i>. An array or string of worker IDs to block from performing this HIT.</li>
+ </ul>
+ 
+ </li>
  * <li><b>reward</b>: how many dollars you want to pay per assignment for this
  * HIT.
  * </ul>
@@ -426,6 +432,22 @@ MTurk.prototype.createHITRaw = function(params) {
 		}
 	}
 
+	if (params.html) {
+		if (!params.bucket) {
+			params.bucket = javaTurKit.awsAccessKeyID.toLowerCase() + "-turkit"
+		}
+		var s = ("" + javaTurKit.taskTemplate).replace(/\[\[\[CONTENT\]\]\]/, params.html)
+		var key = Packages.edu.mit.csail.uid.turkit.util.U.md5(s) + ".html"
+		params.url = s3.putString(params.bucket, key, s)
+		
+		if (params.blockWorkers) {
+			if ((typeof params.blockWorkers) != "string") {
+				params.blockWorkers = params.blockWorkers.join(",")
+			}
+			params.url += "?blockWorkers=" + params.blockWorkers
+		}
+	}
+	
 	if (params.url) {
 		if (!params.height)
 			params.height = 600
@@ -441,7 +463,7 @@ MTurk.prototype.createHITRaw = function(params) {
 	}
 
 	if (!params.question)
-		throw "createHIT requires a question"
+		throw "createHIT requires a question (or a url, or html)"
 
 	if (!params.lifetimeInSeconds)
 		params.lifetimeInSeconds = 60 * 60 * 24 * 7 // one week
@@ -981,6 +1003,79 @@ MTurk.prototype.sort = function(a, comparator) {
  * @return {MTurk}
  */
 mturk = new MTurk()
+
+// /////////////////////////////////////////////////////////////////////
+// JetS3t Wrappers and Utilities
+
+/**
+ * You probably want to use the global variable <code>s3</code>.
+ * 
+ * @class S3 contains wrappers around the JetS3t API for accessing Amazon's S3 storage service.
+ * 
+ * <p>
+ * <code>s3</code> is a global instance of the S3 class.
+ * </p>
+ */
+function S3() {
+	this.s3Service = javaTurKit.s3Service
+}
+
+/**
+ * A reference to an S3Service object in the JetS3t API.
+ */
+S3.prototype.s3Service = null
+
+/**
+	Add public permissions to the given S3Object, and upload it to S3.
+	This function will create the bucket if it doesn't exist.
+	Returns the URL for the object.
+ */
+S3.prototype.putObject = function(bucketName, s3Object) {
+	var bucket = this.s3Service.getOrCreateBucket(bucketName)
+	var acl = this.s3Service.getBucketAcl(bucket)
+	acl.grantPermission(org.jets3t.service.acl.GroupGrantee.ALL_USERS,
+		org.jets3t.service.acl.Permission.PERMISSION_READ)
+	s3Object.setAcl(acl)
+	this.s3Service.putObject(bucket, s3Object);
+	var url = "http://" + bucket.getName() + ".s3.amazonaws.com/" + s3Object.getKey()
+	if (verbose) {
+		print("S3 object put at: " + url)
+	}
+	return url
+}
+
+/**
+	Create a public object in S3 based on a string.
+	Returns the URL for the object.
+ */
+S3.prototype.putString = function(bucketName, key, stringData) {
+	var o = new Packages.org.jets3t.service.model.S3Object(key, stringData)
+	if (key.match(/\.html$/)) {
+		o.setContentType("text/html")
+	}
+	return this.putObject(bucketName, o)
+}
+
+/**
+	Create a public object in S3 based on a file.
+	Returns the URL for the object.
+ */
+S3.prototype.putFile = function(bucketName, file) {
+	if ((typeof file) == "string") {
+		file = new java.io.File(file)
+	}
+	return this.putObject(bucketName, new Packages.org.jets3t.service.model.S3Object(file))
+}
+
+/**
+ * A reference to an {@link S3} object.
+ * 
+ * @return {S3}
+ */
+s3 = new S3()
+
+// /////////////////////////////////////////////////////////////////////
+// Other Utilities
 
 /**
  * Use this instead of <code>Math.random()</code>. This is not just a

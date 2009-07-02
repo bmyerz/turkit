@@ -1,0 +1,82 @@
+<html>
+<head>
+<title>MTurk Task</title>
+<meta>
+<style>
+
+</style>
+</meta>
+<style>
+
+</style>
+</head>
+<body>
+<script src="http://jqueryjs.googlecode.com/files/jquery-1.3.2.min.js"></script>
+<script>
+
+function foreach(a, test) {
+    if (typeof test == "string") {
+        var testString = test
+        test = function (v, k) {
+            var i = k
+            var e = v
+            return eval(testString)
+        }
+    }
+    if (a instanceof Array) {
+        for (var i = 0; i < a.length; i++) {
+            if (test(a[i], i) == false) break
+        }
+    } else {
+        for (var k in a) {
+            if (a.hasOwnProperty(k)) {
+                if (test(a[k], k) == false) break
+            }
+        }
+    }
+    return a
+}
+
+function unescapeURL(s) {
+    return decodeURIComponent(s.replace(/\+/g, "%20"))
+}
+
+function getURLParams() {
+    var params = {}
+    foreach(window.location.href.match(/[\\?&]([^=]+)=([^&#]*)/g), function (m) {
+        var a = m.match(/.([^=]+)=(.*)/)
+        params[unescapeURL(a[1])] = unescapeURL(a[2])
+    })
+    return params
+}
+
+$(function () {
+    var params = getURLParams()
+    if (params.blockWorkers && (params.blockWorkers.match(new RegExp(params.workerId)))) {
+    	$('body').empty().append('<h2>Please return this HIT</h2><p>You have done nothing wrong. However, for some reason, the requester for this HIT does not want you to complete it. This is probably because you have already participated in a group of HITs that are building on each other, and the requester wants to ensure that a variety of people work on the job. You may still be able to participate in future HITs in this process.</p><p><small>NOTE: This message is a temporary fix; we hope that Mechanical Turk itself will allow us to block specific workers from particular HITs, so that they do not show up under "HITs Available To You". Given this and other factors, Mechanical Turk requesters generally do not care how many HITs you return.</small></p><p><b>Sorry for the inconvenience.</b></p>')    	
+    	return
+    }
+    if (params.assignmentId) {
+        if (params.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
+            $('input').attr("DISABLED", "true")
+            $('textarea').attr("DISABLED", "true")
+        }
+        $('#assignmentId').attr('value', params.assignmentId)
+        //$('form').attr('method', 'POST')
+    }
+    if (params.turkSubmitTo) {
+        $('form').attr('action', params.turkSubmitTo + '/mturk/externalSubmit')
+    }
+})
+
+</script>
+
+<div>
+    <form action="/" method="GET">
+        <input type="hidden" name="assignmentId" id="assignmentId" value="temp"></input>
+        [[[CONTENT]]]
+    </form>
+</div>
+
+</body>
+</html>

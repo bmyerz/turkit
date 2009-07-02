@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.jets3t.service.S3Service;
+import org.jets3t.service.impl.rest.httpclient.RestS3Service;
+import org.jets3t.service.security.AWSCredentials;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.Scriptable;
@@ -23,6 +26,16 @@ public class TurKit {
 	 * The version number for this release of TurKit.
 	 */
 	public String version = null;
+	
+	/**
+	 * Your Amazon AWS Access Key ID
+	 */
+	public String awsAccessKeyID;
+	
+	/**
+	 * Your Amazon AWS Secret Access Key
+	 */
+	public String awsSecretAccessKey;
 
 	/**
 	 * A reference to the current JavaScript file being executed.
@@ -38,6 +51,16 @@ public class TurKit {
 	 * A reference to a RequesterService--part of the MTurk Java API.
 	 */
 	public RequesterService requesterService;
+
+	/**
+	 * A reference to an S3Service--part of the JetS3t API
+	 */
+	public S3Service s3Service;
+
+	/**
+	 * This is an HTML template used for created HITs hosted on your S3 account.
+	 */
+	public String taskTemplate;
 
 	/**
 	 * True iff we are using the MTurk sandbox.
@@ -104,7 +127,6 @@ public class TurKit {
 	}
 
 	private void init(File jsFile, ClientConfig conf) throws Exception {
-
 		version = U.slurp(this.getClass().getResource(
 				"/resources/version.properties"));
 		{
@@ -113,11 +135,23 @@ public class TurKit {
 				version = m.group(1).trim();
 			}
 		}
+		
+		awsAccessKeyID = conf.getAccessKeyId();
+		awsSecretAccessKey = conf.getSecretAccessKey();
 
 		this.jsFile = jsFile;
 		resetDatabase();
 		requesterService = new RequesterService(conf);
 		sandbox = conf.getServiceURL().contains("sandbox");
+
+		try {
+			s3Service = new RestS3Service(new AWSCredentials(conf
+					.getAccessKeyId(), conf.getSecretAccessKey()));
+
+			taskTemplate = U.slurp(this.getClass().getResource(
+					"/resources/task-template.html"));
+		} catch (Exception e) {
+		}
 	}
 
 	/**
@@ -128,8 +162,8 @@ public class TurKit {
 			database.delete();
 		}
 		database = new JavaScriptDatabase(new File(jsFile.getAbsolutePath()
-				+ ".database"),
-				new File(jsFile.getAbsolutePath() + ".database.tmp"));
+				+ ".database"), new File(jsFile.getAbsolutePath()
+				+ ".database.tmp"));
 	}
 
 	/**
