@@ -43,7 +43,7 @@ public class Main {
 	public File jsFile;
 	public TurKit turkit;
 	public JTextArea output;
-	public JTextArea bobble;
+	public JTextArea database;
 	public JEditorPane input;
 	public JLabel runPrompt;
 	public long runAgainAtThisTime;
@@ -90,11 +90,11 @@ public class Main {
 			}
 		});
 		runPrompt = new JLabel();
-		JButton deleteBobble = new JButton("Delete Bobble");
-		deleteBobble.addActionListener(new ActionListener() {
+		JButton deleteDatabase = new JButton("Reset Database");
+		deleteDatabase.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					onResetBobble();
+					onResetDatabase();
 				} catch (Exception ee) {
 					throw new Error(ee);
 				}
@@ -116,7 +116,7 @@ public class Main {
 		toolbarCenter.add(runPrompt);
 		toolbar.add(toolbarCenter, BorderLayout.WEST);
 		JPanel toolbarRight = new JPanel();
-		toolbarRight.add(deleteBobble);
+		toolbarRight.add(deleteDatabase);
 		toolbarRight.add(deleteHits);
 		toolbar.add(toolbarRight, BorderLayout.EAST);
 
@@ -168,24 +168,24 @@ public class Main {
 			output.setFont(font);
 		}
 		{
-			bobble = new JTextArea();
-			bobble.setEditable(false);
-			updateBobble();
-			bobble.setFont(font);
+			database = new JTextArea();
+			database.setEditable(false);
+			updateDatabase();
+			database.setFont(font);
 		}
 		Dockable inputDock = new DefaultDockable("input",
 				new JScrollPane(input), "input", null, DockingMode.ALL);
 		Dockable outputDock = new DefaultDockable("output", new JScrollPane(
 				output), "output", null, DockingMode.ALL);
-		Dockable bobbleDock = new DefaultDockable("bobble", new JScrollPane(
-				bobble), "bobble", null, DockingMode.ALL);
+		Dockable databaseDock = new DefaultDockable("database", new JScrollPane(
+				database), "database", null, DockingMode.ALL);
 
 		TabDock leftTabDock = new TabDock();
 		TabDock topTabDock = new TabDock();
 		TabDock bottomTabDock = new TabDock();
 		leftTabDock.addDockable(inputDock, new Position(0));
 		topTabDock.addDockable(outputDock, new Position(0));
-		bottomTabDock.addDockable(bobbleDock, new Position(0));
+		bottomTabDock.addDockable(databaseDock, new Position(0));
 
 		SplitDock leftSplitDock = new SplitDock();
 		leftSplitDock.addChildDock(leftTabDock, new Position(Position.CENTER));
@@ -282,9 +282,9 @@ public class Main {
 				+ turkit.version);
 	}
 
-	public void updateBobble() throws Exception {
-		turkit.bobble.consolidate();
-		bobble.setText(U.slurp(turkit.bobble.storageFile));
+	public void updateDatabase() throws Exception {
+		turkit.database.consolidate();
+		database.setText(U.slurp(turkit.database.storageFile));
 	}
 
 	public void runInABit(long delaySeconds) {
@@ -344,16 +344,16 @@ public class Main {
 		}
 		scriptOut.close();
 
-		// bobble
-		updateBobble();
+		// database
+		updateDatabase();
 
 		runInABit(runDelaySeconds);
 	}
 
-	public void onResetBobble() throws Exception {
+	public void onResetDatabase() throws Exception {
 		onStop();
-		turkit.resetBobble();
-		updateBobble();
+		turkit.resetDatabase();
+		updateDatabase();
 	}
 
 	public void onDeleteHITs() throws Exception {
