@@ -42,6 +42,6 @@
 	<classpathentry kind="lib" path="libs/rhino1_7R2/js.jar"/>
 	<classpathentry kind="lib" path="libs/velocity-1.5/velocity-1.5.jar"/>
 	<classpathentry kind="lib" path="libs/javadocking1.4.1/javadocking.jar"/>
-	<classpathentry kind="lib" path="libs/jets3t-0.7.0/jets3t-0.7.1.jar"/>
+	<classpathentry kind="lib" path="libs/jets3t-0.7.1/jets3t-0.7.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

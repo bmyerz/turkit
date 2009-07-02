@@ -5,7 +5,7 @@
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="generator" content="JsDoc Toolkit" />
 		
-		<title>JsDoc Reference - Database</title>
+		<title>JsDoc Reference - S3</title>
 
 		<style type="text/css">
 			/* default.css */
@@ -210,14 +210,14 @@ ul.inheritsList
 <!-- ============================== class title ============================ -->
 			<h1 class="classTitle">
 				
-				Class Database
+				Class S3
 			</h1>
 
 <!-- ============================== class summary ========================== -->			
 			<p class="description">
 				
 			
-				Each TurKit script file has a JavaScript database associated with it.       This JavaScriptDatabase instance is called <code>database</code>.<p>You may think of a JavaScript Database as a JavaScript environment that ispersisted on disk. Any query you make to thedatabase is evaluated in the context of the database, the new state of the databaseis written to disk, and then the result is returned.
+				S3 contains wrappers around the JetS3t API for accessing Amazon's S3 storage service.<p><code>s3</code> is a global instance of the S3 class.</p>
 				
 				
 					<br /><i>Defined in: </i> <a href="../symbols/src/src_resources_js_libs_turkit.js.html">turkit.js</a>.
@@ -226,7 +226,7 @@ ul.inheritsList
 
 <!-- ============================== constructor summary ==================== -->			
 			
-			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class Database.">
+			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class S3.">
 				<caption>Class Summary</caption>
 				<thead>
 					<tr>
@@ -239,9 +239,9 @@ ul.inheritsList
 						<td class="attributes">&nbsp;</td>
 						<td class="nameDescription" >
 							<div class="fixedFont">
-								<b><a href="../symbols/Database.html">Database</a></b>()
+								<b><a href="../symbols/S3.html">S3</a></b>()
 							</div>
-							<div class="description">You probably want to use the global variable <code>database</code>.</div>
+							<div class="description">You probably want to use the global variable <code>s3</code>.</div>
 						</td>
 					</tr>
 				</tbody>
@@ -252,7 +252,7 @@ ul.inheritsList
 			
 				
 				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class Database.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class S3.">
 					<caption>Field Summary</caption>
 					<thead>
 						<tr>
@@ -266,9 +266,9 @@ ul.inheritsList
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont">
-								<b><a href="../symbols/Database.html#database">database</a></b>
+								<b><a href="../symbols/S3.html#s3Service">s3Service</a></b>
 								</div>
-								<div class="description">A reference to the Java JavaScriptDatabase object associated with this TurKitfile.</div>
+								<div class="description">A reference to an S3Service object in the JetS3t API.</div>
 							</td>
 						</tr>
 					
@@ -283,7 +283,7 @@ ul.inheritsList
 			
 				
 				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class Database.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class S3.">
 					<caption>Method Summary</caption>
 					<thead>
 						<tr>
@@ -296,9 +296,27 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/Database.html#query">query</a></b>(s)
+								<div class="fixedFont"><b><a href="../symbols/S3.html#putFile">putFile</a></b>(bucketName, file)
 								</div>
-								<div class="description">Evaluates <i>s</i> in the context of the JavaScript database, and returns adeep clone of the result.</div>
+								<div class="description">Create a public object in S3 based on a file.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/S3.html#putObject">putObject</a></b>(bucketName, s3Object)
+								</div>
+								<div class="description">Add public permissions to the given S3Object, and upload it to S3.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/S3.html#putString">putString</a></b>(bucketName, key, stringData)
+								</div>
+								<div class="description">Create a public object in S3 based on a string.</div>
 							</td>
 						</tr>
 					
@@ -319,11 +337,11 @@ ul.inheritsList
 				</div>
 				
 				<div class="fixedFont">
-						<b>Database</b>()
+						<b>S3</b>()
 				</div>
 				
 				<div class="description">
-					You probably want to use the global variable <code>database</code>.
+					You probably want to use the global variable <code>s3</code>.
 					
 				</div>
 				
@@ -347,15 +365,15 @@ ul.inheritsList
 					Field Detail
 				</div>
 				
-					<a name="database"> </a>
+					<a name="s3Service"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>database</b>
+					<b>s3Service</b>
 					
 					</div>
 					<div class="description">
-						A reference to the Java JavaScriptDatabase object associated with this TurKitfile.
+						A reference to an S3Service object in the JetS3t API.
 						
 						
 					</div>
@@ -377,15 +395,16 @@ ul.inheritsList
 					Method Detail
 				</div>
 				
-					<a name="query"> </a>
+					<a name="putFile"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>query</b>(s)
+					<b>putFile</b>(bucketName, file)
 					
 					</div>
 					<div class="description">
-						Evaluates <i>s</i> in the context of the JavaScript database, and returns adeep clone of the result. Note that this function evaluates the string ofJSON returned from the JavaScript database, and returns the result.
+						Create a public object in S3 based on a file.
+	Returns the URL for the object.
 						
 						
 					</div>
@@ -397,7 +416,106 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>s</b>
+									<b>bucketName</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>file</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="putObject"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>putObject</b>(bucketName, s3Object)
+					
+					</div>
+					<div class="description">
+						Add public permissions to the given S3Object, and upload it to S3.
+	This function will create the bucket if it doesn't exist.
+	Returns the URL for the object.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>bucketName</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>s3Object</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="putString"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>putString</b>(bucketName, key, stringData)
+					
+					</div>
+					<div class="description">
+						Create a public object in S3 based on a string.
+	Returns the URL for the object.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>bucketName</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>key</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>stringData</b>
 									
 								</dt>
 								<dd></dd>
