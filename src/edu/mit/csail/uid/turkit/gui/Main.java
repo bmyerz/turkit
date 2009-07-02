@@ -10,6 +10,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 
 import javax.swing.JButton;
@@ -66,7 +68,7 @@ public class Main {
 		f.getContentPane().setLayout(new BorderLayout());
 
 		// toolbar
-		JPanel toolbar = new JPanel();
+		JPanel toolbar = new JPanel(new BorderLayout());
 		JButton pauseButton = new JButton("Stop");
 		pauseButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -88,13 +90,37 @@ public class Main {
 			}
 		});
 		runPrompt = new JLabel();
-		toolbar.add(pauseButton);
-		toolbar.add(runButton);
-		toolbar.add(runPrompt);
+		JButton deleteBobble = new JButton("Delete Bobble");
+		deleteBobble.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					onResetBobble();
+				} catch (Exception ee) {
+					throw new Error(ee);
+				}
+			}
+		});
+		JButton deleteHits = new JButton("Delete HITs");
+		deleteHits.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					onDeleteHITs();
+				} catch (Exception ee) {
+					throw new Error(ee);
+				}
+			}
+		});
+		JPanel toolbarCenter = new JPanel();
+		toolbarCenter.add(pauseButton);
+		toolbarCenter.add(runButton);
+		toolbarCenter.add(runPrompt);
+		toolbar.add(toolbarCenter, BorderLayout.WEST);
+		JPanel toolbarRight = new JPanel();
+		toolbarRight.add(deleteBobble);
+		toolbarRight.add(deleteHits);
+		toolbar.add(toolbarRight, BorderLayout.EAST);
 
-		JPanel toolbarWrapper = new JPanel(new BorderLayout());
-		toolbarWrapper.add(toolbar, BorderLayout.WEST);
-		f.getContentPane().add(toolbarWrapper, BorderLayout.NORTH);
+		f.getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		// dockables
 		Font font = new Font(Font.MONOSPACED, Font.PLAIN, 12);
@@ -266,6 +292,41 @@ public class Main {
 		updateRunPrompt();
 	}
 
+	private class MyOutputStream extends OutputStream {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		PrintStream realOut;
+		PrintStream realErr;
+		PrintStream printStream;
+
+		public MyOutputStream() {
+			realOut = System.out;
+			realErr = System.err;
+			printStream = new PrintStream(this, true);
+			System.setOut(printStream);
+			System.setErr(printStream);
+		}
+
+		@Override
+		public void close() {
+			printStream.flush();
+			printStream.close();
+			System.setOut(realOut);
+			System.setErr(realErr);
+		}
+
+		@Override
+		public void flush() {
+			output.append(stream.toString());
+			output.setCaretPosition(output.getText().length());
+			stream = new ByteArrayOutputStream();
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			stream.write(b);
+		}
+	}
+
 	public void onRun() throws Exception {
 		if (inputSaved) {
 			onReloadInput();
@@ -273,27 +334,35 @@ public class Main {
 			onSaveInput();
 		}
 
-		PrintStream realOut = System.out;
-		PrintStream realErr = System.err;
-		ByteArrayOutputStream scriptOut = new ByteArrayOutputStream();
-		PrintStream scriptOutStream = new PrintStream(scriptOut, true);
-		System.setOut(scriptOutStream);
-		System.setErr(scriptOutStream);
+		output.setText("");
+		MyOutputStream scriptOut = new MyOutputStream();
 		try {
 			turkit.runOnce(10, 100);
 		} catch (Exception e) {
 			System.out.println("ERROR: ----------------------------------");
 			e.printStackTrace();
 		}
-		System.setOut(realOut);
-		System.setErr(realErr);
-		output.setText(scriptOut.toString());
-		output.setCaretPosition(output.getText().length());
+		scriptOut.close();
 
 		// bobble
 		updateBobble();
 
 		runInABit(runDelaySeconds);
+	}
+
+	public void onResetBobble() throws Exception {
+		onStop();
+		turkit.resetBobble();
+		updateBobble();
+	}
+
+	public void onDeleteHITs() throws Exception {
+		onStop();
+
+		output.setText("");
+		MyOutputStream scriptOut = new MyOutputStream();
+		turkit.deleteHITs();
+		scriptOut.close();
 	}
 
 	public void onStop() {

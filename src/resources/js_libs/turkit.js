@@ -617,7 +617,19 @@ MTurk.prototype.deleteHITsRaw = function(hits) {
 		var hitIds = [this.tryToGetHITId(hits)]
 	}
 	this.keepTrying(function() {
-				mturk.requesterService.deleteHITs(hitIds, true, true, null)
+				var totalCount = hitIds.length
+				var goodCount = 0
+				mturk.requesterService.deleteHITs(hitIds, true, true, new com.amazonaws.mturk.addon.BatchItemCallback({
+					processItemResult : function(itemId, succeeded, result, itemException) {
+						if (succeeded) {
+							print("deleted HIT: " + itemId)
+							goodCount++
+						} else {
+							print("failed to delete HIT: " + itemId + " (" + itemException.getMessage() + ")")
+						}
+					}
+				}))
+				print("deleted " + goodCount + " of " + totalCount)
 			})
 }
 

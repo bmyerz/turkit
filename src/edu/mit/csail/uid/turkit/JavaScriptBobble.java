@@ -98,6 +98,19 @@ public class JavaScriptBobble {
 	 */
 	synchronized public void close() {
 		consolidationTimer.close();
+		if (storageFileOut != null) {
+			storageFileOut.close();
+			storageFileOut = null;
+		}
+	}
+	
+	/**
+	 * Deletes the files associated with the bobble.
+	 */
+	synchronized public void delete() {
+		close();
+		storageFile.delete();
+		tempFile.delete();
 	}
 
 	private class ConsolidationTimer implements Runnable {
@@ -138,7 +151,6 @@ public class JavaScriptBobble {
 				while (true) {
 					synchronized (this) {
 						if (Thread.interrupted()) {
-							thread = null;
 							break;
 						}
 
@@ -158,6 +170,7 @@ public class JavaScriptBobble {
 			} catch (Exception e) {
 				throw new Error(e);
 			}
+			thread = null;
 		}
 	}
 

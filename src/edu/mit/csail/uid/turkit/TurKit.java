@@ -108,18 +108,28 @@ public class TurKit {
 		version = U.slurp(this.getClass().getResource(
 				"/resources/version.properties"));
 		{
-			Matcher m = Pattern.compile("=\\s*([0-9\\.]+)").matcher(version);
+			Matcher m = Pattern.compile("=(.*)").matcher(version);
 			if (m.find()) {
-				version = m.group(1);
+				version = m.group(1).trim();
 			}
 		}
 
 		this.jsFile = jsFile;
+		resetBobble();
+		requesterService = new RequesterService(conf);
+		sandbox = conf.getServiceURL().contains("sandbox");
+	}
+
+	/**
+	 * Deletes the bobble file(s) and creates a new one.
+	 */
+	public void resetBobble() throws Exception {
+		if (bobble != null) {
+			bobble.delete();
+		}
 		bobble = new JavaScriptBobble(new File(jsFile.getAbsolutePath()
 				+ ".bobble"),
 				new File(jsFile.getAbsolutePath() + ".bobble.tmp"));
-		requesterService = new RequesterService(conf);
-		sandbox = conf.getServiceURL().contains("sandbox");
 	}
 
 	/**
@@ -152,16 +162,21 @@ public class TurKit {
 
 			scope.put("javaTurKit", scope, this);
 
-			URL util = this.getClass()
-					.getResource("/resources/js_libs/util.js");
-			cx.evaluateReader(scope, new InputStreamReader(util.openStream()),
-					util.toString(), 1, null);
+			{
+				URL url = this.getClass().getResource(
+						"/resources/js_libs/util.js");
+				cx.evaluateReader(scope,
+						new InputStreamReader(url.openStream()),
+						url.toString(), 1, null);
+			}
 
-			URL turkit = this.getClass().getResource(
-					"/resources/js_libs/turkit.js");
-			cx.evaluateReader(scope,
-					new InputStreamReader(turkit.openStream()), turkit
-							.toString(), 1, null);
+			{
+				URL url = this.getClass().getResource(
+						"/resources/js_libs/turkit.js");
+				cx.evaluateReader(scope,
+						new InputStreamReader(url.openStream()),
+						url.toString(), 1, null);
+			}
 
 			stopped = false;
 			cx.evaluateReader(scope, new FileReader(jsFile), jsFile
@@ -182,6 +197,47 @@ public class TurKit {
 			throw e;
 		}
 		return !stopped;
+	}
+
+	/**
+	 * Trys to delete all your HITs.
+	 * It may fail, but it should print out how many HITs it was able to delete.
+	 */
+	public void deleteHITs() throws Exception {
+		try {
+			Context cx = Context.enter();
+			cx.setLanguageVersion(170);
+			Scriptable scope = cx.initStandardObjects();
+
+			scope.put("javaTurKit", scope, this);
+
+			{
+				URL url = this.getClass().getResource(
+						"/resources/js_libs/util.js");
+				cx.evaluateReader(scope,
+						new InputStreamReader(url.openStream()),
+						url.toString(), 1, null);
+			}
+
+			{
+				URL url = this.getClass().getResource(
+						"/resources/js_libs/turkit.js");
+				cx.evaluateReader(scope,
+						new InputStreamReader(url.openStream()),
+						url.toString(), 1, null);
+			}
+
+			{
+				URL url = this.getClass().getResource(
+						"/resources/js_libs/deleteHITs.js");
+				cx.evaluateReader(scope,
+						new InputStreamReader(url.openStream()),
+						url.toString(), 1, null);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		}
 	}
 
 	/**
