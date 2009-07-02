@@ -16,43 +16,43 @@ function verbosePrint(s) {
 var javaTurKit = javaTurKit
 
 // /////////////////////////////////////////////////////////////////////
-// Bobble
+// Database
 
 /**
- * You probably want to use the global variable <code>bobble</code>.
+ * You probably want to use the global variable <code>database</code>.
  * 
- * @class Each TurKit script file has a JavaScript Bobble associated with it.
- *        This Bobble instance is called <code>bobble</code>.
+ * @class Each TurKit script file has a JavaScript database associated with it.
+ *        This JavaScriptDatabase instance is called <code>database</code>.
  * 
  * <p>
- * You may think of a JavaScript Bobble as a JavaScript environment that is
- * persisted on disk. You may use it like a database. Any query you make to the
- * bobble is evaluated in the context of the bobble, the new state of the bobble
+ * You may think of a JavaScript Database as a JavaScript environment that is
+ * persisted on disk. Any query you make to the
+ * database is evaluated in the context of the database, the new state of the database
  * is written to disk, and then the result is returned.
  */
-function Bobble() {
-	this.bobble = javaTurKit.bobble
+function Database() {
+	this.database = javaTurKit.database
 }
 
 /**
- * A reference to the Java JavaScriptBobble object associated with this TurKit
+ * A reference to the Java JavaScriptDatabase object associated with this TurKit
  * file.
  */
-Bobble.prototype.bobble = null
+Database.prototype.database = null
 
 /**
- * Evaluates <i>s</i> in the context of the JavaScript Bobble, and returns a
+ * Evaluates <i>s</i> in the context of the JavaScript database, and returns a
  * deep clone of the result. Note that this function evaluates the string of
- * JSON returned from the JavaScript Bobble, and returns the result.
+ * JSON returned from the JavaScript database, and returns the result.
  */
-Bobble.prototype.query = function(s) {
-	return eval("" + this.bobble.query(s))
+Database.prototype.query = function(s) {
+	return eval("" + this.database.query(s))
 }
 
 /**
- * This is a reference to the {@link Bobble} associated with this TurKit file.
+ * This is a reference to the {@link Database} associated with this TurKit file.
  */
-var bobble = new Bobble()
+var database = new Database()
 
 // /////////////////////////////////////////////////////////////////////
 // Trace API
@@ -61,7 +61,7 @@ var bobble = new Bobble()
  * You probably want to just use the global variable <code>traceManager</code>.
  * 
  * @class The TraceManager manages a sort of stack frame that is memoized on
- *        disk (using the JavaScript Bobble associated with the current file).
+ *        disk (using the JavaScript database associated with the current file).
  *        All stack frames are memoized, so the result is a sort of stack tree.
  * 
  * <p>
@@ -99,7 +99,7 @@ TraceManager.prototype.pushFrame = function(frameName) {
 	}
 	this.visitedStackFrames[path] = true
 
-	return bobble.query("return prune(ensure(null, " + path + ", " + json({
+	return database.query("return prune(ensure(null, " + path + ", " + json({
 				creationTime : time()
 			}) + "))")
 }
@@ -109,7 +109,7 @@ TraceManager.prototype.pushFrame = function(frameName) {
  * This value is persisted in the memoized stack.
  */
 TraceManager.prototype.setFrameValue = function(name, value) {
-	bobble.query("ensure(null, " + json(this.stackFramePath.concat(["values"]))
+	database.query("ensure(null, " + json(this.stackFramePath.concat(["values"]))
 			+ ")[" + json(name) + "] = " + json(value))
 }
 
@@ -117,7 +117,7 @@ TraceManager.prototype.setFrameValue = function(name, value) {
  * Gets the value of a "local variable" in the current memoized stack frame.
  */
 TraceManager.prototype.getFrameValue = function(name) {
-	bobble.query("return ensure(null, "
+	database.query("return ensure(null, "
 			+ json(this.stackFramePath.concat(["values"])) + ")[" + json(name)
 			+ "]")
 }
@@ -149,7 +149,7 @@ TraceManager.prototype.once = function(func, frameName) {
 	var frame = this.pushFrame(frameName)
 	try {
 		if ("returnValue" in frame) {
-			frame.returnValue = bobble.query("return ensure(null, "
+			frame.returnValue = database.query("return ensure(null, "
 					+ json(this.stackFramePath) + ").returnValue")
 		}
 
@@ -158,7 +158,7 @@ TraceManager.prototype.once = function(func, frameName) {
 				returnValue : func(),
 				returnTime : time()
 			}
-			bobble.query("merge(ensure(null, " + json(this.stackFramePath)
+			database.query("merge(ensure(null, " + json(this.stackFramePath)
 					+ "), " + json(frame) + ")")
 		}
 	} finally {
@@ -239,7 +239,7 @@ TraceManager.prototype.resetTrace = function(traceName) {
 	}
 	this.stackFramePath[1] = (javaTurKit.sandbox ? "sandbox" : "for-real")
 			+ ":" + traceName
-	bobble.query("var a = " + this.stackFramePath[0]
+	database.query("var a = " + this.stackFramePath[0]
 			+ "; foreach(a, function (v, k) {if (k != "
 			+ json(this.stackFramePath[1]) + ") {delete a[k]}})")
 }
@@ -313,7 +313,7 @@ MTurk.prototype.assertWeCanSpend = function(money, hits, callbackBeforeCrash) {
 		moneySpent : 0,
 		hitsCreated : 0
 	}
-	safety = bobble.query("return ensure('__safetyCounters', " + json(safety)
+	safety = database.query("return ensure('__safetyCounters', " + json(safety)
 			+ ")")
 	safety.moneySpent += money
 	safety.hitsCreated += hits
@@ -327,7 +327,7 @@ MTurk.prototype.assertWeCanSpend = function(money, hits, callbackBeforeCrash) {
 		throw "TurKit has detected a safety violation: creating too many HITs."
 				+ "You need to increase your hit limit with TurKit (not with MTurk) to overcome this problem."
 	}
-	safety = bobble.query("__safetyCounters = " + json(safety))
+	safety = database.query("__safetyCounters = " + json(safety))
 }
 
 /**
