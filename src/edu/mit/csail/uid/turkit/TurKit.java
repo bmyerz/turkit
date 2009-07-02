@@ -30,9 +30,9 @@ public class TurKit {
 	public File jsFile;
 
 	/**
-	 * A reference to the {@link JavaScriptBobble} associated with this TurKit program.
+	 * A reference to the {@link JavaScriptDatabase} associated with this TurKit program.
 	 */
-	public JavaScriptBobble bobble;
+	public JavaScriptDatabase database;
 
 	/**
 	 * A reference to a RequesterService--part of the MTurk Java API.
@@ -115,30 +115,30 @@ public class TurKit {
 		}
 
 		this.jsFile = jsFile;
-		resetBobble();
+		resetDatabase();
 		requesterService = new RequesterService(conf);
 		sandbox = conf.getServiceURL().contains("sandbox");
 	}
 
 	/**
-	 * Deletes the bobble file(s) and creates a new one.
+	 * Deletes the database file(s) and creates a new one.
 	 */
-	public void resetBobble() throws Exception {
-		if (bobble != null) {
-			bobble.delete();
+	public void resetDatabase() throws Exception {
+		if (database != null) {
+			database.delete();
 		}
-		bobble = new JavaScriptBobble(new File(jsFile.getAbsolutePath()
-				+ ".bobble"),
-				new File(jsFile.getAbsolutePath() + ".bobble.tmp"));
+		database = new JavaScriptDatabase(new File(jsFile.getAbsolutePath()
+				+ ".database"),
+				new File(jsFile.getAbsolutePath() + ".database.tmp"));
 	}
 
 	/**
 	 * Call this when you are done using this TurKit object. It will release any resources it is using,
-	 * including a {@link JavaScriptBobble}.
+	 * including a {@link JavaScriptDatabase}.
 	 */
 
 	public void close() {
-		bobble.close();
+		database.close();
 	}
 
 	/**

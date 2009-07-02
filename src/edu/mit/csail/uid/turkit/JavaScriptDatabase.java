@@ -13,10 +13,10 @@ import org.mozilla.javascript.Scriptable;
 
 import edu.mit.csail.uid.turkit.util.U;
 
-public class JavaScriptBobble {
+public class JavaScriptDatabase {
 	/**
-	 * The file used to store all the bobble's data.
-	 * This data takes the form of JavaScript which can be evaluated to re-create the state of the JavaScript environment in the bobble.
+	 * The file used to store all the data.
+	 * This data takes the form of JavaScript which can be evaluated to re-create the state of the JavaScript environment in the database.
 	 */
 	public File storageFile;
 	private File tempFile;
@@ -26,7 +26,7 @@ public class JavaScriptBobble {
 	private ConsolidationTimer consolidationTimer;
 
 	/**
-	 * Creates a JavaScript Bobble using the given <code>storageFile</code>.
+	 * Creates a JavaScript Database using the given <code>storageFile</code>.
 	 * The <code>tempFile</code> is used as a swap file, and may, under obscure certain conditions,
 	 * be the only living version of the data.
 	 * If this happens, the data will be loaded from the <code>tempFile</code> the next time this constructor is called.
@@ -34,7 +34,7 @@ public class JavaScriptBobble {
 	 * @param tempFile
 	 * @throws Exception
 	 */
-	public JavaScriptBobble(File storageFile, File tempFile) throws Exception {
+	public JavaScriptDatabase(File storageFile, File tempFile) throws Exception {
 		this.storageFile = storageFile;
 		this.tempFile = tempFile;
 
@@ -92,7 +92,7 @@ public class JavaScriptBobble {
 	}
 
 	/**
-	 * Releases resources associated with the JavaScript Bobble.
+	 * Releases resources associated with the JavaScript Database.
 	 * In particular, it releases a thread--failure to call <code>close</code>
 	 * may result in your program continuing to run after your main method has ended.
 	 */
@@ -105,7 +105,7 @@ public class JavaScriptBobble {
 	}
 	
 	/**
-	 * Deletes the files associated with the bobble.
+	 * Deletes the files associated with the JavaScript database.
 	 */
 	synchronized public void delete() {
 		close();
@@ -186,7 +186,7 @@ public class JavaScriptBobble {
 	}
 
 	/**
-	 * Reformat the representation of the bobble on disk to take up less space.
+	 * Reformat the representation of the JavaScript database on disk to take up less space.
 	 * @throws Exception
 	 */
 	synchronized public void consolidate() throws Exception {
@@ -213,7 +213,7 @@ public class JavaScriptBobble {
 	}
 
 	/**
-	 * Evaluates <code>q</code> in the context of the JavaScript Bobble.
+	 * Evaluates <code>q</code> in the context of the JavaScript database.
 	 * State changes are persisted on disk,
 	 * and the result is returned to the user using {@link RhinoJson#json(Object)}.
 	 * 
