@@ -362,7 +362,7 @@ MTurk.prototype.getAccountBalance = function() {
 }
 
 /**
- * Creates a HIT. <i>params</i> is an object with the following values:
+ * Creates a HIT. <i>params</i> is an object with the following properties:
  * <ul>
  * <li><b>title</b>: displayed in the list of HITs on MTurk.</li>
  * <li><b>description</b>: <b>desc</b> is also accepted. A slightly longer
@@ -371,18 +371,21 @@ MTurk.prototype.getAccountBalance = function() {
  * href="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/index.html?ApiReference_QuestionFormDataStructureArticle.html">See
  * documentation here</a>. Instead of <i>question</i>, you may use either of the following special parameters native to TurKit:
  <ul>
- <li><b>url</b>: assumes an external question</li>
- <li><b>html</b>: this HTML will be injected into a template, uploaded to a bucket in your S3 account, and the URL will be supplied as an external question.</li>
+ <li><b>url</b>: creates an external question pointing to this URL</li>
+ <li><b>html</b>: this HTML will be injected into a template, uploaded to a bucket in your S3 account, and then an external question will be created pointing to the S3 HTML page.
+   <ul>
+   <li><b>bucket</b>: (optional) S3 bucket to put the generated HTML page in (default is <code>&lt;your-aws-access-key-id&gt;-turkit</code>).</li>
+   <li><b>blockWorkers</b>: (optional) An array or string of worker IDs to block from performing this HIT.</li>
+   </ul>
+ </li>
  <li><b>height</b>: (optional) height of the iFrame embedded in MTurk, in pixels (default is 600).</li>
- <li><b>bucket</b>: (optional) S3 bucket to put the generated HTML page in (default is <code>&lt;your-aws-access-key-id&gt;-turkit</code>).</li>
- <li><b>blockWorkers</b>: (optional) <i> only work with <b>html</b>, not <b>url</b></i>. An array or string of worker IDs to block from performing this HIT.</li>
  </ul>
  
  </li>
  * <li><b>reward</b>: how many dollars you want to pay per assignment for this
  * HIT.
  * </ul>
- * The following values are optional:
+ * The following properties are optional:
  * <ul>
  * <li><b>hitTypeId</b>: this may be given instead of the information above;
  * usually it is not known or needed.</li>
