@@ -5,7 +5,7 @@
 		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 		<meta name="generator" content="JsDoc Toolkit" />
 		
-		<title>JsDoc Reference - Array</title>
+		<title>JsDoc Reference - Database</title>
 
 		<style type="text/css">
 			/* default.css */
@@ -208,29 +208,80 @@ ul.inheritsList
 <!-- ============================== class title ============================ -->
 			<h1 class="classTitle">
 				
-				Built-In Namespace Array
+				Class Database
 			</h1>
 
 <!-- ============================== class summary ========================== -->			
 			<p class="description">
 				
 			
+				Each TurKit script file has a JavaScript database associated with it.       This JavaScriptDatabase instance is called <code>database</code>.<p>You may think of a JavaScript Database as a JavaScript environment that ispersisted on disk. Any query you make to thedatabase is evaluated in the context of the database, the new state of the databaseis written to disk, and then the result is returned.
 				
 				
+					<br /><i>Defined in: </i> <a href="../symbols/src/src_resources_js_libs_turkit.js.html">turkit.js</a>.
 				
 			</p>
 
 <!-- ============================== constructor summary ==================== -->			
 			
+			<table class="summaryTable" cellspacing="0" summary="A summary of the constructor documented in the class Database.">
+				<caption>Class Summary</caption>
+				<thead>
+					<tr>
+						<th scope="col">Constructor Attributes</th>
+						<th scope="col">Constructor Name and Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td class="attributes">&nbsp;</td>
+						<td class="nameDescription" >
+							<div class="fixedFont">
+								<b><a href="../symbols/Database.html">Database</a></b>()
+							</div>
+							<div class="description">You probably want to use the global variable <code>database</code>.</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			
 
 <!-- ============================== properties summary ===================== -->
+			
+				
+				
+				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class Database.">
+					<caption>Field Summary</caption>
+					<thead>
+						<tr>
+							<th scope="col">Field Attributes</th>
+							<th scope="col">Field Name and Description</th>
+						</tr>
+					</thead>
+					<tbody>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/Database.html#database">database</a></b>
+								</div>
+								<div class="description">A reference to the Java JavaScriptDatabase object associated with this TurKitfile.</div>
+							</td>
+						</tr>
+					
+					</tbody>
+				</table>
+				
+				
+				
 			
 
 <!-- ============================== methods summary ======================== -->
 			
 				
 				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class Array.">
+				<table class="summaryTable" cellspacing="0" summary="A summary of the methods documented in the class Database.">
 					<caption>Method Summary</caption>
 					<thead>
 						<tr>
@@ -243,9 +294,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/Array.html#last">last</a></b>()
+								<div class="fixedFont"><b><a href="../symbols/Database.html#query">query</a></b>(s)
 								</div>
-								<div class="description">Returns the last element of this array.</div>
+								<div class="description">Evaluates <i>s</i> in the context of the JavaScript database, and returns adeep clone of the result.</div>
 							</td>
 						</tr>
 					
@@ -260,8 +311,62 @@ ul.inheritsList
 
 <!-- ============================== constructor details ==================== -->		
 			
+			<div class="details"><a name="constructor"> </a>
+				<div class="sectionTitle">
+					Class Detail
+				</div>
+				
+				<div class="fixedFont">
+						<b>Database</b>()
+				</div>
+				
+				<div class="description">
+					You probably want to use the global variable <code>database</code>.
+					
+				</div>
+				
+				
+				
+				
+					
+					
+					
+					
+					
+					
+					
+
+			</div>
+			
 
 <!-- ============================== field details ========================== -->		
+			
+				<div class="sectionTitle">
+					Field Detail
+				</div>
+				
+					<a name="database"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>database</b>
+					
+					</div>
+					<div class="description">
+						A reference to the Java JavaScriptDatabase object associated with this TurKitfile.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					
+				
 			
 
 <!-- ============================== method details ========================= -->		
@@ -270,24 +375,32 @@ ul.inheritsList
 					Method Detail
 				</div>
 				
-					<a name="last"> </a>
+					<a name="query"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>last</b>()
+					<b>query</b>(s)
 					
 					</div>
 					<div class="description">
-						Returns the last element of this array.
-						
-							<br />
-							<i>Defined in: </i> <a href="../symbols/src/src_resources_js_libs_util.js.html">util.js</a>.
+						Evaluates <i>s</i> in the context of the JavaScript database, and returns adeep clone of the result. Note that this function evaluates the string ofJSON returned from the JavaScript database, and returns the result.
 						
 						
 					</div>
 					
 					
 					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>s</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
 						
 						
 						
