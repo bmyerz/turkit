@@ -51,12 +51,36 @@ ul li {
 </style>
 </head>
 <body>
+<script src="http://jqueryjs.googlecode.com/files/jquery-1.3.2.min.js"></script>
+<script src="http://glittle.org/js/myutil.js"></script>
+<script src="http://groups.csail.mit.edu/uid/turkit-blog/blogfeed/topBlogFeedItems.cgi"></script>
+
+
+
+<script>
+
+$(function () {
+	//alert(foreach)
+	//$('body').append('<script src="' + escapeXML("http://groups.csail.mit.edu/uid/turkit-blog/blogfeed/topBlogFeedItems.cgi") + '">&gt;/script&lt;')
+	foreach(topBlogFeedItems, function (item) {
+		if (item.permalink && item.label) {
+			$('#blog-feed').append('<li><a href="' + item.permalink + '">' + escapeXML(item.label) + '</a></li>')
+		}
+	})
+})
+
+</script>
 <div id="head"><a href="http://groups.csail.mit.edu/uid/">User Interface Design Group</a></div>
 <div id="content">
 <table class="main">
     <tr valign="top">
         <td rowspan="2">
             <img src="www/logo-140.png" width="140" height="55" alt="TurKit" />
+            <div style="width:140px;margin-top:40px">
+            	<a href="http://groups.csail.mit.edu/uid/turkit-blog">Blog</a>
+            	<ul id="blog-feed">
+            	</ul>
+            </div>
         </td>
         <td colspan="2">
 
