@@ -296,7 +296,43 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/S3.html#deleteObject">deleteObject</a></b>(bucketName, key)
+								</div>
+								<div class="description">Calls <a href="../symbols/S3.html#deleteObjectRaw">S3#deleteObjectRaw</a> inside of <a href="../symbols/TraceManager.html#once">TraceManager#once</a>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/S3.html#deleteObjectRaw">deleteObjectRaw</a></b>(bucketName, key)
+								</div>
+								<div class="description">Remove the object with the given <code>key</code> from the bucket with the given <code>bucketName</code>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/S3.html#getBucketAndKey">getBucketAndKey</a></b>(url)
+								</div>
+								<div class="description">Extracts the bucket name and key from an S3 URL.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/S3.html#putFile">putFile</a></b>(bucketName, file)
+								</div>
+								<div class="description">Calls <a href="../symbols/S3.html#putFileRaw">S3#putFileRaw</a> inside of <a href="../symbols/TraceManager.html#once">TraceManager#once</a>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/S3.html#putFileRaw">putFileRaw</a></b>(bucketName, file)
 								</div>
 								<div class="description">Create a public object in S3 based on a file.</div>
 							</td>
@@ -307,6 +343,15 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/S3.html#putObject">putObject</a></b>(bucketName, s3Object)
 								</div>
+								<div class="description">Calls <a href="../symbols/S3.html#putObjectRaw">S3#putObjectRaw</a> inside of <a href="../symbols/TraceManager.html#once">TraceManager#once</a>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/S3.html#putObjectRaw">putObjectRaw</a></b>(bucketName, s3Object)
+								</div>
 								<div class="description">Add public permissions to the given S3Object, and upload it to S3.</div>
 							</td>
 						</tr>
@@ -315,6 +360,15 @@ ul.inheritsList
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/S3.html#putString">putString</a></b>(bucketName, key, stringData)
+								</div>
+								<div class="description">Calls <a href="../symbols/S3.html#putStringRaw">S3#putStringRaw</a> inside of <a href="../symbols/TraceManager.html#once">TraceManager#once</a>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/S3.html#putStringRaw">putStringRaw</a></b>(bucketName, key, stringData)
 								</div>
 								<div class="description">Create a public object in S3 based on a string.</div>
 							</td>
@@ -395,11 +449,175 @@ ul.inheritsList
 					Method Detail
 				</div>
 				
+					<a name="deleteObject"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>deleteObject</b>(bucketName, key)
+					
+					</div>
+					<div class="description">
+						Calls <a href="../symbols/S3.html#deleteObjectRaw">S3#deleteObjectRaw</a> inside of <a href="../symbols/TraceManager.html#once">TraceManager#once</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>bucketName</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>key</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="deleteObjectRaw"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>deleteObjectRaw</b>(bucketName, key)
+					
+					</div>
+					<div class="description">
+						Remove the object with the given <code>key</code> from the bucket with the given <code>bucketName</code>.
+	If only one parameter is supplied, it assumes it is an S3 URL, and attempts to extract the bucket name and key from that.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>bucketName</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>key</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="getBucketAndKey"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>getBucketAndKey</b>(url)
+					
+					</div>
+					<div class="description">
+						Extracts the bucket name and key from an S3 URL. For instance, given <code>http://s3.amazonaws.com/hello/hi.txt</code>,
+	returns <code>{bucket:"hello", key:"hi.txt"}</code>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>url</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="putFile"> </a>
 					<div class="fixedFont">
 					
 					
 					<b>putFile</b>(bucketName, file)
+					
+					</div>
+					<div class="description">
+						Calls <a href="../symbols/S3.html#putFileRaw">S3#putFileRaw</a> inside of <a href="../symbols/TraceManager.html#once">TraceManager#once</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>bucketName</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>file</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="putFileRaw"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>putFileRaw</b>(bucketName, file)
 					
 					</div>
 					<div class="description">
@@ -446,6 +664,48 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
+						Calls <a href="../symbols/S3.html#putObjectRaw">S3#putObjectRaw</a> inside of <a href="../symbols/TraceManager.html#once">TraceManager#once</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>bucketName</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>s3Object</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="putObjectRaw"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>putObjectRaw</b>(bucketName, s3Object)
+					
+					</div>
+					<div class="description">
 						Add public permissions to the given S3Object, and upload it to S3.
 	This function will create the bucket if it doesn't exist.
 	Returns the URL for the object.
@@ -487,6 +747,54 @@ ul.inheritsList
 					
 					
 					<b>putString</b>(bucketName, key, stringData)
+					
+					</div>
+					<div class="description">
+						Calls <a href="../symbols/S3.html#putStringRaw">S3#putStringRaw</a> inside of <a href="../symbols/TraceManager.html#once">TraceManager#once</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>bucketName</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>key</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>stringData</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="putStringRaw"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>putStringRaw</b>(bucketName, key, stringData)
 					
 					</div>
 					<div class="description">
@@ -543,7 +851,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Thu Jul 02 2009 12:27:07 GMT-0400 (EDT)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Sat Jul 04 2009 20:31:06 GMT-0400 (EDT)
 		</div>
 	</body>
 </html>

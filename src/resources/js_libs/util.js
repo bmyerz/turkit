@@ -224,6 +224,39 @@ function map(a, test) {
 }
 
 /**
+    Maps values of an array or object using the <i>test</i> function, overriding the values in the original object.<br>
+    For example:<br>
+    <code>mapToSelf({a:5,b:7,c:3}, function (e) {return e + 1})</code><br>
+    returns <code>{a:6,b:8,c:4}</code>.<br>
+    You may also use a string for <i>test</i> like so:<br>
+    <code>mapToSelf({a:5,b:7,c:3}, "e + 1")</code>.<br>
+    Note that <i>e</i> is a special value in the string. Another special value is <i>i</i>, which is the index or key of the current element.
+*/
+function mapToSelf(a, test) {
+    if (typeof test == "string") {
+        var testString = test
+        test = function (v, k) {
+            var i = k
+            var e = v
+            return eval(testString)
+        }
+    }
+    if (a instanceof Array) {
+        for (var i = 0; i < a.length; i++) {
+            a[i] = test(a[i], i)
+        }
+        return a
+    } else {
+        for (var k in a) {
+            if (a.hasOwnProperty(k)) {
+                a[k] = test(a[k], k)
+            }
+        }
+        return a
+    }
+}
+
+/**
     Returns the last element of this array.
 */
 Array.prototype.last = function() {

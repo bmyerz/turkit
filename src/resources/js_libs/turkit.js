@@ -315,12 +315,14 @@ MTurk.prototype.assertWeCanSpend = function(money, hits, callbackBeforeCrash) {
 	safety.moneySpent += money
 	safety.hitsCreated += hits
 	if (safety.moneySpent > javaTurKit.maxMoney) {
-		callbackBeforeCrash()
+		if (callbackBeforeCrash)
+			callbackBeforeCrash()
 		throw "TurKit has detected a safety violation: spending too much money."
 				+ "You need to increase your spending limit with TurKit (not with MTurk) to overcome this problem."
 	}
 	if (safety.hitsCreated > javaTurKit.maxHITs) {
-		callbackBeforeCrash()
+		if (callbackBeforeCrash)
+			callbackBeforeCrash()
 		throw "TurKit has detected a safety violation: creating too many HITs."
 				+ "You need to increase your hit limit with TurKit (not with MTurk) to overcome this problem."
 	}
@@ -369,15 +371,9 @@ MTurk.prototype.getAccountBalance = function() {
  * description of the HIT, also shown in the list of HITs on MTurk</li>
  * <li><b>question</b>: a string of XML specifying what will be shown. <a
  * href="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/index.html?ApiReference_QuestionFormDataStructureArticle.html">See
- * documentation here</a>. Instead of <i>question</i>, you may use either of the following special parameters native to TurKit:
+ * documentation here</a>. Instead of <i>question</i>, you may use the following special parameters:
  <ul>
  <li><b>url</b>: creates an external question pointing to this URL</li>
- <li><b>html</b>: this HTML will be injected into a template, uploaded to a bucket in your S3 account, and then an external question will be created pointing to the S3 HTML page.
-   <ul>
-   <li><b>bucket</b>: (optional) S3 bucket to put the generated HTML page in (default is <code>&lt;your-aws-access-key-id&gt;-turkit</code>).</li>
-   <li><b>blockWorkers</b>: (optional) An array or string of worker IDs to block from performing this HIT.</li>
-   </ul>
- </li>
  <li><b>height</b>: (optional) height of the iFrame embedded in MTurk, in pixels (default is 600).</li>
  </ul>
  
@@ -519,11 +515,12 @@ MTurk.prototype.createHITRaw = function(params) {
 
 	var hitId = "" + hit.getHITId()
 	verbosePrint("created HIT: " + hitId)
-	verbosePrint("        url: "
-			+ (javaTurKit.sandbox
+	var url = (javaTurKit.sandbox
 					? "https://workersandbox.mturk.com/mturk/preview?groupId="
 					: "https://www.mturk.com/mturk/preview?groupId=")
-			+ hit.getHITTypeId())
+			+ hit.getHITTypeId()
+	verbosePrint("        url: " + url)
+	database.query("ensure('__HITs', []).push(" + json({hitId : hitId, url : url}) + ")")
 	return hitId
 }
 
@@ -1033,14 +1030,14 @@ S3.prototype.s3Service = null
 	This function will create the bucket if it doesn't exist.
 	Returns the URL for the object.
  */
-S3.prototype.putObject = function(bucketName, s3Object) {
+S3.prototype.putObjectRaw = function(bucketName, s3Object) {
 	var bucket = this.s3Service.getOrCreateBucket(bucketName)
 	var acl = this.s3Service.getBucketAcl(bucket)
 	acl.grantPermission(org.jets3t.service.acl.GroupGrantee.ALL_USERS,
 		org.jets3t.service.acl.Permission.PERMISSION_READ)
 	s3Object.setAcl(acl)
 	this.s3Service.putObject(bucket, s3Object);
-	var url = "http://" + bucket.getName() + ".s3.amazonaws.com/" + s3Object.getKey()
+	var url = "http://s3.amazonaws.com/" + bucket.getName() + "/" + s3Object.getKey()
 	if (verbose) {
 		print("S3 object put at: " + url)
 	}
@@ -1048,26 +1045,88 @@ S3.prototype.putObject = function(bucketName, s3Object) {
 }
 
 /**
+ * Calls {@link S3#putObjectRaw} inside of {@link TraceManager#once}.
+ */
+S3.prototype.putObject = function(bucketName, s3Object) {
+	return once(function() {
+				return s3.putObjectRaw(bucketName, s3Object)
+			})
+}
+
+/**
+	Extracts the bucket name and key from an S3 URL. For instance, given <code>http://s3.amazonaws.com/hello/hi.txt</code>,
+	returns <code>{bucket:"hello", key:"hi.txt"}</code>.
+ */
+S3.prototype.getBucketAndKey = function(url) {
+    var a = url.match(/http:\/\/s3\.amazonaws\.com\/([^\/]+)\/(.*)/)
+    if (!a) {
+        a = url.match(/http:\/\/([^\/]+)\.s3\.amazonaws\.com\/(.*)/)
+        if (!a) return
+    }
+    return {bucket : a[1], key : a[2]}
+}
+
+/**
+	Remove the object with the given <code>key</code> from the bucket with the given <code>bucketName</code>.
+	If only one parameter is supplied, it assumes it is an S3 URL, and attempts to extract the bucket name and key from that.
+ */
+S3.prototype.deleteObjectRaw = function(bucketName, key) {
+	if (!key) {
+		var a = this.getBucketAndKey(bucketName)
+		bucketName = a.bucket
+		key = a.key
+	}
+	this.s3Service.deleteObject(bucketName, key)
+}
+
+/**
+ * Calls {@link S3#deleteObjectRaw} inside of {@link TraceManager#once}.
+ */
+S3.prototype.deleteObject = function(bucketName, key) {
+	return once(function() {
+				return s3.deleteObjectRaw(bucketName, key)
+			})
+}
+
+/**
 	Create a public object in S3 based on a string.
 	Returns the URL for the object.
  */
-S3.prototype.putString = function(bucketName, key, stringData) {
+S3.prototype.putStringRaw = function(bucketName, key, stringData) {
 	var o = new Packages.org.jets3t.service.model.S3Object(key, stringData)
 	if (key.match(/\.html$/)) {
 		o.setContentType("text/html")
 	}
-	return this.putObject(bucketName, o)
+	return this.putObjectRaw(bucketName, o)
+}
+
+/**
+ * Calls {@link S3#putStringRaw} inside of {@link TraceManager#once}.
+ */
+S3.prototype.putString = function(bucketName, key, stringData) {
+	return once(function() {
+				return s3.putStringRaw(bucketName, key, stringData)
+			})
 }
 
 /**
 	Create a public object in S3 based on a file.
 	Returns the URL for the object.
  */
-S3.prototype.putFile = function(bucketName, file) {
+S3.prototype.putFileRaw = function(bucketName, file) {
 	if ((typeof file) == "string") {
 		file = new java.io.File(file)
 	}
-	return this.putObject(bucketName, new Packages.org.jets3t.service.model.S3Object(file))
+	return this.putObjectRaw(bucketName, new Packages.org.jets3t.service.model.S3Object(file))
+}
+
+/**
+ * Calls {@link S3#putFileRaw} inside of {@link TraceManager#once}.
+ */
+S3.prototype.putFile = function(bucketName, file) {
+	return once(function() {
+				return s3.putFileRaw(bucketName, file)
+			})
 }
 
 /**
@@ -1103,4 +1162,106 @@ function shuffle(a) {
 		a[ii] = temp
 	}
 	return a
+}
+
+/**
+	Creates a webpage, puts it on S3, and returns the URL.
+	The webpage represents a HIT.
+	The webpage is created by starting with a <a href="/src/resources/task-template.html">template HTML page</a>.
+	The <code>html</code> supplied to this function in injected into the template.
+	If <code>bucketName</code> is not supplied,
+	then the result is placed on S3 in the bucket <code>your-aws-access-key-id.TurKit</code> with the key <code>md5-hash-of-content.html</code>.
+	The S3 webpage is made publicly accessible.
+	The URL to the S3 webpage is returned.
+	You can pass the URL to <code>s3.deleteObject</code> to remove it.
+	If you supply an array or comma-delimited-string for <code>blockWorkers</code>,
+	then the html page will use JavaScript to prevent those workers from completing the HIT.
+	If you give any elements the class "random", then those elements will be randomly permuted each time a user views the page.
+	This is good for randomizing the choices in voting tasks.
+	*/
+function createWebpageFromTemplate(html, blockWorkers, bucketName) {
+	if (!blockWorkers) {
+		blockWorkers = ""
+	} else if (blockWorkers instanceof Array) {
+		blockWorkers = blockWorkers.join(",")
+	}
+	if (!bucketName) {
+		bucketName = javaTurKit.awsAccessKeyID + ".TurKit"
+	}	
+	var s = ("" + javaTurKit.taskTemplate).
+		replace(/___CONTENT___/, html).
+		replace(/___BLOCK_WORKERS___/, blockWorkers)
+	var key = Packages.edu.mit.csail.uid.turkit.util.U.md5(s) + ".html"
+	return s3.putString(bucketName, key, s)
+}
+
+/**
+	Takes two strings <code>a</code> and <code>b</code>, and calculates their difference.
+	The differences are highlighted in each result using HTML span tags with yellow backgrounds.
+	There are two resulting strings of HTML, returned in an object with two properties, <code>a</code> and <code>b</code>.
+ */
+function highlightDiff(a, b) {
+    a = a.match(/\S+|\s+/g)
+    b = b.match(/\S+|\s+/g)
+    diff(a, b)
+    return {
+        a : '<span>' + mapToSelf(a, function (word) {
+            if (typeof word == "string") {
+                return '<span style="background-color:yellow">' + escapeXml(word) + '</span>'
+            } else {
+                return escapeXml(word.text)
+            }
+        }).join('') + '</span>',
+        b : '<span>' + mapToSelf(b, function (word) {
+            if (typeof word == "string") {
+                return '<span style="background-color:yellow">' + escapeXml(word) + '</span>'
+            } else {
+                return escapeXml(word.text)
+            }
+        }).join('') + '</span>'
+    }
+    
+	// much of the "diff" function below comes from the web, but I forget where,
+	// please let me know if you know the source
+    function diff( o, n ) {
+      var ns = new Object();
+      var os = new Object();
+      
+      for ( var i = 0; i < n.length; i++ ) {
+        if ( ns[ n[i] ] == null )
+          ns[ n[i] ] = { rows: new Array(), o: null };
+        ns[ n[i] ].rows.push( i );
+      }
+      
+      for ( var i = 0; i < o.length; i++ ) {
+        if ( os[ o[i] ] == null )
+          os[ o[i] ] = { rows: new Array(), n: null };
+        os[ o[i] ].rows.push( i );
+      }
+      
+      for ( var i in ns ) {
+        if ( ns[i].rows.length == 1 && typeof(os[i]) != "undefined" && os[i].rows.length == 1 ) {
+          n[ ns[i].rows[0] ] = { text: n[ ns[i].rows[0] ], row: os[i].rows[0] };
+          o[ os[i].rows[0] ] = { text: o[ os[i].rows[0] ], row: ns[i].rows[0] };
+        }
+      }
+      
+      for ( var i = 0; i < n.length - 1; i++ ) {
+        if ( n[i].text != null && n[i+1].text == null && n[i].row + 1 < o.length && o[ n[i].row + 1 ].text == null && 
+             n[i+1] == o[ n[i].row + 1 ] ) {
+          n[i+1] = { text: n[i+1], row: n[i].row + 1 };
+          o[n[i].row+1] = { text: o[n[i].row+1], row: i + 1 };
+        }
+      }
+      
+      for ( var i = n.length - 1; i > 0; i-- ) {
+        if ( n[i].text != null && n[i-1].text == null && n[i].row > 0 && o[ n[i].row - 1 ].text == null && 
+             n[i-1] == o[ n[i].row - 1 ] ) {
+          n[i-1] = { text: n[i-1], row: n[i].row - 1 };
+          o[n[i].row-1] = { text: o[n[i].row-1], row: i - 1 };
+        }
+      }
+      
+      return { o: o, n: n };
+    }
 }
