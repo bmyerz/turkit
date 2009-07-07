@@ -199,22 +199,22 @@ public class TurKit {
 			{
 				URL url = this.getClass().getResource(
 						"/resources/js_libs/util.js");
-				cx.evaluateReader(scope,
+				RhinoUtil.evaluateReader(cx, scope,
 						new InputStreamReader(url.openStream()),
-						url.toString(), 1, null);
+						url.toString());
 			}
 
 			{
 				URL url = this.getClass().getResource(
 						"/resources/js_libs/turkit.js");
-				cx.evaluateReader(scope,
+				RhinoUtil.evaluateReader(cx, scope,
 						new InputStreamReader(url.openStream()),
-						url.toString(), 1, null);
+						url.toString());
 			}
 
 			stopped = false;
-			cx.evaluateReader(scope, new FileReader(jsFile), jsFile
-					.getAbsolutePath(), 1, null);
+			RhinoUtil.evaluateReader(cx, scope, new FileReader(jsFile), jsFile
+					.getAbsolutePath());
 		} catch (Exception e) {
 			if (e instanceof JavaScriptException) {
 				JavaScriptException je = (JavaScriptException) e;
@@ -248,25 +248,25 @@ public class TurKit {
 			{
 				URL url = this.getClass().getResource(
 						"/resources/js_libs/util.js");
-				cx.evaluateReader(scope,
+				RhinoUtil.evaluateReader(cx, scope,
 						new InputStreamReader(url.openStream()),
-						url.toString(), 1, null);
+						url.toString());
 			}
 
 			{
 				URL url = this.getClass().getResource(
 						"/resources/js_libs/turkit.js");
-				cx.evaluateReader(scope,
+				RhinoUtil.evaluateReader(cx, scope,
 						new InputStreamReader(url.openStream()),
-						url.toString(), 1, null);
+						url.toString());
 			}
 
 			{
 				URL url = this.getClass().getResource(
 						"/resources/js_libs/deleteHITs.js");
-				cx.evaluateReader(scope,
+				RhinoUtil.evaluateReader(cx, scope,
 						new InputStreamReader(url.openStream()),
-						url.toString(), 1, null);
+						url.toString());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

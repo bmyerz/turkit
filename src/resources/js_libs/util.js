@@ -27,7 +27,7 @@ function time() {
     @type String
 */
 function json(o) {
-	return "" + Packages.edu.mit.csail.uid.turkit.RhinoJson.json(o)
+	return "" + Packages.edu.mit.csail.uid.turkit.RhinoUtil.json(o)
 }
 
 // adapted from "parse" function at http://json.org/json.js

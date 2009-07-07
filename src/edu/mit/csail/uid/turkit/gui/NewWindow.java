@@ -19,6 +19,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.Scriptable;
 
+import edu.mit.csail.uid.turkit.RhinoUtil;
 import edu.mit.csail.uid.turkit.util.U;
 
 public class NewWindow {
@@ -73,8 +74,8 @@ public class NewWindow {
 		Scriptable scope = cx.initStandardObjects();
 
 		URL util = this.getClass().getResource("/resources/js_libs/util.js");
-		cx.evaluateReader(scope, new InputStreamReader(util.openStream()), util
-				.toString(), 1, null);
+		RhinoUtil.evaluateReader(cx, scope, new InputStreamReader(util.openStream()), util
+				.toString());
 
 		scope.put("input", scope, props);
 		scope.put("defaultFileContents", scope, U.slurp(this.getClass()
@@ -82,8 +83,8 @@ public class NewWindow {
 
 		URL js = this.getClass().getResource("NewWindow.js");
 		try {
-			cx.evaluateReader(scope, new InputStreamReader(js.openStream()), js
-					.toString(), 1, null);
+			RhinoUtil.evaluateReader(cx, scope, new InputStreamReader(js.openStream()), js
+					.toString());
 			f.setVisible(false);
 		} catch (Exception e) {
 			if (e instanceof JavaScriptException) {

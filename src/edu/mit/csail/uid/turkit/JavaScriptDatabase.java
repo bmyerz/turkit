@@ -43,8 +43,8 @@ public class JavaScriptDatabase {
 		scope = cx.initStandardObjects();
 
 		URL util = this.getClass().getResource("/resources/js_libs/util.js");
-		cx.evaluateReader(scope, new InputStreamReader(util.openStream()),
-				util.toString(), 1, null);
+		RhinoUtil.evaluateReader(cx, scope, new InputStreamReader(util.openStream()),
+				util.toString());
 
 		if (!storageFile.exists() && tempFile.exists()) {
 			tempFile.renameTo(storageFile);
@@ -75,7 +75,7 @@ public class JavaScriptDatabase {
 			}
 
 			s = s.substring(0, goodUntil);
-			cx.evaluateString(scope, s, storageFile.getAbsolutePath(), 1, null);
+			RhinoUtil.evaluateString(cx, scope, s, storageFile.getAbsolutePath());
 
 			// save a copy of the storage file if it is corrupt
 			if (goodUntil < s.length()) {
@@ -195,7 +195,7 @@ public class JavaScriptDatabase {
 			storageFileOut = null;
 		}
 
-		String s = RhinoJson.json_scope(scope);
+		String s = RhinoUtil.json_scope(scope);
 		String key = getKey(s);
 		U.saveString(tempFile, "// begin:" + key + "\n" + s + "// end:" + key
 				+ "\n");
@@ -227,7 +227,7 @@ public class JavaScriptDatabase {
 	 */
 	synchronized public String query(String q) throws Exception {
 		q = "try{(function(){\n" + q + "\n})()}catch(e){e}\n";
-		Object ret = cx.evaluateString(scope, q, "query", 1, null);
+		Object ret = RhinoUtil.evaluateString(cx, scope, q, "query");
 
 		String key = getKey(q);
 		if (storageFileOut == null) {
@@ -241,6 +241,6 @@ public class JavaScriptDatabase {
 		if (consolidationTimer != null)
 			consolidationTimer.onQuery();
 
-		return RhinoJson.json(ret);
+		return RhinoUtil.json(ret);
 	}
 }

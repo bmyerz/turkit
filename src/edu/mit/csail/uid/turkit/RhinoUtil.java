@@ -1,8 +1,11 @@
 package edu.mit.csail.uid.turkit;
 
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mozilla.javascript.Context;
+import org.mozilla.javascript.EvaluatorException;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.NativeObject;
@@ -11,10 +14,46 @@ import org.mozilla.javascript.Undefined;
 
 import edu.mit.csail.uid.turkit.util.U;
 
-public class RhinoJson {
+public class RhinoUtil {
 	private static Map<Object, String> objToPath;
 	private static StringBuffer result;
 	private static StringBuffer appendAtEnd;
+
+	/**
+	 * Wrapper around <code>Context.evaluateString</code> which tries to evaluate the code first with optimization turned on,
+	 * and if that doesn't work, tries executing it again with optimization turned off.
+	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
+	 */
+	public static Object evaluateString(Context cx, Scriptable scope,
+			String source, String sourceName) {
+		try {
+			return cx.evaluateString(scope, source, sourceName, 1, null);
+		} catch (EvaluatorException ee) {
+			int oldOp = cx.getOptimizationLevel();
+			cx.setOptimizationLevel(-1);
+			Object ret = cx.evaluateString(scope, source, sourceName, 1, null);
+			cx.setOptimizationLevel(oldOp);
+			return ret;
+		}
+	}
+
+	/**
+	 * Wrapper around <code>Context.evaluateReader</code> which tries to evaluate the code first with optimization turned on,
+	 * and if that doesn't work, tries executing it again with optimization turned off.
+	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
+	 */
+	public static Object evaluateReader(Context cx, Scriptable scope, Reader in,
+			String sourceName) throws Exception {
+		try {
+			return cx.evaluateReader(scope, in, sourceName, 1, null);
+		} catch (EvaluatorException ee) {
+			int oldOp = cx.getOptimizationLevel();
+			cx.setOptimizationLevel(-1);
+			Object ret = cx.evaluateReader(scope, in, sourceName, 1, null);
+			cx.setOptimizationLevel(oldOp);
+			return ret;
+		}
+	}
 
 	/**
 	 * Return a string of JavaScript which, when evaluated, recreates all the variables and data structures in <code>scope</code>.
