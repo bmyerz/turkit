@@ -520,7 +520,7 @@ MTurk.prototype.createHITRaw = function(params) {
 					: "https://www.mturk.com/mturk/preview?groupId=")
 			+ hit.getHITTypeId()
 	verbosePrint("        url: " + url)
-	database.query("ensure('__HITs', []).push(" + json({hitId : hitId, url : url}) + ")")
+	database.query("ensure(null, ['__HITs', " + json(hitId) + "], " + json({url : url}) + ")")
 	return hitId
 }
 
@@ -627,32 +627,70 @@ MTurk.prototype.extendHIT = function(hit, moreAssignments, moreSeconds) {
 }
 
 /**
- * Tries very hard to delete the given array of <code>hits</code> (or single
- * HIT). It can fail. It is not yet clear under what circumstances it fails.
+	Deletes the given <code>hit</code>.
+	If there are any completed assignments that have not been approved or rejected, then they are approved.
+ */
+MTurk.prototype.deleteHITRaw = function(hit) {
+	var hitId = this.tryToGetHITId(hit)
+	
+	// first, try to disable the HIT
+	try {
+		this.keepTrying(function() {
+			mturk.requesterService.disableHIT(hitId)
+		})
+		verbosePrint("disabled HIT: " + hitId)
+	} catch (e) {
+		try {	
+			// check to see if we have already deleted it
+			hit = this.getHIT(hitId)
+			if (hit.hitStatus == "Disposed") {
+				verbosePrint("already deleted HIT: " + hitId)
+			} else {
+				// ok, it must be "Reviewable"
+				// (since we couldn't disable it, and it isn't already deleted)
+				
+				// first, approve all the assignments
+				foreach(hit.assignments, function (a) {
+					mturk.approveAssignmentRaw(a)
+				})
+				
+				// next, dispose of the HIT
+				this.keepTrying(function() {
+					mturk.requesterService.disposeHIT(hitId)
+				})
+				verbosePrint("disposed HIT: " + hitId)
+			}
+		} catch (e) {
+			if (/AWS\.MechanicalTurk\.HITDoesNotExist/.exec("" + e)) {
+				verbosePrint("HIT not found: " + hitId)
+			} else {
+				throw e
+			}
+		}
+	}
+	
+	database.query("delete __HITs[" + json(hitId) + "]")
+}
+
+/**
+ * Calls {@link MTurk#deleteHITRaw} inside of {@link TraceManager#once}.
+ */
+MTurk.prototype.deleteHIT = function(hit) {
+	once(function() {
+				mturk.deleteHITRaw(hit)
+			})
+}
+
+/**
+ * Calls {@link MTurk#deleteHITRaw} on the array of <code>hits</code>.
  */
 MTurk.prototype.deleteHITsRaw = function(hits) {
-	if ((typeof hits) == "object" && (hits instanceof Array)) {
-		var hitIds = map(hits, function(h) {
-					return mturk.tryToGetHITId(h)
-				})
-	} else {
-		var hitIds = [this.tryToGetHITId(hits)]
+	if (!(hits instanceof Array)) {
+		hits = [hits]
 	}
-	this.keepTrying(function() {
-				var totalCount = hitIds.length
-				var goodCount = 0
-				mturk.requesterService.deleteHITs(hitIds, true, true, new com.amazonaws.mturk.addon.BatchItemCallback({
-					processItemResult : function(itemId, succeeded, result, itemException) {
-						if (succeeded) {
-							print("deleted HIT: " + itemId)
-							goodCount++
-						} else {
-							print("failed to delete HIT: " + itemId + " (" + itemException.getMessage() + ")")
-						}
-					}
-				}))
-				print("deleted " + goodCount + " of " + totalCount)
-			})
+	foreach(hits, function (hit) {
+		mturk.deleteHITRaw(hit)
+	})
 }
 
 /**
@@ -662,14 +700,6 @@ MTurk.prototype.deleteHITs = function(hits) {
 	once(function() {
 				mturk.deleteHITsRaw(hits)
 			})
-}
-
-/**
- * Same as {@link MTurk#deleteHITs}, since that accepts a single HIT, but reads
- * better when deleting a single HIT.
- */
-MTurk.prototype.deleteHIT = function(hit) {
-	this.deleteHITs(hit)
 }
 
 /**
@@ -1037,7 +1067,8 @@ S3.prototype.putObjectRaw = function(bucketName, s3Object) {
 		org.jets3t.service.acl.Permission.PERMISSION_READ)
 	s3Object.setAcl(acl)
 	this.s3Service.putObject(bucket, s3Object);
-	var url = "http://s3.amazonaws.com/" + bucket.getName() + "/" + s3Object.getKey()
+	var url = this.getURL(bucket, s3Object)
+	database.query("ensure(null, ['__S3_Objects', " + json(url) + "], " + json({}) + ")")
 	if (verbose) {
 		print("S3 object put at: " + url)
 	}
@@ -1051,6 +1082,19 @@ S3.prototype.putObject = function(bucketName, s3Object) {
 	return once(function() {
 				return s3.putObjectRaw(bucketName, s3Object)
 			})
+}
+
+/**
+	Creates an S3 URL given a <code>bucket</code> and a <code>key</code>.
+ */
+S3.prototype.getURL = function(bucket, key) {
+	if ((typeof bucket) == "object") {
+		bucket = bucket.getName()
+	}
+	if ((typeof key) == "object") {
+		key = key.getKey()
+	}
+	return "http://s3.amazonaws.com/" + bucket + "/" + key
 }
 
 /**
@@ -1077,6 +1121,10 @@ S3.prototype.deleteObjectRaw = function(bucketName, key) {
 		key = a.key
 	}
 	this.s3Service.deleteObject(bucketName, key)
+	
+	var url = this.getURL(bucketName, key)
+	verbosePrint("deleted S3 object at: " + url)
+	database.query("delete __S3_Objects[" + json(url) + "]")	
 }
 
 /**

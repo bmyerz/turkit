@@ -1,0 +1,29 @@
+
+-------------------------------
+version 0.1.26-test
+
+
+- "Reset Database" now deletes all the HITs and S3 Objects associated with the database.
+	In particular, any time you call mturk.createHIT or s3.putObject in a TurKit program,
+	the HIT Id or S3 Object URL is stored in the database,
+	and when the database is reset, all of these HITs and S3 Objects are removed.
+
+- new function mturk.deleteHITRaw
+- the deleteHIT functions now work better -- in general, they will always succeed at deleting the HIT,
+	no matter what state it is in, even if turkers are currently working on assignments for the HIT.
+	Note that all assignments that haven't been rejected for the HIT will be approved
+	(this is consistent with the previous behavior).
+
+- deleteHIT now removes the HIT from "__HITs" in the database
+- "Delete HITs" button changed to "Delete All HITs" (performs same function)
+- the global value "__HITs" in the database is now an object (each key is a HIT Id), as opposed to an Array
+
+- when S3 objects are created or deleted, the new "__S3_Objects" variable in the database is updated.
+	It stores the URLs for each S3 Object as a key.
+	
+- new function s3.getURL, useful for constructing an S3 URL based on a bucket name and a key
+
+-------------------------------
+version 0.1.25
+
+- this was the version when the change log was created

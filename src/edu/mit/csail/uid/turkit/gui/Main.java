@@ -100,11 +100,11 @@ public class Main {
 				}
 			}
 		});
-		JButton deleteHits = new JButton("Delete HITs");
+		JButton deleteHits = new JButton("Delete All HITs");
 		deleteHits.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					onDeleteHITs();
+					onDeleteAllHITs();
 				} catch (Exception ee) {
 					throw new Error(ee);
 				}
@@ -177,8 +177,8 @@ public class Main {
 				new JScrollPane(input), "input", null, DockingMode.ALL);
 		Dockable outputDock = new DefaultDockable("output", new JScrollPane(
 				output), "output", null, DockingMode.ALL);
-		Dockable databaseDock = new DefaultDockable("database", new JScrollPane(
-				database), "database", null, DockingMode.ALL);
+		Dockable databaseDock = new DefaultDockable("database",
+				new JScrollPane(database), "database", null, DockingMode.ALL);
 
 		TabDock leftTabDock = new TabDock();
 		TabDock topTabDock = new TabDock();
@@ -352,16 +352,24 @@ public class Main {
 
 	public void onResetDatabase() throws Exception {
 		onStop();
-		turkit.resetDatabase();
-		updateDatabase();
+
+		output.setText("");
+		MyOutputStream scriptOut = new MyOutputStream();
+		{
+			turkit.resetDatabase();
+			updateDatabase();
+		}
+		scriptOut.close();
 	}
 
-	public void onDeleteHITs() throws Exception {
+	public void onDeleteAllHITs() throws Exception {
 		onStop();
 
 		output.setText("");
 		MyOutputStream scriptOut = new MyOutputStream();
-		turkit.deleteHITs();
+		{
+			turkit.deleteAllHITs();
+		}
 		scriptOut.close();
 	}
 
