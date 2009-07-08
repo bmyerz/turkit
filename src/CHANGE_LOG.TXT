@@ -1,4 +1,17 @@
 
+
+
+-------------------------------
+version 0.1.27-test
+
+- TurKit now tries to notice when you call "once" functions out of order.
+	This should help catch cases where you edit your program in "illegal" ways,
+	that get the program execution out of step with the memoized execution trace.
+
+- printed messages, like "hit created" are now shown every time the program is run.
+	This means you will still have access to that url that it shows,
+	even if you re-run the program.
+
 -------------------------------
 version 0.1.26-test
 

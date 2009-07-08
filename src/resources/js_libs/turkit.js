@@ -148,15 +148,30 @@ TraceManager.prototype.popFrame = function() {
 TraceManager.prototype.once = function(func, frameName) {
 	var frame = this.pushFrame(frameName)
 	try {
+		if ("onceFunc" in frame) {
+			if (frame.onceFunc != "" + func) {
+				throw "The memoized stack is inconsistent with the program. The program is running: " + func + "\nBut on a previous run, it ran: " + frame.onceFunc 
+			}
+		} else {
+			database.query("merge(ensure(null, " + json(this.stackFramePath)
+					+ "), " + json({onceFunc : "" + func}) + ")")
+		}
+	
 		if ("returnValue" in frame) {
 			frame.returnValue = database.query("return ensure(null, "
 					+ json(this.stackFramePath) + ").returnValue")
-		}
-
-		else {
+			if ("printOutput" in frame) {
+				Packages.java.lang.System.out["print(java.lang.String)"](frame.printOutput)
+			}
+		} else {
+			var wireTap = new Packages.edu.mit.csail.uid.turkit.util.WireTap()
+			var returnValue = func()
+			var printOutput = wireTap.close()
+			var returnTime = time()		
 			frame = {
-				returnValue : func(),
-				returnTime : time()
+				returnValue : returnValue,
+				returnTime : returnTime,
+				printOutput : printOutput
 			}
 			database.query("merge(ensure(null, " + json(this.stackFramePath)
 					+ "), " + json(frame) + ")")
