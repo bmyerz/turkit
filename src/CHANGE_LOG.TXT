@@ -1,5 +1,24 @@
 
 
+-------------------------------
+version 0.1.29
+
+- Java API change: TurKit.runOnce now accepts different parameters.
+
+- JavaScript API change:
+	- new "slurp" function which accepts a filename/path and returns the file contents as a string 
+	- MTurk.vote now returns an additional parameter: the hit as it looked right before it was deleted
+
+- highlightDiff moved from turkit.js to util.js (no effect visible to users, except in documentation)
+
+- bug fix: now able to load database files of arbitrary size.
+	It used to be that TurKit could not reload the database for some TurKit programs,
+	if they were too large.
+	
+- minor bug fixes:
+	- task-template.html now disables buttons as well as inputs and textareas
+	- fixed problem when reseting database if no HITs had been created
+	- fixed bug in mturk.deleteHITRaw, triggered when deleting a HITs where some assignments had been approved already
 
 -------------------------------
 version 0.1.27-test

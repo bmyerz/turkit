@@ -666,7 +666,8 @@ MTurk.prototype.deleteHITRaw = function(hit) {
 				
 				// first, approve all the assignments
 				foreach(hit.assignments, function (a) {
-					mturk.approveAssignmentRaw(a)
+					if (a.assignmentStatus == "Submitted")
+						mturk.approveAssignmentRaw(a)
 				})
 				
 				// next, dispose of the HIT
@@ -953,6 +954,7 @@ MTurk.prototype.waitForHIT = function(hit) {
  * <li><b>totalVoteCount</b>: the number of votes received from turkers.</li>
  * <li><b>voteCounts</b>: an object with key/value pairs representing
  * choice/voteCounts.</li>
+ * <li><b>hit</b>: the HIT data structure representing the HIT on the final iteration of the voting process.</li>
  * </ul>
  */
 MTurk.prototype.vote = function(hit, extractVoteFromAnswer) {
@@ -981,7 +983,8 @@ MTurk.prototype.vote = function(hit, extractVoteFromAnswer) {
 			return {
 				bestOption : winner,
 				totalVoteCount : hit.assignments.length,
-				voteCounts : votes
+				voteCounts : votes,
+				hit : hit
 			}
 		} else {
 			this.extendHIT(hit, necessaryVoteCount - winnerVotes, null)
@@ -1228,7 +1231,7 @@ function shuffle(a) {
 }
 
 /**
-	Creates a webpage, puts it on S3, and returns the URL.
+	<p>Creates a webpage, puts it on S3, and returns the URL.
 	The webpage represents a HIT.
 	The webpage is created by starting with a <a href="/src/resources/task-template.html">template HTML page</a>.
 	The <code>html</code> supplied to this function in injected into the template.
@@ -1236,11 +1239,11 @@ function shuffle(a) {
 	then the result is placed on S3 in the bucket <code>your-aws-access-key-id.TurKit</code> with the key <code>md5-hash-of-content.html</code>.
 	The S3 webpage is made publicly accessible.
 	The URL to the S3 webpage is returned.
-	You can pass the URL to <code>s3.deleteObject</code> to remove it.
-	If you supply an array or comma-delimited-string for <code>blockWorkers</code>,
-	then the html page will use JavaScript to prevent those workers from completing the HIT.
-	If you give any elements the class "random", then those elements will be randomly permuted each time a user views the page.
-	This is good for randomizing the choices in voting tasks.
+	You can pass the URL to <code>s3.deleteObject</code> to remove it.</p>
+	<p>If you supply an array or comma-delimited-string for <code>blockWorkers</code>,
+	then the html page will use JavaScript to prevent those workers from completing the HIT.</p>
+	<p>If you give any elements the class "random", then those elements will be randomly permuted each time a user views the page.
+	This is good for randomizing the choices in voting tasks.</p>
 	*/
 function createWebpageFromTemplate(html, blockWorkers, bucketName) {
 	if (!blockWorkers) {
@@ -1256,75 +1259,4 @@ function createWebpageFromTemplate(html, blockWorkers, bucketName) {
 		replace(/___BLOCK_WORKERS___/, blockWorkers)
 	var key = Packages.edu.mit.csail.uid.turkit.util.U.md5(s) + ".html"
 	return s3.putString(bucketName, key, s)
-}
-
-/**
-	Takes two strings <code>a</code> and <code>b</code>, and calculates their difference.
-	The differences are highlighted in each result using HTML span tags with yellow backgrounds.
-	There are two resulting strings of HTML, returned in an object with two properties, <code>a</code> and <code>b</code>.
- */
-function highlightDiff(a, b) {
-    a = a.match(/\S+|\s+/g)
-    b = b.match(/\S+|\s+/g)
-    diff(a, b)
-    return {
-        a : '<span>' + mapToSelf(a, function (word) {
-            if (typeof word == "string") {
-                return '<span style="background-color:yellow">' + escapeXml(word) + '</span>'
-            } else {
-                return escapeXml(word.text)
-            }
-        }).join('') + '</span>',
-        b : '<span>' + mapToSelf(b, function (word) {
-            if (typeof word == "string") {
-                return '<span style="background-color:yellow">' + escapeXml(word) + '</span>'
-            } else {
-                return escapeXml(word.text)
-            }
-        }).join('') + '</span>'
-    }
-    
-	// much of the "diff" function below comes from the web, but I forget where,
-	// please let me know if you know the source
-    function diff( o, n ) {
-      var ns = new Object();
-      var os = new Object();
-      
-      for ( var i = 0; i < n.length; i++ ) {
-        if ( ns[ n[i] ] == null )
-          ns[ n[i] ] = { rows: new Array(), o: null };
-        ns[ n[i] ].rows.push( i );
-      }
-      
-      for ( var i = 0; i < o.length; i++ ) {
-        if ( os[ o[i] ] == null )
-          os[ o[i] ] = { rows: new Array(), n: null };
-        os[ o[i] ].rows.push( i );
-      }
-      
-      for ( var i in ns ) {
-        if ( ns[i].rows.length == 1 && typeof(os[i]) != "undefined" && os[i].rows.length == 1 ) {
-          n[ ns[i].rows[0] ] = { text: n[ ns[i].rows[0] ], row: os[i].rows[0] };
-          o[ os[i].rows[0] ] = { text: o[ os[i].rows[0] ], row: ns[i].rows[0] };
-        }
-      }
-      
-      for ( var i = 0; i < n.length - 1; i++ ) {
-        if ( n[i].text != null && n[i+1].text == null && n[i].row + 1 < o.length && o[ n[i].row + 1 ].text == null && 
-             n[i+1] == o[ n[i].row + 1 ] ) {
-          n[i+1] = { text: n[i+1], row: n[i].row + 1 };
-          o[n[i].row+1] = { text: o[n[i].row+1], row: i + 1 };
-        }
-      }
-      
-      for ( var i = n.length - 1; i > 0; i-- ) {
-        if ( n[i].text != null && n[i-1].text == null && n[i].row > 0 && o[ n[i].row - 1 ].text == null && 
-             n[i-1] == o[ n[i].row - 1 ] ) {
-          n[i-1] = { text: n[i-1], row: n[i].row - 1 };
-          o[n[i].row-1] = { text: o[n[i].row-1], row: i - 1 };
-        }
-      }
-      
-      return { o: o, n: n };
-    }
 }

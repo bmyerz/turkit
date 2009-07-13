@@ -1,6 +1,9 @@
 package edu.mit.csail.uid.turkit;
 
-import java.io.Reader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,14 +45,36 @@ public class RhinoUtil {
 	 * and if that doesn't work, tries executing it again with optimization turned off.
 	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
 	 */
-	public static Object evaluateReader(Context cx, Scriptable scope, Reader in,
-			String sourceName) throws Exception {
+	public static Object evaluateFile(Context cx, Scriptable scope, File file)
+			throws Exception {
 		try {
-			return cx.evaluateReader(scope, in, sourceName, 1, null);
+			return cx.evaluateReader(scope, new FileReader(file), file
+					.getAbsolutePath(), 1, null);
 		} catch (EvaluatorException ee) {
 			int oldOp = cx.getOptimizationLevel();
 			cx.setOptimizationLevel(-1);
-			Object ret = cx.evaluateReader(scope, in, sourceName, 1, null);
+			Object ret = cx.evaluateReader(scope, new FileReader(file), file
+					.getAbsolutePath(), 1, null);
+			cx.setOptimizationLevel(oldOp);
+			return ret;
+		}
+	}
+
+	/**
+	 * Wrapper around <code>Context.evaluateReader</code> which tries to evaluate the code first with optimization turned on,
+	 * and if that doesn't work, tries executing it again with optimization turned off.
+	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
+	 */
+	public static Object evaluateURL(Context cx, Scriptable scope, URL url)
+			throws Exception {
+		try {
+			return cx.evaluateReader(scope, new InputStreamReader(url
+					.openStream()), url.toString(), 1, null);
+		} catch (EvaluatorException ee) {
+			int oldOp = cx.getOptimizationLevel();
+			cx.setOptimizationLevel(-1);
+			Object ret = cx.evaluateReader(scope, new InputStreamReader(url
+					.openStream()), url.toString(), 1, null);
 			cx.setOptimizationLevel(oldOp);
 			return ret;
 		}

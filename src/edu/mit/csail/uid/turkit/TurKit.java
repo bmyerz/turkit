@@ -160,10 +160,8 @@ public class TurKit {
 	 */
 	public void resetDatabase() throws Exception {
 		if (database != null) {
-			URL url = this.getClass().getResource(
-					"/resources/js_libs/resetDatabase.js");
-			runOnce(maxMoney, maxHITs, new InputStreamReader(url.openStream()),
-					url.toString());
+			runOnce(maxMoney, maxHITs, this.getClass().getResource(
+					"/resources/js_libs/resetDatabase.js"));
 
 			database.delete();
 		}
@@ -182,14 +180,15 @@ public class TurKit {
 	}
 
 	/**
-	 * Runs the JavaScript program in the <code>reader</code> once.
+	 * Runs the JavaScript program in the <code>source</code> once.
+	 * The <code>source</code> must be a File or URL.
 	 * @param maxMoney if non-zero, sets how much money the JavaScript program may spend (over all it's runs) before throwing a safety exception.
 	 * @param maxHITs if non-zero, sets how many HITs the JavaScript program may create (over all it's runs) before throwing a safety exception.
 	 * @return true iff no "stop" exceptions were thrown using <code>stop()</code> in the JavaScript program.
 	 * @throws Exception
 	 */
-	public boolean runOnce(double maxMoney, int maxHITs, Reader reader,
-			String sourceName) throws Exception {
+	public boolean runOnce(double maxMoney, int maxHITs, Object source)
+			throws Exception {
 		if (maxMoney < 0 && maxHITs < 0) {
 			safety = false;
 		} else if (maxMoney < 0 || maxHITs < 0) {
@@ -204,21 +203,21 @@ public class TurKit {
 			scope.put("javaTurKit", scope, this);
 
 			{
-				URL url = this.getClass().getResource(
-						"/resources/js_libs/util.js");
-				RhinoUtil.evaluateReader(cx, scope, new InputStreamReader(url
-						.openStream()), url.toString());
+				RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+						"/resources/js_libs/util.js"));
 			}
 
 			{
-				URL url = this.getClass().getResource(
-						"/resources/js_libs/turkit.js");
-				RhinoUtil.evaluateReader(cx, scope, new InputStreamReader(url
-						.openStream()), url.toString());
+				RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+						"/resources/js_libs/turkit.js"));
 			}
 
 			stopped = false;
-			RhinoUtil.evaluateReader(cx, scope, reader, sourceName);
+			if (source instanceof URL) {
+				RhinoUtil.evaluateURL(cx, scope, (URL) source);
+			} else if (source instanceof File) {
+				RhinoUtil.evaluateFile(cx, scope, (File) source);
+			}
 		} catch (Exception e) {
 			if (e instanceof JavaScriptException) {
 				JavaScriptException je = (JavaScriptException) e;
@@ -245,8 +244,7 @@ public class TurKit {
 	 * @throws Exception
 	 */
 	public boolean runOnce(double maxMoney, int maxHITs) throws Exception {
-		return runOnce(maxMoney, maxHITs, new FileReader(jsFile), jsFile
-				.getAbsolutePath());
+		return runOnce(maxMoney, maxHITs, jsFile);
 	}
 
 	/**
@@ -255,8 +253,7 @@ public class TurKit {
 	public void deleteAllHITs() throws Exception {
 		URL url = this.getClass().getResource(
 				"/resources/js_libs/deleteAllHITs.js");
-		runOnce(maxMoney, maxHITs, new InputStreamReader(url.openStream()), url
-				.toString());
+		runOnce(maxMoney, maxHITs, url);
 	}
 
 	/**

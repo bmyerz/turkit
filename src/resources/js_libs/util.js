@@ -21,6 +21,13 @@ function time() {
 }
 
 /**
+	Reads the contents of the file indicated by <code>filename</code> into a string.
+ */
+function slurp(filename) {
+	return "" + Packages.edu.mit.csail.uid.turkit.util.U.slurp(filename)
+}
+
+/**
     Returns a JSON-like representation of the JavaScript data value. You may call "eval" on the result and get back the original data structure. This works even if the structure contains nested or even circular references. It does not handle functions.
     @param o The data value to convert. May be a number, string, array or object.
     @returns A JSON-like representation of o.
@@ -416,4 +423,89 @@ unescapeXml = function (s) {
                 }
         }
     })
+}
+
+/**
+	<p>Takes two strings <code>a</code> and <code>b</code>, and calculates their differences.
+	The differences are highlighted in each result using HTML span tags with yellow backgrounds.
+	There are two resulting strings of HTML, returned in an object with two properties, <code>a</code> and <code>b</code>.</p>
+ */
+function highlightDiff(a, b) {
+    a = a.match(/\S+|\s+/g)
+    b = b.match(/\S+|\s+/g)
+    mapToSelf(a, function (e) { return ":" + e })
+    mapToSelf(b, function (e) { return ":" + e })
+    diff(a, b)
+    function toHTML(tokens) {
+        var yellow = false
+        var s = []
+        foreach(tokens, function (token) {
+            if (typeof token == "string") {
+                if (!yellow) {
+                    yellow = true
+                    s.push('<span style="background-color:yellow">')
+                }
+                s.push(escapeXml(token.substring(1)))
+            } else {
+                if (yellow) {
+                    yellow = false
+                    s.push('</span>')
+                }
+                s.push(escapeXml(token.text.substring(1)))
+            }        
+        })
+        if (yellow) {
+            yellow = false
+            s.push('</span>')
+        }
+        return s.join('')
+    }
+    return {
+        a : toHTML(a),
+        b : toHTML(b)
+    }
+    
+	// much of the "diff" function below comes from the web, but I forget where,
+	// please let me know if you know the source
+    function diff( o, n ) {
+      var ns = new Object();
+      var os = new Object();
+      
+      for ( var i = 0; i < n.length; i++ ) {
+        if ( ns[ n[i] ] == null )
+          ns[ n[i] ] = { rows: new Array(), o: null };
+        ns[ n[i] ].rows.push( i );
+      }
+      
+      for ( var i = 0; i < o.length; i++ ) {
+        if ( os[ o[i] ] == null )
+          os[ o[i] ] = { rows: new Array(), n: null };
+        os[ o[i] ].rows.push( i );
+      }
+      
+      for ( var i in ns ) {
+        if ( ns[i].rows.length == 1 && typeof(os[i]) != "undefined" && os[i].rows.length == 1 ) {
+          n[ ns[i].rows[0] ] = { text: n[ ns[i].rows[0] ], row: os[i].rows[0] };
+          o[ os[i].rows[0] ] = { text: o[ os[i].rows[0] ], row: ns[i].rows[0] };
+        }
+      }
+      
+      for ( var i = 0; i < n.length - 1; i++ ) {
+        if ( n[i].text != null && n[i+1].text == null && n[i].row + 1 < o.length && o[ n[i].row + 1 ].text == null && 
+             n[i+1] == o[ n[i].row + 1 ] ) {
+          n[i+1] = { text: n[i+1], row: n[i].row + 1 };
+          o[n[i].row+1] = { text: o[n[i].row+1], row: i + 1 };
+        }
+      }
+      
+      for ( var i = n.length - 1; i > 0; i-- ) {
+        if ( n[i].text != null && n[i-1].text == null && n[i].row > 0 && o[ n[i].row - 1 ].text == null && 
+             n[i-1] == o[ n[i].row - 1 ] ) {
+          n[i-1] = { text: n[i-1], row: n[i].row - 1 };
+          o[n[i].row-1] = { text: o[n[i].row-1], row: i - 1 };
+        }
+      }
+      
+      return { o: o, n: n };
+    }
 }

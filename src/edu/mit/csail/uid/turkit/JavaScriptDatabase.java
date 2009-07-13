@@ -42,9 +42,7 @@ public class JavaScriptDatabase {
 		cx.setLanguageVersion(170);
 		scope = cx.initStandardObjects();
 
-		URL util = this.getClass().getResource("/resources/js_libs/util.js");
-		RhinoUtil.evaluateReader(cx, scope, new InputStreamReader(util.openStream()),
-				util.toString());
+		RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource("/resources/js_libs/util.js"));
 
 		if (!storageFile.exists() && tempFile.exists()) {
 			tempFile.renameTo(storageFile);

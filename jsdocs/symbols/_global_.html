@@ -333,7 +333,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#createWebpageFromTemplate">createWebpageFromTemplate</a></b>(html, blockWorkers, bucketName)
 								</div>
-								<div class="description">Creates a webpage, puts it on S3, and returns the URL.</div>
+								<div class="description"><p>Creates a webpage, puts it on S3, and returns the URL.</div>
 							</td>
 						</tr>
 					
@@ -387,7 +387,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#highlightDiff">highlightDiff</a></b>(a, b)
 								</div>
-								<div class="description">Takes two strings <code>a</code> and <code>b</code>, and calculates their difference.</div>
+								<div class="description"><p>Takes two strings <code>a</code> and <code>b</code>, and calculates their differences.</div>
 							</td>
 						</tr>
 					
@@ -514,6 +514,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#sleep">sleep</a></b>(seconds)
 								</div>
 								<div class="description">Sleep for the specified number of seconds using Java's Thread.sleep</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#slurp">slurp</a></b>(filename)
+								</div>
+								<div class="description">Reads the contents of the file indicated by <code>filename</code> into a string.</div>
 							</td>
 						</tr>
 					
@@ -814,7 +823,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Creates a webpage, puts it on S3, and returns the URL.
+						<p>Creates a webpage, puts it on S3, and returns the URL.
 	The webpage represents a HIT.
 	The webpage is created by starting with a <a href="/src/resources/task-template.html">template HTML page</a>.
 	The <code>html</code> supplied to this function in injected into the template.
@@ -822,11 +831,11 @@ ul.inheritsList
 	then the result is placed on S3 in the bucket <code>your-aws-access-key-id.TurKit</code> with the key <code>md5-hash-of-content.html</code>.
 	The S3 webpage is made publicly accessible.
 	The URL to the S3 webpage is returned.
-	You can pass the URL to <code>s3.deleteObject</code> to remove it.
-	If you supply an array or comma-delimited-string for <code>blockWorkers</code>,
-	then the html page will use JavaScript to prevent those workers from completing the HIT.
-	If you give any elements the class "random", then those elements will be randomly permuted each time a user views the page.
-	This is good for randomizing the choices in voting tasks.
+	You can pass the URL to <code>s3.deleteObject</code> to remove it.</p>
+	<p>If you supply an array or comma-delimited-string for <code>blockWorkers</code>,
+	then the html page will use JavaScript to prevent those workers from completing the HIT.</p>
+	<p>If you give any elements the class "random", then those elements will be randomly permuted each time a user views the page.
+	This is good for randomizing the choices in voting tasks.</p>
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/src_resources_js_libs_turkit.js.html">turkit.js</a>.
@@ -1131,12 +1140,12 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Takes two strings <code>a</code> and <code>b</code>, and calculates their difference.
+						<p>Takes two strings <code>a</code> and <code>b</code>, and calculates their differences.
 	The differences are highlighted in each result using HTML span tags with yellow backgrounds.
-	There are two resulting strings of HTML, returned in an object with two properties, <code>a</code> and <code>b</code>.
+	There are two resulting strings of HTML, returned in an object with two properties, <code>a</code> and <code>b</code>.</p>
 						
 							<br />
-							<i>Defined in: </i> <a href="../symbols/src/src_resources_js_libs_turkit.js.html">turkit.js</a>.
+							<i>Defined in: </i> <a href="../symbols/src/src_resources_js_libs_util.js.html">util.js</a>.
 						
 						
 					</div>
@@ -1764,6 +1773,45 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="slurp"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>slurp</b>(filename)
+					
+					</div>
+					<div class="description">
+						Reads the contents of the file indicated by <code>filename</code> into a string.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_resources_js_libs_util.js.html">util.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>filename</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="stop"> </a>
 					<div class="fixedFont">
 					
@@ -1994,7 +2042,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Tue Jul 07 2009 12:49:59 GMT-0400 (EDT)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Mon Jul 13 2009 16:35:11 GMT-0400 (EDT)
 		</div>
 	</body>
 </html>

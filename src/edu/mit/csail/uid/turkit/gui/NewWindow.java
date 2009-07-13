@@ -73,18 +73,14 @@ public class NewWindow {
 		cx.setLanguageVersion(170);
 		Scriptable scope = cx.initStandardObjects();
 
-		URL util = this.getClass().getResource("/resources/js_libs/util.js");
-		RhinoUtil.evaluateReader(cx, scope, new InputStreamReader(util.openStream()), util
-				.toString());
+		RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource("/resources/js_libs/util.js"));
 
 		scope.put("input", scope, props);
 		scope.put("defaultFileContents", scope, U.slurp(this.getClass()
 				.getResource("default-file-contents.js")));
 
-		URL js = this.getClass().getResource("NewWindow.js");
 		try {
-			RhinoUtil.evaluateReader(cx, scope, new InputStreamReader(js.openStream()), js
-					.toString());
+			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource("NewWindow.js"));
 			f.setVisible(false);
 		} catch (Exception e) {
 			if (e instanceof JavaScriptException) {
