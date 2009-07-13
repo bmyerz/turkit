@@ -5,6 +5,7 @@
 	<property name="output_dir" value="build" />
 
 	<target name="jsdocs" description="build JavaScript documentation">
+		<echo file="jsdoc-toolkit/templates/jsdoc/static/header.html">&lt;div id=&quot;header&quot; style=&quot;width:100%;text-align:right&quot;&gt;&lt;h3&gt;&lt;i&gt;TurKit JavaScript API v${version.value}&lt;/i&gt;&lt;/h3&gt;&lt;/div&gt;</echo>
 		<exec executable="java" dir="jsdoc-toolkit">
 			<arg value="-jar" />
 			<arg value="jsrun.jar" />
@@ -26,6 +27,8 @@
 			<arg value="edu" />
 			<arg value="-exclude" />
 			<arg value="edu.mit.csail.uid.turkit.util:edu.mit.csail.uid.turkit.gui" />
+			<arg value="-header" />
+			<arg value="TurKit Java API&lt;br/&gt;v${version.value}" />
 		</exec>
 	</target>
 
