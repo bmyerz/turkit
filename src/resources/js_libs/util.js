@@ -313,10 +313,10 @@ function merge(objA, objB) {
 }
 
 /**
-    Passes each value of an array or object through the <i>test</i> function, and returns the maximum value found.<br>
+    Passes each value of an array or object through the <i>test</i> function, and returns the maximum value found, along with the index it was found at, in an array.<br>
     For example:<br>
     <code>getMax({a:5,b:7,c:3}, function (e) {return e})</code><br>
-    returns 7<br>
+    returns [7, "b"]<br>
     You may also use a string for <i>test</i> like so:<br>
     <code>getMax({a:5,b:7,c:3}, "e")</code>.<br>
     Note that <i>e</i> is a special value in the string. Another special value is <i>i</i>, which is the index or key of the current element. If you omit a value for <i>test</i>, the default is "e".
