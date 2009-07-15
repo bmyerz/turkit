@@ -64,9 +64,9 @@ public class TurKit {
 	public String taskTemplate;
 
 	/**
-	 * True iff we are using the MTurk sandbox.
+	 * Should be one of the following values: "offline", "sandbox", "real"
 	 */
-	public boolean sandbox = false;
+	public String mode;
 
 	/**
 	 * True iff we want to see verbose output from the TurKit program.
@@ -98,23 +98,12 @@ public class TurKit {
 	 * @param jsFile a file on disk with the TurKit program, written in JavaScript, using the TurKit JavaScript API.
 	 * @param accessKeyId your Amazon AWS access key id.
 	 * @param secretKey your Amazon AWS secret key.
-	 * @param sandbox set to true to use the sandbox, where you won't spend any real money.
+	 * @param mode set to "offline", "sandbox" or "real". ("offline" will not let you access MTurk or S3. "sandbox" will let you access the MTurk sandbox, and the real S3. "real" mode accesses the real MTurk and the real S3.)
 	 * @throws Exception
 	 */
-	public TurKit(File jsFile, String accessKeyId, String secretKey,
-			boolean sandbox) throws Exception {
-		ClientConfig conf = new ClientConfig();
-		conf.setAccessKeyId(accessKeyId);
-		conf.setSecretAccessKey(secretKey);
-		conf
-				.setServiceURL(sandbox ? "http://mechanicalturk.sandbox.amazonaws.com/?Service=AWSMechanicalTurkRequester"
-						: "http://mechanicalturk.amazonaws.com/?Service=AWSMechanicalTurkRequester");
-		Set<String> retriableErrors = new HashSet();
-		retriableErrors.add("Server.ServiceUnavailable");
-		conf.setRetriableErrors(retriableErrors);
-		conf.setRetryAttempts(10);
-		conf.setRetryDelayMillis(1000);
-		init(jsFile, conf);
+	public TurKit(File jsFile, String accessKeyId, String secretKey, String mode)
+			throws Exception {
+		reinit(jsFile, accessKeyId, secretKey, mode);
 	}
 
 	/**
@@ -124,47 +113,126 @@ public class TurKit {
 	 * @throws Exception
 	 */
 	public TurKit(File jsFile, ClientConfig conf) throws Exception {
-		init(jsFile, conf);
+		reinit(jsFile, conf);
 	}
 
-	private void init(File jsFile, ClientConfig conf) throws Exception {
-		version = U.slurp(this.getClass().getResource(
-				"/resources/version.properties"));
-		{
-			Matcher m = Pattern.compile("=(.*)").matcher(version);
-			if (m.find()) {
-				version = m.group(1).trim();
+	/**
+	 * Use this function if you want to re-initialize certain parameters of the TurKit object.
+	 * This function will only have an effect if these values are different from their current values.
+	 * @throws Exception
+	 */
+	public void reinit(File jsFile, String accessKeyId, String secretKey,
+			String mode) throws Exception {
+		ClientConfig conf = new ClientConfig();
+		conf.setAccessKeyId(accessKeyId);
+		conf.setSecretAccessKey(secretKey);
+		mode = mode.toLowerCase();
+		conf
+				.setServiceURL(mode.equals("sandbox") ? "http://mechanicalturk.sandbox.amazonaws.com/?Service=AWSMechanicalTurkRequester"
+						: mode.equals("real") ? "http://mechanicalturk.amazonaws.com/?Service=AWSMechanicalTurkRequester"
+								: "");
+		Set<String> retriableErrors = new HashSet();
+		retriableErrors.add("Server.ServiceUnavailable");
+		conf.setRetriableErrors(retriableErrors);
+		conf.setRetryAttempts(10);
+		conf.setRetryDelayMillis(1000);
+		reinit(jsFile, conf);
+	}
+
+	/**
+	 * Use this function if you want to re-initialize certain parameters of the TurKit object.
+	 * This function will only have an effect if these values are different from their current values.
+	 * @throws Exception
+	 */
+	public void reinit(File jsFile, ClientConfig conf) throws Exception {
+		if (version == null) {
+			version = U.slurp(this.getClass().getResource(
+					"/resources/version.properties"));
+			{
+				Matcher m = Pattern.compile("=(.*)").matcher(version);
+				if (m.find()) {
+					version = m.group(1).trim();
+				}
+			}
+		}
+		if (taskTemplate == null) {
+			taskTemplate = U.slurp(this.getClass().getResource(
+					"/resources/task-template.html"));
+		}
+
+		String oldAwsAccessKeyID = awsAccessKeyID;
+		String oldAwsSecretAccessKey = awsSecretAccessKey;
+		String oldMode = mode;
+		awsAccessKeyID = conf.getAccessKeyId();
+		awsSecretAccessKey = conf.getSecretAccessKey();
+		String serviceURL = conf.getServiceURL();
+		mode = serviceURL.contains("sandbox") ? "sandbox" : serviceURL
+				.contains("mechanicalturk.amazonaws.com") ? "real" : "offline";
+		if ((requesterService == null)
+				|| (!awsAccessKeyID.equals(oldAwsSecretAccessKey))
+				|| (!awsSecretAccessKey.equals(oldAwsSecretAccessKey))
+				|| (!mode.equals(oldMode))) {
+
+			if (mode.equals("offline")) {
+				requesterService = null;
+				s3Service = null;
+			} else {
+				try {
+					requesterService = new RequesterService(conf);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if ((s3Service == null)
+						|| (!awsAccessKeyID.equals(oldAwsSecretAccessKey))
+						|| (!awsSecretAccessKey.equals(oldAwsSecretAccessKey))) {
+					try {
+						s3Service = new RestS3Service(new AWSCredentials(conf
+								.getAccessKeyId(), conf.getSecretAccessKey()));
+					} catch (Exception e) {
+					}
+				}
 			}
 		}
 
-		awsAccessKeyID = conf.getAccessKeyId();
-		awsSecretAccessKey = conf.getSecretAccessKey();
-
+		File oldJsFile = this.jsFile;
 		this.jsFile = jsFile;
-		resetDatabase();
-		requesterService = new RequesterService(conf);
-		sandbox = conf.getServiceURL().contains("sandbox");
-
-		try {
-			s3Service = new RestS3Service(new AWSCredentials(conf
-					.getAccessKeyId(), conf.getSecretAccessKey()));
-
-			taskTemplate = U.slurp(this.getClass().getResource(
-					"/resources/task-template.html"));
-		} catch (Exception e) {
+		if (!jsFile.equals(oldJsFile)) {
+			if (database != null) {
+				database.close();
+			}
+			database = null;
+			loadDatabase();
 		}
 	}
 
 	/**
-	 * Deletes the database file(s) and creates a new one.
+	 * Changes the mode. Possible values include "offline", "sandbox" and "real".
+	 * <ul>
+	 * <li>"offline" will not let you access MTurk or S3.</li>
+	 * <li>"sandbox" will let you access the MTurk sandbox, and the real S3.</li>
+	 * <li>"real" mode accesses the real MTurk and the real S3.</li>
+	 * </ul>
 	 */
-	public void resetDatabase() throws Exception {
+	public void setMode(String mode) throws Exception {
+		reinit(jsFile, awsAccessKeyID, awsSecretAccessKey, mode);
+	}
+
+	/**
+	 * Deletes the database file(s) and creates a new one.
+	 * @param saveBackup set to true if you want to keep a copy of the database file
+	 */
+	public void resetDatabase(boolean saveBackup) throws Exception {
 		if (database != null) {
-			runOnce(maxMoney, maxHITs, this.getClass().getResource(
+			runOnce(0, 0, this.getClass().getResource(
 					"/resources/js_libs/resetDatabase.js"));
 
-			database.delete();
+			database.delete(saveBackup);
+			database = null;
 		}
+		loadDatabase();
+	}
+
+	private void loadDatabase() throws Exception {
 		database = new JavaScriptDatabase(new File(jsFile.getAbsolutePath()
 				+ ".database"), new File(jsFile.getAbsolutePath()
 				+ ".database.tmp"));

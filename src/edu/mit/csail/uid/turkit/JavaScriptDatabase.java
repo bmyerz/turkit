@@ -42,7 +42,8 @@ public class JavaScriptDatabase {
 		cx.setLanguageVersion(170);
 		scope = cx.initStandardObjects();
 
-		RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource("/resources/js_libs/util.js"));
+		RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+				"/resources/js_libs/util.js"));
 
 		if (!storageFile.exists() && tempFile.exists()) {
 			tempFile.renameTo(storageFile);
@@ -73,7 +74,8 @@ public class JavaScriptDatabase {
 			}
 
 			s = s.substring(0, goodUntil);
-			RhinoUtil.evaluateString(cx, scope, s, storageFile.getAbsolutePath());
+			RhinoUtil.evaluateString(cx, scope, s, storageFile
+					.getAbsolutePath());
 
 			// save a copy of the storage file if it is corrupt
 			if (goodUntil < s.length()) {
@@ -101,13 +103,29 @@ public class JavaScriptDatabase {
 			storageFileOut = null;
 		}
 	}
-	
+
 	/**
 	 * Deletes the files associated with the JavaScript database.
+	 * @param saveBackup set to true if you want to keep a backup copy of the database file
 	 */
-	synchronized public void delete() {
+	synchronized public void delete(boolean saveBackup) throws Exception {
+		if (saveBackup) {
+			consolidate();
+		}
 		close();
-		storageFile.delete();
+		if (saveBackup) {
+			int i = 1;
+			while (true) {
+				File dest = new File(storageFile.getAbsolutePath() + ".old" + i);
+				if (!dest.exists()) {
+					storageFile.renameTo(dest);
+					break;
+				}
+				i++;
+			}
+		} else {
+			storageFile.delete();
+		}
 		tempFile.delete();
 	}
 
@@ -209,7 +227,14 @@ public class JavaScriptDatabase {
 		if (consolidationTimer != null)
 			consolidationTimer.onConsolidate();
 	}
-
+	
+	/**
+	 * Evaluates <code>q</code> as-is in the context of the JavaScript database, and returns the resulting Rhino object.
+	 */
+	synchronized public Object queryRaw(String q) throws Exception {
+		return RhinoUtil.evaluateString(cx, scope, q, "query");
+	}
+	
 	/**
 	 * Evaluates <code>q</code> in the context of the JavaScript database.
 	 * State changes are persisted on disk,

@@ -69,8 +69,7 @@ var database = new Database()
  * </p>
  */
 function TraceManager() {
-	this.stackFramePath = ["__stackFrames",
-			javaTurKit.sandbox ? "sandbox" : "for-real"]
+	this.stackFramePath = ["__stackFrames", "for-real"]
 	this.stackIndexes = [0]
 	this.visitedStackFrames = {}
 	this.beforePushFrame = true
@@ -230,8 +229,7 @@ TraceManager.prototype.setTrace = function(traceName) {
 	if (!traceName) {
 		throw "you must provide an identifier or version number of some sort"
 	}
-	this.stackFramePath[1] = (javaTurKit.sandbox ? "sandbox" : "for-real")
-			+ ":" + traceName
+	this.stackFramePath[1] = "for-real:" + traceName
 }
 
 /**
@@ -252,8 +250,7 @@ TraceManager.prototype.resetTrace = function(traceName) {
 	if (!traceName) {
 		throw "you must provide an identifier or version number of some sort"
 	}
-	this.stackFramePath[1] = (javaTurKit.sandbox ? "sandbox" : "for-real")
-			+ ":" + traceName
+	this.stackFramePath[1] = "for-real:" + traceName
 	database.query("var a = " + this.stackFramePath[0]
 			+ "; foreach(a, function (v, k) {if (k != "
 			+ json(this.stackFramePath[1]) + ") {delete a[k]}})")
@@ -530,12 +527,12 @@ MTurk.prototype.createHITRaw = function(params) {
 
 	var hitId = "" + hit.getHITId()
 	verbosePrint("created HIT: " + hitId)
-	var url = (javaTurKit.sandbox
+	var url = (javaTurKit.mode == "sandbox"
 					? "https://workersandbox.mturk.com/mturk/preview?groupId="
 					: "https://www.mturk.com/mturk/preview?groupId=")
 			+ hit.getHITTypeId()
 	verbosePrint("        url: " + url)
-	database.query("ensure(null, ['__HITs', " + json(hitId) + "], " + json({url : url}) + ")")
+	database.query("ensure(null, ['__HITs', " + json(javaTurKit.mode + ":" + hitId) + "], " + json({url : url}) + ")")
 	return hitId
 }
 
@@ -685,7 +682,7 @@ MTurk.prototype.deleteHITRaw = function(hit) {
 		}
 	}
 	
-	database.query("delete __HITs[" + json(hitId) + "]")
+	database.query("delete __HITs[" + json(javaTurKit.mode + ":" + hitId) + "]")
 }
 
 /**
@@ -1259,4 +1256,18 @@ function createWebpageFromTemplate(html, blockWorkers, bucketName) {
 		replace(/___BLOCK_WORKERS___/, blockWorkers)
 	var key = Packages.edu.mit.csail.uid.turkit.util.U.md5(s) + ".html"
 	return s3.putString(bucketName, key, s)
+}
+
+/**
+ * Changes the mode. Possible values include "offline", "sandbox" and "real".
+ * <ul>
+ * <li>"offline" will not let you access MTurk or S3.</li>
+ * <li>"sandbox" will let you access the MTurk sandbox, and the real S3.</li>
+ * <li>"real" mode accesses the real MTurk and the real S3.</li>
+ * </ul>
+ */
+function setMode(mode) {
+	javaTurKit.setMode(mode)
+	mturk.requesterService = javaTurKit.requesterService
+	s3.s3Service = javaTurKit.s3Service
 }

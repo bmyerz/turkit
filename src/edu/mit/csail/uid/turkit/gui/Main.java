@@ -4,27 +4,26 @@ import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.util.Map;
 
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
+import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileFilter;
 
 import com.javadocking.DockingManager;
 import com.javadocking.dock.Position;
@@ -35,61 +34,175 @@ import com.javadocking.dockable.Dockable;
 import com.javadocking.dockable.DockingMode;
 import com.javadocking.model.FloatDockModel;
 
+import edu.mit.csail.uid.turkit.JavaScriptDatabase;
 import edu.mit.csail.uid.turkit.TurKit;
 import edu.mit.csail.uid.turkit.util.U;
 
-public class Main {
-	public JFrame f;
+public class Main implements SimpleEventListener {
+	public static JavaScriptDatabase turkitProperties;
+	public SimpleEventManager sem;
 	public File jsFile;
+	public File propertiesFile;
+	public JFrame f;
 	public TurKit turkit;
-	public JTextArea output;
-	public JTextArea database;
-	public JEditorPane input;
-	public JLabel runPrompt;
+	public RunControls runControls;
+	public OutputPane outputPane;
+	public DatabasePane databasePane;
+	public CodePane codePane;
+	public PropertiesPane propertiesPane;
 	public long runAgainAtThisTime;
 	public long runDelaySeconds = 60;
 	public Timer timer;
-	public boolean inputSaved = true;
-	public long jsFile_lastModified = -1;
+	public Dockable propertiesDock;
 
-	public Main(File jsFile, String accessKey, String secretKey,
-			boolean sandbox, double maxMoney, int maxHITs) throws Exception {
-		this.jsFile = jsFile;
+	public static void main(String[] args) throws Exception {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					new Main();
+				} catch (Exception e) {
+					throw new Error(e);
+				}
+			}
+		});
+	}
+
+	public Main() throws Exception {
+
+		if (turkitProperties == null) {
+			turkitProperties = new JavaScriptDatabase(new File(
+					"turkit.properties"), new File("turkit.properties.tmp"));
+		}
+
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileFilter(new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.getName().endsWith(".js");
+			}
+
+			@Override
+			public String getDescription() {
+				return "JavaScript Files";
+			}
+		});
+		{
+			String recentFilename = (String) turkitProperties
+					.queryRaw("ensure(null, 'recentFile', '')");
+			if (!recentFilename.isEmpty()) {
+				chooser.setCurrentDirectory(new File(recentFilename));
+			} else {
+				chooser.setCurrentDirectory(new File("."));
+			}
+		}
+		int returnVal = chooser.showOpenDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			jsFile = chooser.getSelectedFile();
+			if (!jsFile.exists()) {
+				U.save(jsFile, U.slurp(this.getClass().getResource(
+						"default-file-contents.js")));
+			}
+		} else {
+			return;
+		}
+
+		sem = new SimpleEventManager();
+		sem.addListener(this);
+
+		// properties
+		propertiesFile = new File(jsFile.getAbsolutePath() + ".properties");
+		String defaultKey = "change_me";
+		if (!propertiesFile.exists()) {
+			String id = turkitProperties.queryRaw(
+					"ensure(null, 'awsAccessKeyID', '" + defaultKey + "')")
+					.toString();
+			String secret = turkitProperties.queryRaw(
+					"ensure(null, 'awsSecretAccessKey', 'change_me_too')")
+					.toString();
+
+			U.save(propertiesFile, U.slurp(
+					this.getClass().getResource("default.properties"))
+					.replaceAll("___ID___", id).replaceAll("___SECRET___",
+							secret));
+		}
+		boolean showPropsPane = false;
+		String mode = "offline";
+		{
+			Map props = PropertiesReader.read(U.slurp(propertiesFile), false);
+			if (props != null) {
+				mode = ((String) props.get("mode")).toLowerCase();
+				if (props.get("awsAccessKeyID").toString().equals(defaultKey)) {
+					showPropsPane = true;
+				}
+			} else {
+				showPropsPane = true;
+			}
+		}
 
 		// create turkit
-		turkit = new TurKit(jsFile, accessKey, secretKey, sandbox);
-		turkit.maxMoney = maxMoney;
-		turkit.maxHITs = maxHITs;
+		turkit = new TurKit(jsFile, "", "", "Offline");
 
 		// create gui
 		f = new JFrame();
-		f.setTitle("" + jsFile.getName() + "  -  TurKit");
 		U.exitOnClose(f);
+		f.setTitle("" + jsFile.getName() + "  -  TurKit");
 		f.getContentPane().setLayout(new BorderLayout());
+
+		// menubar
+		{
+			JMenuBar menubar = new JMenuBar();
+			f.setJMenuBar(menubar);
+			{
+				JMenu m = new JMenu("File");
+				menubar.add(m);
+				{
+					JMenuItem mi = new JMenuItem("Save", 'S');
+					m.add(mi);
+
+					mi.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							sem.fireEvent("save", null, null);
+						}
+					});
+				}
+			}
+			{
+				JMenu m = new JMenu("Tools");
+				menubar.add(m);
+				{
+					JMenuItem mi = new JMenuItem("Delete all sandbox HITs");
+					m.add(mi);
+
+					mi.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							try {
+								onDeleteAllHITs("sandbox");
+							} catch (Exception ee) {
+								throw new Error(ee);
+							}
+						}
+					});
+				}
+				{
+					JMenuItem mi = new JMenuItem("Delete all real HITs");
+					m.add(mi);
+
+					mi.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							try {
+								onDeleteAllHITs("real");
+							} catch (Exception ee) {
+								throw new Error(ee);
+							}
+						}
+					});
+				}
+			}
+		}
 
 		// toolbar
 		JPanel toolbar = new JPanel(new BorderLayout());
-		JButton pauseButton = new JButton("Stop");
-		pauseButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					onStop();
-				} catch (Exception ee) {
-					throw new Error(ee);
-				}
-			}
-		});
-		JButton runButton = new JButton("Run");
-		runButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					onRun();
-				} catch (Exception ee) {
-					throw new Error(ee);
-				}
-			}
-		});
-		runPrompt = new JLabel();
+		runControls = new RunControls(sem);
 		JButton deleteDatabase = new JButton("Reset Database");
 		deleteDatabase.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -100,90 +213,61 @@ public class Main {
 				}
 			}
 		});
-		JButton deleteHits = new JButton("Delete All HITs");
-		deleteHits.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					onDeleteAllHITs();
-				} catch (Exception ee) {
-					throw new Error(ee);
-				}
-			}
-		});
 		JPanel toolbarCenter = new JPanel();
-		toolbarCenter.add(pauseButton);
-		toolbarCenter.add(runButton);
-		toolbarCenter.add(runPrompt);
+		{
+			JComboBox modeDropdown = new JComboBox(new String[] { "offline",
+					"sandbox", "real" });
+			toolbarCenter.add(modeDropdown);
+			modeDropdown.setSelectedIndex(mode.equals("real") ? 2 : mode
+					.equals("sandbox") ? 1 : 0);
+
+			modeDropdown.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					String mode = (String) ((JComboBox) e.getSource())
+							.getSelectedItem();
+					try {
+						propertiesPane.setMode(mode);
+					} catch (Exception ee) {
+						throw new Error(ee);
+					}
+				}
+			});
+		}
+		toolbarCenter.add(runControls);
 		toolbar.add(toolbarCenter, BorderLayout.WEST);
 		JPanel toolbarRight = new JPanel();
 		toolbarRight.add(deleteDatabase);
-		toolbarRight.add(deleteHits);
 		toolbar.add(toolbarRight, BorderLayout.EAST);
 
 		f.getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		// dockables
 		Font font = new Font(Font.MONOSPACED, Font.PLAIN, 12);
-		{
-			input = new JEditorPane();
-			checkReloadInput();
-			input.getDocument().addDocumentListener(new DocumentListener() {
-				public void changedUpdate(DocumentEvent arg0) {
-					onInputChange();
-				}
-
-				public void insertUpdate(DocumentEvent arg0) {
-					onInputChange();
-				}
-
-				public void removeUpdate(DocumentEvent arg0) {
-					onInputChange();
-				}
-			});
-			input.addKeyListener(new KeyListener() {
-
-				public void keyPressed(KeyEvent ke) {
-					// TODO Auto-generated method stub
-					if (ke.isControlDown()
-							&& (ke.getKeyCode() == KeyEvent.VK_S)) {
-						try {
-							onSaveInput();
-						} catch (Exception e) {
-							throw new Error(e);
-						}
-					}
-				}
-
-				public void keyReleased(KeyEvent arg0) {
-				}
-
-				public void keyTyped(KeyEvent arg0) {
-				}
-			});
-			input.setFont(font);
-		}
-		{
-			output = new JTextArea();
-			output.setEditable(false);
-			output.setFont(font);
-		}
-		{
-			database = new JTextArea();
-			database.setEditable(false);
-			updateDatabase();
-			database.setFont(font);
-		}
-		Dockable inputDock = new DefaultDockable("input",
-				new JScrollPane(input), "input", null, DockingMode.ALL);
-		Dockable outputDock = new DefaultDockable("output", new JScrollPane(
-				output), "output", null, DockingMode.ALL);
-		Dockable databaseDock = new DefaultDockable("database",
-				new JScrollPane(database), "database", null, DockingMode.ALL);
+		codePane = new CodePane(sem, jsFile);
+		propertiesPane = new PropertiesPane(sem, propertiesFile);
+		outputPane = new OutputPane(sem);
+		databasePane = new DatabasePane(sem, turkit);
+		Dockable codeDock = new DefaultDockable("input", codePane, "input",
+				null, DockingMode.ALL);
+		propertiesDock = new DefaultDockable("properties", propertiesPane,
+				"properties", null, DockingMode.ALL);
+		Dockable outputDock = new DefaultDockable("output", outputPane,
+				"output", null, DockingMode.ALL);
+		Dockable databaseDock = new DefaultDockable("database", databasePane,
+				"database", null, DockingMode.ALL);
 
 		TabDock leftTabDock = new TabDock();
 		TabDock topTabDock = new TabDock();
 		TabDock bottomTabDock = new TabDock();
-		leftTabDock.addDockable(inputDock, new Position(0));
+
+		if (showPropsPane) {
+			leftTabDock.addDockable(codeDock, new Position(0));
+			leftTabDock.addDockable(propertiesDock, new Position(1));
+		} else {
+			leftTabDock.addDockable(propertiesDock, new Position(1));
+			leftTabDock.addDockable(codeDock, new Position(0));
+		}
+
 		topTabDock.addDockable(outputDock, new Position(0));
 		bottomTabDock.addDockable(databaseDock, new Position(0));
 
@@ -218,13 +302,9 @@ public class Main {
 		f.setVisible(true);
 
 		{
-			Timer filePoller = new Timer(500, new ActionListener() {
+			Timer filePoller = new Timer(1000, new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					try {
-						checkReloadInput();
-					} catch (Exception e) {
-						throw new Error(e);
-					}
+					sem.fireEvent("reload", null, null);
 				}
 			});
 			filePoller.start();
@@ -233,11 +313,7 @@ public class Main {
 		f.addWindowFocusListener(new WindowFocusListener() {
 
 			public void windowGainedFocus(WindowEvent arg0) {
-				try {
-					checkReloadInput();
-				} catch (Exception e) {
-					throw new Error(e);
-				}
+				sem.fireEvent("reload", null, null);
 			}
 
 			public void windowLostFocus(WindowEvent arg0) {
@@ -245,46 +321,32 @@ public class Main {
 
 			}
 		});
-	}
 
-	public void onSaveInput() throws Exception {
-		U.saveString(jsFile, input.getText());
-		jsFile_lastModified = jsFile.lastModified();
-		inputSaved = true;
-		updateTitle();
-	}
-
-	public void checkReloadInput() throws Exception {
-		if (inputSaved) {
-			long a = jsFile.lastModified();
-			if (a > jsFile_lastModified) {
-				onStop();
-				onReloadInput();
+		f.addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				if (!(codePane.saved && propertiesPane.saved)) {
+					int result = JOptionPane.showConfirmDialog(f,
+							"Save before quitting?");
+					if (result == JOptionPane.CANCEL_OPTION) {
+						f
+								.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+						SwingUtilities.invokeLater(new Runnable() {
+							public void run() {
+								U.exitOnClose(f);
+							}
+						});
+					} else if (result == JOptionPane.YES_OPTION) {
+						sem.fireEvent("save", null, null);
+					}
+				}
 			}
-			jsFile_lastModified = a;
-		}
-	}
-
-	public void onReloadInput() throws Exception {
-		input.setText(U.slurp(jsFile));
-		inputSaved = true;
-		updateTitle();
-	}
-
-	public void onInputChange() {
-		onStop();
-		inputSaved = false;
-		updateTitle();
+		});
 	}
 
 	public void updateTitle() {
-		f.setTitle(jsFile.getName() + (inputSaved ? "" : "*") + "  -  TurKit "
-				+ turkit.version);
-	}
-
-	public void updateDatabase() throws Exception {
-		turkit.database.consolidate();
-		database.setText(U.slurp(turkit.database.storageFile));
+		f.setTitle(jsFile.getName()
+				+ ((codePane.saved && propertiesPane.saved) ? "" : "*")
+				+ "  -  TurKit " + turkit.version);
 	}
 
 	public void runInABit(long delaySeconds) {
@@ -292,85 +354,94 @@ public class Main {
 		updateRunPrompt();
 	}
 
-	private class MyOutputStream extends OutputStream {
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		PrintStream realOut;
-		PrintStream realErr;
-		PrintStream printStream;
-
-		public MyOutputStream() {
-			realOut = System.out;
-			realErr = System.err;
-			printStream = new PrintStream(this, true);
-			System.setOut(printStream);
-			System.setErr(printStream);
-		}
-
-		@Override
-		public void close() {
-			printStream.flush();
-			printStream.close();
-			System.setOut(realOut);
-			System.setErr(realErr);
-		}
-
-		@Override
-		public void flush() {
-			output.append(stream.toString());
-			output.setCaretPosition(output.getText().length());
-			stream = new ByteArrayOutputStream();
-		}
-
-		@Override
-		public void write(int b) throws IOException {
-			stream.write(b);
+	public void onEvent(SimpleEvent e) throws Exception {
+		if (e.name == "run") {
+			onRun();
+		} else if (e.name == "stop") {
+			onStop();
+		} else if (e.name == "save") {
+		} else if (e.name == "updateTitle") {
+			updateTitle();
+		} else if (e.name == "showProperties") {
+			showProperties();
 		}
 	}
 
-	public void onRun() throws Exception {
-		if (inputSaved) {
-			onReloadInput();
-		} else {
-			onSaveInput();
-		}
+	public void showProperties() {
+		//propertiesDock.getDock().
+	}
 
-		output.setText("");
-		MyOutputStream scriptOut = new MyOutputStream();
+	public Map<String, Object> reinitTurKit() throws Exception {
+		Map props = PropertiesReader.read(U.slurp(propertiesFile), true);
+		if (props == null) {
+			turkitProperties.query("recentFile = \""
+					+ U.escapeString(jsFile.getAbsolutePath()) + "\"");
+			sem.fireEvent("stop", null, null);
+			sem.fireEvent("showProperties", null, null);
+			throw new Exception("error reading properties");
+		}
+		String awsAccessKeyID = (String) props.get("awsAccessKeyID");
+		String awsSecretAccessKey = (String) props.get("awsSecretAccessKey");
+		turkit.reinit(jsFile, awsAccessKeyID, awsSecretAccessKey,
+				(String) props.get("mode"));
+
+		turkitProperties.query("awsAccessKeyID = \""
+				+ U.escapeString(awsAccessKeyID) + "\";"
+				+ "awsSecretAccessKey = \""
+				+ U.escapeString(awsSecretAccessKey) + "\";"
+				+ "recentFile = \"" + U.escapeString(jsFile.getAbsolutePath())
+				+ "\"");
+
+		return props;
+	}
+
+	public void onRun() throws Exception {
+		sem.fireEvent("save", null, null);
+
+		outputPane.startCapture();
 		try {
-			turkit.runOnce(10, 100);
+			Map m = reinitTurKit();
+			turkit.runOnce((Double) m.get("maxMoney"), ((Double) m
+					.get("maxHITs")).intValue());
 		} catch (Exception e) {
 			System.out.println("ERROR: ----------------------------------");
 			e.printStackTrace();
+		} finally {
+			outputPane.stopCapture();
 		}
-		scriptOut.close();
 
-		// database
-		updateDatabase();
+		databasePane.reload();
 
 		runInABit(runDelaySeconds);
 	}
 
 	public void onResetDatabase() throws Exception {
-		onStop();
+		sem.fireEvent("stop", null, null);
 
-		output.setText("");
-		MyOutputStream scriptOut = new MyOutputStream();
-		{
-			turkit.resetDatabase();
-			updateDatabase();
+		outputPane.startCapture();
+		try {
+			reinitTurKit();
+			turkit.resetDatabase(true);
+			databasePane.reload();
+			System.out
+					.println("Done reseting database. (Backup database file created.)");
+		} finally {
+			outputPane.stopCapture();
 		}
-		scriptOut.close();
 	}
 
-	public void onDeleteAllHITs() throws Exception {
-		onStop();
+	public void onDeleteAllHITs(String mode) throws Exception {
+		sem.fireEvent("stop", null, null);
 
-		output.setText("");
-		MyOutputStream scriptOut = new MyOutputStream();
-		{
+		outputPane.startCapture();
+		try {
+			reinitTurKit();
+			turkit.setMode(mode);
 			turkit.deleteAllHITs();
+			System.out.println("Done deleting all " + mode + " HITs.");
+		} finally {
+			outputPane.stopCapture();
 		}
-		scriptOut.close();
 	}
 
 	public void onStop() {
@@ -380,13 +451,13 @@ public class Main {
 
 	public void updateRunPrompt() {
 		if (runAgainAtThisTime < 0) {
-			runPrompt.setText("stopped");
+			runControls.runPrompt.setText("stopped");
 		} else {
 			long delta = runAgainAtThisTime - System.currentTimeMillis();
 			if (delta <= 0) {
-				runPrompt.setText("about to run again");
+				runControls.runPrompt.setText("about to run again");
 			} else {
-				runPrompt
+				runControls.runPrompt
 						.setText("will run again in "
 								+ U.printf("%1.0f", (double) delta / 1000)
 								+ " seconds");

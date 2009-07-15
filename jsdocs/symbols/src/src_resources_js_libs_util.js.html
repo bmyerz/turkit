@@ -320,10 +320,10 @@
 <span class='line'>313</span> </span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>314</span> 
 <span class='line'>315</span> </span><span class="COMM">/**
-<span class='line'>316</span>     Passes each value of an array or object through the &lt;i>test&lt;/i> function, and returns the maximum value found.&lt;br>
+<span class='line'>316</span>     Passes each value of an array or object through the &lt;i>test&lt;/i> function, and returns the maximum value found, along with the index it was found at, in an array.&lt;br>
 <span class='line'>317</span>     For example:&lt;br>
 <span class='line'>318</span>     &lt;code>getMax({a:5,b:7,c:3}, function (e) {return e})&lt;/code>&lt;br>
-<span class='line'>319</span>     returns 7&lt;br>
+<span class='line'>319</span>     returns [7, "b"]&lt;br>
 <span class='line'>320</span>     You may also use a string for &lt;i>test&lt;/i> like so:&lt;br>
 <span class='line'>321</span>     &lt;code>getMax({a:5,b:7,c:3}, "e")&lt;/code>.&lt;br>
 <span class='line'>322</span>     Note that &lt;i>e&lt;/i> is a special value in the string. Another special value is &lt;i>i&lt;/i>, which is the index or key of the current element. If you omit a value for &lt;i>test&lt;/i>, the default is "e".

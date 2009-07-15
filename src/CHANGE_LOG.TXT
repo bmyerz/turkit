@@ -1,4 +1,39 @@
 
+-------------------------------
+version 0.1.30
+
+- Loading the TurKit jar now asks you to open a JavaScript file.
+	This JavaScript file will have properties associated with it,
+	including the AWS access identifiers, and the current mode.
+	You may set these parameters at any time,
+	and they will take effect when the JavaScript file is re-executed.
+	
+- added menu bar with save, and tools for deleting HITs
+
+- bug fix: reset database now removes HITs regardless of which mode they were created in
+	(it knows which mode (sandbox or real) each HIT was created in,
+	and it switches to that mode before deleting it, for each HIT)
+	
+- quitting will ask if you want to save
+
+- bug fix: maxMoney and maxHITs are now adjustable (the values in the properties file were ignored before)
+
+- "Reset Database" now creates a backup copy of the database before deleting it.
+	this file will look something like: mycode.js.database.old2
+
+- there are now 3 different modes:
+	 * "offline" will not let you access MTurk or S3. (Good for using after an experiment is completed, and all the data is in the database)
+	 * "sandbox" will let you access the MTurk sandbox, and the real S3.
+	 * "real" mode accesses the real MTurk and the real S3.
+
+- Java API change:
+	- it is now possible to "reinit" the TurKit object with new parameters,
+		this function will only re-initialize what is necessary based on which parameters are different from before.
+		This features allows the GUI to change the mode without restarting,
+		in fact, the mode may be changed programmatically using the "setMode" function in JavaScript
+
+- JavaScript API change:
+	- added "setMode" function (you probably don't want to use this, it is mainly used internally)
 
 -------------------------------
 version 0.1.29
