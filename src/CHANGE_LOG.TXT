@@ -1,5 +1,13 @@
 
 -------------------------------
+version 0.1.31
+
+- Fixed show-stopping bug in version 0.1.30, which apparently can't even run.
+
+- bug fix: if the most recently loaded file has been deleted,
+	TurKit will now default to the directory that it was in.
+
+-------------------------------
 version 0.1.30
 
 - Loading the TurKit jar now asks you to open a JavaScript file.

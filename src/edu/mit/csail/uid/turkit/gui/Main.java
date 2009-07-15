@@ -90,7 +90,17 @@ public class Main implements SimpleEventListener {
 			String recentFilename = (String) turkitProperties
 					.queryRaw("ensure(null, 'recentFile', '')");
 			if (!recentFilename.isEmpty()) {
-				chooser.setCurrentDirectory(new File(recentFilename));
+				File f = new File(recentFilename);
+				if (f.exists()) {
+					chooser.setCurrentDirectory(f);
+				} else {
+					f = f.getParentFile();
+					if (f.exists()) {
+						chooser.setCurrentDirectory(f);
+					} else {
+						chooser.setCurrentDirectory(new File("."));
+					}
+				}
 			} else {
 				chooser.setCurrentDirectory(new File("."));
 			}

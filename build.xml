@@ -38,7 +38,7 @@
 		<jar destfile="${output_dir}/${run_jar_file}" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
-				<attribute name="Main-Class" value="edu.mit.csail.uid.turkit.gui.NewWindow" />
+				<attribute name="Main-Class" value="edu.mit.csail.uid.turkit.gui.Main" />
 				<attribute name="Class-Path" value="." />
 			</manifest>
 			<fileset dir="bin" />
