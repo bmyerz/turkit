@@ -28,6 +28,13 @@ function slurp(filename) {
 }
 
 /**
+	Return the md5 hash of the given string.
+ */
+function md5(s) {
+	return Packages.edu.mit.csail.uid.turkit.util.U.md5(s)
+}
+
+/**
     Returns a JSON-like representation of the JavaScript data value. You may call "eval" on the result and get back the original data structure. This works even if the structure contains nested or even circular references. It does not handle functions.
     @param o The data value to convert. May be a number, string, array or object.
     @returns A JSON-like representation of o.

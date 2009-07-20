@@ -25,17 +25,15 @@ public class DatabasePane extends JPanel implements SimpleEventListener {
 		text.setEditable(false);
 		Font font = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 		text.setFont(font);
-		reload();
 
 		setLayout(new BorderLayout());
 		add(new JScrollPane(text));
 	}
 
-	public void reload() throws Exception {
-		turkit.database.consolidate();
-		text.setText(U.slurp(turkit.database.storageFile));
-	}
-
 	public void onEvent(SimpleEvent e) throws Exception {
+		if (e.name == "updateDatabase") {
+			turkit.database.consolidate();
+			text.setText(U.slurp(turkit.database.storageFile));
+		}
 	}
 }

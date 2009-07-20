@@ -55,9 +55,9 @@ $(function () {
     }
     if (params.assignmentId) {
         if (params.assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE") {
-            $('input').attr("DISABLED", "true")
-            $('textarea').attr("DISABLED", "true")
-            $('button').attr("DISABLED", "true")
+            $('input').attr("disabled", "true")
+            $('textarea').attr("disabled", "true")
+            $('button').attr("disabled", "true")
         }
         $('#assignmentId').attr('value', params.assignmentId)
         $('form').attr('method', 'POST')

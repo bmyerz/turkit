@@ -24,6 +24,7 @@ public class JavaScriptDatabase {
 	private Scriptable scope;
 	private PrintWriter storageFileOut;
 	private ConsolidationTimer consolidationTimer;
+	private boolean needsConsolidation = true;
 
 	/**
 	 * Creates a JavaScript Database using the given <code>storageFile</code>.
@@ -43,7 +44,7 @@ public class JavaScriptDatabase {
 		scope = cx.initStandardObjects();
 
 		RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-				"/resources/js_libs/util.js"));
+				"js_libs/util.js"));
 
 		if (!storageFile.exists() && tempFile.exists()) {
 			tempFile.renameTo(storageFile);
@@ -86,6 +87,8 @@ public class JavaScriptDatabase {
 
 			if ((entryCount > 1) || (goodUntil < s.length())) {
 				consolidate();
+			} else {
+				needsConsolidation = false;
 			}
 		}
 		consolidationTimer = new ConsolidationTimer();
@@ -206,6 +209,11 @@ public class JavaScriptDatabase {
 	 * @throws Exception
 	 */
 	synchronized public void consolidate() throws Exception {
+		if (!needsConsolidation) {
+			return;
+		}
+		needsConsolidation = false;
+
 		if (storageFileOut != null) {
 			storageFileOut.close();
 			storageFileOut = null;
@@ -227,14 +235,14 @@ public class JavaScriptDatabase {
 		if (consolidationTimer != null)
 			consolidationTimer.onConsolidate();
 	}
-	
+
 	/**
 	 * Evaluates <code>q</code> as-is in the context of the JavaScript database, and returns the resulting Rhino object.
 	 */
 	synchronized public Object queryRaw(String q) throws Exception {
 		return RhinoUtil.evaluateString(cx, scope, q, "query");
 	}
-	
+
 	/**
 	 * Evaluates <code>q</code> in the context of the JavaScript database.
 	 * State changes are persisted on disk,
@@ -260,6 +268,7 @@ public class JavaScriptDatabase {
 		storageFileOut.print("// begin:" + key + "\n" + q + "// end:" + key
 				+ "\n");
 		storageFileOut.flush();
+		needsConsolidation = true;
 
 		if (consolidationTimer != null)
 			consolidationTimer.onQuery();

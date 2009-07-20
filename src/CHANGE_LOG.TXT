@@ -1,5 +1,26 @@
 
 -------------------------------
+version 0.1.32
+
+
+- added new pane showing HITs and S3 Objects created by the current TurKit program,
+	with links that can be clicked on to open the appropriate URLs in a separate brower.
+	
+- S3 functions now support the notion of a default bucket,
+	which is created by concatening together your AWS access key ID, and the string ".TurKit".
+	For example, it will look something like 8XAF98FASHGJVVWE.TurKit.
+	The putString method now also supports the notion of a default key,
+	which is currently just the md5 hash of the string contents concatenated with ".html".
+	
+- bug fix: buttons weren't being disabled in IE when previewing the HIT
+
+- bug fix: maxMoney and maxHITs now work.. hopefully.
+	I finally ran a project which needed to break these limits,
+	so I had a chance to discover that it still wasn't working, fix it, and test it.
+
+- some files have been moved around
+
+-------------------------------
 version 0.1.31
 
 - Fixed show-stopping bug in version 0.1.30, which apparently can't even run.

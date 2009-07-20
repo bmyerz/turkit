@@ -13,7 +13,7 @@
 			<arg value="-a" />
 			<arg value="-t=templates/jsdoc" />
 			<arg value="-d=../jsdocs" />
-			<arg value="../src/resources/js_libs/*.js" />
+			<arg value="../src/edu/mit/csail/uid/turkit/js_libs/*.js" />
 		</exec>
 	</target>
 

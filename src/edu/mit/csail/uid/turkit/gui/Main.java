@@ -252,11 +252,12 @@ public class Main implements SimpleEventListener {
 		f.getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		// dockables
-		Font font = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 		codePane = new CodePane(sem, jsFile);
 		propertiesPane = new PropertiesPane(sem, propertiesFile);
 		outputPane = new OutputPane(sem);
 		databasePane = new DatabasePane(sem, turkit);
+		HITsAndS3Pane hitsAndS3Pane = new HITsAndS3Pane(sem, turkit);
+		
 		Dockable codeDock = new DefaultDockable("input", codePane, "input",
 				null, DockingMode.ALL);
 		propertiesDock = new DefaultDockable("properties", propertiesPane,
@@ -265,6 +266,8 @@ public class Main implements SimpleEventListener {
 				"output", null, DockingMode.ALL);
 		Dockable databaseDock = new DefaultDockable("database", databasePane,
 				"database", null, DockingMode.ALL);
+		Dockable hitsAndS3Dock = new DefaultDockable("HITs / S3", hitsAndS3Pane,
+				"HITs / S3", null, DockingMode.ALL);
 
 		TabDock leftTabDock = new TabDock();
 		TabDock topTabDock = new TabDock();
@@ -279,7 +282,8 @@ public class Main implements SimpleEventListener {
 		}
 
 		topTabDock.addDockable(outputDock, new Position(0));
-		bottomTabDock.addDockable(databaseDock, new Position(0));
+		bottomTabDock.addDockable(databaseDock, new Position(1));
+		bottomTabDock.addDockable(hitsAndS3Dock, new Position(0));
 
 		SplitDock leftSplitDock = new SplitDock();
 		leftSplitDock.addChildDock(leftTabDock, new Position(Position.CENTER));
@@ -351,6 +355,8 @@ public class Main implements SimpleEventListener {
 				}
 			}
 		});
+		
+		sem.fireEvent("updateDatabase", null, null);
 	}
 
 	public void updateTitle() {
@@ -420,7 +426,7 @@ public class Main implements SimpleEventListener {
 			outputPane.stopCapture();
 		}
 
-		databasePane.reload();
+		sem.fireEvent("updateDatabase", null, null);
 
 		runInABit(runDelaySeconds);
 	}
@@ -432,7 +438,7 @@ public class Main implements SimpleEventListener {
 		try {
 			reinitTurKit();
 			turkit.resetDatabase(true);
-			databasePane.reload();
+			sem.fireEvent("updateDatabase", null, null);
 			System.out
 					.println("Done reseting database. (Backup database file created.)");
 		} finally {

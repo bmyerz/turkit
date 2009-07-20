@@ -223,8 +223,7 @@ public class TurKit {
 	 */
 	public void resetDatabase(boolean saveBackup) throws Exception {
 		if (database != null) {
-			runOnce(0, 0, this.getClass().getResource(
-					"/resources/js_libs/resetDatabase.js"));
+			runOnce(0, 0, this.getClass().getResource("resetDatabase.js"));
 
 			database.delete(saveBackup);
 			database = null;
@@ -257,6 +256,8 @@ public class TurKit {
 	 */
 	public boolean runOnce(double maxMoney, int maxHITs, Object source)
 			throws Exception {
+		this.maxMoney = maxMoney;
+		this.maxHITs = maxHITs;
 		if (maxMoney < 0 && maxHITs < 0) {
 			safety = false;
 		} else if (maxMoney < 0 || maxHITs < 0) {
@@ -270,15 +271,20 @@ public class TurKit {
 
 			scope.put("javaTurKit", scope, this);
 
-			{
-				RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-						"/resources/js_libs/util.js"));
-			}
-
-			{
-				RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-						"/resources/js_libs/turkit.js"));
-			}
+			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+					"js_libs/util.js"));
+			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+					"js_libs/turkit_base.js"));
+			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+					"js_libs/Database.js"));
+			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+					"js_libs/TraceManager.js"));
+			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+					"js_libs/MTurk.js"));
+			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+					"js_libs/S3.js"));
+			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+					"js_libs/highlevel_utils.js"));
 
 			stopped = false;
 			if (source instanceof URL) {
@@ -319,8 +325,7 @@ public class TurKit {
 	 * Delete all your HITs.
 	 */
 	public void deleteAllHITs() throws Exception {
-		URL url = this.getClass().getResource(
-				"/resources/js_libs/deleteAllHITs.js");
+		URL url = this.getClass().getResource("deleteAllHITs.js");
 		runOnce(maxMoney, maxHITs, url);
 	}
 
