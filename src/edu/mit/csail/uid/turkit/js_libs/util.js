@@ -1,8 +1,12 @@
 
 /**
-    A thin wrapper around Java's System.out.println(s)
+    A thin wrapper around Java's System.out.println(s).
+    If <code>s</code> is an object, then it is converted into a string using {@link json}.
 */
 function print(s) {
+	if ((typeof s) == "object") {
+		s = json(s)
+	}
 	Packages.java.lang.System.out["println(java.lang.Object)"](s)
 }
 
@@ -24,7 +28,7 @@ function time() {
 	Reads the contents of the file indicated by <code>filename</code> into a string.
  */
 function slurp(filename) {
-	return "" + Packages.edu.mit.csail.uid.turkit.util.U.slurp(filename)
+	return "" + Packages.edu.mit.csail.uid.turkit.util.U.slurp(getFile(filename))
 }
 
 /**
