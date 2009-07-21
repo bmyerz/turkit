@@ -176,7 +176,7 @@ ul.inheritsList
 	<body>
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
-		<div id="header" style="width:100%;text-align:right"><h3><i>TurKit JavaScript API v0.1.32</i></h3></div>
+		<div id="header" style="width:100%;text-align:right"><h3><i>TurKit JavaScript API v0.1.33</i></h3></div>
 		<!-- end static/header.html -->
 
 <!-- ============================== classes index ============================ -->
@@ -237,6 +237,16 @@ ul.inheritsList
 						</tr>
 					</thead>
 					<tbody>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont">
+								<b><a href="../symbols/_global_.html#baseDir">baseDir</a></b>
+								</div>
+								<div class="description">This is the directory that the currently running TurKit JavaScript file is in.</div>
+							</td>
+						</tr>
 					
 						<tr>
 							<td class="attributes">&nbsp;</td>
@@ -375,6 +385,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#getFile">getFile</a></b>(relPath)
+								</div>
+								<div class="description">Get a Java File object given a path relative to the <a href="../symbols/_global_.html#baseDir">baseDir</a>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#getMax">getMax</a></b>(a, test)
 								</div>
 								<div class="description">Passes each value of an array or object through the <i>test</i> function, and returns the maximum value found, along with the index it was found at, in an array.</div>
@@ -429,6 +448,15 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#md5">md5</a></b>(s)
+								</div>
+								<div class="description">Return the md5 hash of the given string.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#merge">merge</a></b>(objA, objB)
 								</div>
 								<div class="description">Adds the key/value pairs found in <i>objB</i> to <i>objA</i>.</div>
@@ -449,7 +477,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#print">print</a></b>(s)
 								</div>
-								<div class="description">A thin wrapper around Java's System.out.println(s)</div>
+								<div class="description">A thin wrapper around Java's System.out.println(s).</div>
 							</td>
 						</tr>
 					
@@ -605,6 +633,31 @@ ul.inheritsList
 				<div class="sectionTitle">
 					Field Detail
 				</div>
+				
+					<a name="baseDir"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>baseDir</b>
+					
+					</div>
+					<div class="description">
+						This is the directory that the currently running TurKit JavaScript file is in.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_turkit_base.js.html">turkit_base.js</a>.
+						
+						
+					</div>
+					
+					
+
+						
+						
+						
+						
+
+					<hr />
 				
 					<a name="database"> </a>
 					<div class="fixedFont">
@@ -835,15 +888,17 @@ ul.inheritsList
 	The webpage represents a HIT.
 	The webpage is created by starting with a <a href="/src/resources/task-template.html">template HTML page</a>.
 	The <code>html</code> supplied to this function in injected into the template.
-	If <code>bucketName</code> is not supplied,
-	then the result is placed on S3 in the bucket <code>your-aws-access-key-id.TurKit</code> with the key <code>md5-hash-of-content.html</code>.
 	The S3 webpage is made publicly accessible.
 	The URL to the S3 webpage is returned.
 	You can pass the URL to <code>s3.deleteObject</code> to remove it.</p>
+	
 	<p>If you supply an array or comma-delimited-string for <code>blockWorkers</code>,
 	then the html page will use JavaScript to prevent those workers from completing the HIT.</p>
 	<p>If you give any elements the class "random", then those elements will be randomly permuted each time a user views the page.
 	This is good for randomizing the choices in voting tasks.</p>
+	
+	<p><code>bucketName</code> is optional.
+	If you do not provide it, the name <a href="../symbols/S3.html#defaultBucketName">S3#defaultBucketName</a> will be used.</p>
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_highlevel_utils.js.html">highlevel_utils.js</a>.
@@ -1074,6 +1129,45 @@ ul.inheritsList
 							
 								<dt>
 									<b>test</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="getFile"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>getFile</b>(relPath)
+					
+					</div>
+					<div class="description">
+						Get a Java File object given a path relative to the <a href="../symbols/_global_.html#baseDir">baseDir</a>.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_turkit_base.js.html">turkit_base.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>relPath</b>
 									
 								</dt>
 								<dd></dd>
@@ -1374,6 +1468,45 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="md5"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>md5</b>(s)
+					
+					</div>
+					<div class="description">
+						Return the md5 hash of the given string.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>s</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="merge"> </a>
 					<div class="fixedFont">
 					
@@ -1477,7 +1610,8 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						A thin wrapper around Java's System.out.println(s)
+						A thin wrapper around Java's System.out.println(s).
+    If <code>s</code> is an object, then it is converted into a string using <a href="../symbols/_global_.html#json">json</a>.
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
@@ -2089,7 +2223,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Sat Jul 18 2009 20:51:37 GMT-0400 (EDT)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Tue Jul 21 2009 03:31:28 GMT-0400 (EDT)
 		</div>
 	</body>
 </html>

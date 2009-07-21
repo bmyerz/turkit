@@ -15,3 +15,22 @@ function verbosePrint(s) {
  * file.
  */
 var javaTurKit = javaTurKit
+
+/**
+	This is the directory that the currently running TurKit JavaScript file is in.
+ */
+var baseDir = javaTurKit.jsFile.getParent()
+
+/**
+	Get a Java File object given a path relative to the {@link baseDir}.
+ */
+function getFile(relPath) {
+	var f = new Packages.java.io.File(baseDir, relPath)
+	try {
+		f.getCanonicalPath()
+		return f
+	} catch (e) {
+		// maybe it's an absolute path after all?
+		return new Packages.java.io.File(relPath)
+	}	
+}

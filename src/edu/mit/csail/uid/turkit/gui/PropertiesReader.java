@@ -26,7 +26,7 @@ public class PropertiesReader {
 		Scriptable scope = cx.initStandardObjects();
 
 		RhinoUtil.evaluateURL(cx, scope, PropertiesReader.class
-				.getResource("../js_libs/util.js"));
+				.getResource("/edu/mit/csail/uid/turkit/js_libs/util.js"));
 		scope.put("input", scope, input);
 
 		Set<String> old = new HashSet();

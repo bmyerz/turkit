@@ -1,13 +1,13 @@
 package edu.mit.csail.uid.turkit.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.io.File;
+import java.net.URL;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -78,7 +78,7 @@ public class Main implements SimpleEventListener {
 		chooser.setFileFilter(new FileFilter() {
 			@Override
 			public boolean accept(File f) {
-				return f.getName().endsWith(".js");
+				return f.isDirectory() || f.getName().endsWith(".js");
 			}
 
 			@Override
@@ -257,7 +257,7 @@ public class Main implements SimpleEventListener {
 		outputPane = new OutputPane(sem);
 		databasePane = new DatabasePane(sem, turkit);
 		HITsAndS3Pane hitsAndS3Pane = new HITsAndS3Pane(sem, turkit);
-		
+
 		Dockable codeDock = new DefaultDockable("input", codePane, "input",
 				null, DockingMode.ALL);
 		propertiesDock = new DefaultDockable("properties", propertiesPane,
@@ -266,8 +266,8 @@ public class Main implements SimpleEventListener {
 				"output", null, DockingMode.ALL);
 		Dockable databaseDock = new DefaultDockable("database", databasePane,
 				"database", null, DockingMode.ALL);
-		Dockable hitsAndS3Dock = new DefaultDockable("HITs / S3", hitsAndS3Pane,
-				"HITs / S3", null, DockingMode.ALL);
+		Dockable hitsAndS3Dock = new DefaultDockable("HITs / S3",
+				hitsAndS3Pane, "HITs / S3", null, DockingMode.ALL);
 
 		TabDock leftTabDock = new TabDock();
 		TabDock topTabDock = new TabDock();
@@ -355,7 +355,7 @@ public class Main implements SimpleEventListener {
 				}
 			}
 		});
-		
+
 		sem.fireEvent("updateDatabase", null, null);
 	}
 

@@ -189,7 +189,7 @@ S3.prototype.putFileRaw = function(bucketName, file) {
 	}
 	
 	if ((typeof file) == "string") {
-		file = new java.io.File(file)
+		file = getFile(file)
 	}
 	return this.putObjectRaw(bucketName, new Packages.org.jets3t.service.model.S3Object(file))
 }

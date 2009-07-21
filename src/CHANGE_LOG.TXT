@@ -1,13 +1,27 @@
 
 -------------------------------
-version 0.1.32
+version 0.1.33
 
+- function added to JavaScript API called getFile that accepts a relative path name,
+	and returns a Java File object. The path is relative to the directory containing the JavaScript program.
+	This function is now used internally in functions like slurp and s3.putFile.
+	NOTE: you can also access the directory of the JavaScript program using the new global variable: baseDir.
+	
+- the print function now prints json if the thing you are printing is an object
+
+- bug fix: the open dialog now shows folders, so that you can navigate places
+
+- bug fix: the build.xml now creates the necessary output directory
+	(which happened to exist on my own machine).
+
+-------------------------------
+version 0.1.32
 
 - added new pane showing HITs and S3 Objects created by the current TurKit program,
 	with links that can be clicked on to open the appropriate URLs in a separate brower.
 	
 - S3 functions now support the notion of a default bucket,
-	which is created by concatening together your AWS access key ID, and the string ".TurKit".
+	which is created by concatenating together your AWS access key ID, and the string ".TurKit".
 	For example, it will look something like 8XAF98FASHGJVVWE.TurKit.
 	The putString method now also supports the notion of a default key,
 	which is currently just the md5 hash of the string contents concatenated with ".html".

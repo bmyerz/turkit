@@ -33,8 +33,7 @@
 	</target>
 
 	<target name="create_run_jar">
-		<copy file="${output_dir}/latest-template.html" tofile="${output_dir}/latest.html" />
-		<replace file="${output_dir}/latest.html" token="@@@" value="${run_jar_file}" />
+		<mkdir dir="${output_dir}"/>
 		<jar destfile="${output_dir}/${run_jar_file}" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
