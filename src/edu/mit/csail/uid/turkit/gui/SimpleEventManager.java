@@ -7,6 +7,8 @@ import java.util.Vector;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import edu.mit.csail.uid.turkit.util.U;
+
 public class SimpleEventManager {
 	Vector<SimpleEventListener> listeners = new Vector();
 
@@ -27,7 +29,7 @@ public class SimpleEventManager {
 			try {
 				lis.onEvent(e);
 			} catch (Exception ee) {
-				throw new Error(ee);
+				U.rethrow(ee);
 			}
 		}
 		return e;

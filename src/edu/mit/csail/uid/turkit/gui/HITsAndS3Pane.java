@@ -33,7 +33,7 @@ public class HITsAndS3Pane extends JPanel implements SimpleEventListener {
 					try {
 						Desktop.getDesktop().browse(e.getURL().toURI());
 					} catch (Exception ee) {
-						throw new Error(ee);
+						U.rethrow(ee);
 					}
 				}
 			}

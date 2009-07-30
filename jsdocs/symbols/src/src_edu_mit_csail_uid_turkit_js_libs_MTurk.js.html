@@ -82,7 +82,7 @@
 <span class='line'> 75</span> </span><span class="WHIT">				</span><span class="NAME">sleep</span><span class="PUNC">(</span><span class="NAME">waitTime</span><span class="PUNC">)</span><span class="WHIT">
 <span class='line'> 76</span> </span><span class="WHIT">				</span><span class="NAME">waitTime</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NUMB">0.1</span><span class="WHIT">
 <span class='line'> 77</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'> 78</span> </span><span class="WHIT">				</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="NAME">e</span><span class="WHIT">
+<span class='line'> 78</span> </span><span class="WHIT">				</span><span class="NAME">rethrow</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT">
 <span class='line'> 79</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'> 80</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'> 81</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">
@@ -403,7 +403,7 @@
 <span class='line'>396</span> </span><span class="WHIT">			</span><span class="KEYW">if</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="REGX">/AWS\.MechanicalTurk\.HITDoesNotExist/</span><span class="PUNC">.</span><span class="NAME">exec</span><span class="PUNC">(</span><span class="STRN">""</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">e</span><span class="PUNC">)</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
 <span class='line'>397</span> </span><span class="WHIT">				</span><span class="NAME">verbosePrint</span><span class="PUNC">(</span><span class="STRN">"HIT not found: "</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">hitId</span><span class="PUNC">)</span><span class="WHIT">
 <span class='line'>398</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT"> </span><span class="KEYW">else</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'>399</span> </span><span class="WHIT">				</span><span class="KEYW">throw</span><span class="WHIT"> </span><span class="NAME">e</span><span class="WHIT">
+<span class='line'>399</span> </span><span class="WHIT">				</span><span class="NAME">rethrow</span><span class="PUNC">(</span><span class="NAME">e</span><span class="PUNC">)</span><span class="WHIT">
 <span class='line'>400</span> </span><span class="WHIT">			</span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>401</span> </span><span class="WHIT">		</span><span class="PUNC">}</span><span class="WHIT">
 <span class='line'>402</span> </span><span class="WHIT">	</span><span class="PUNC">}</span><span class="WHIT">

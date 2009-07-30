@@ -76,6 +76,12 @@ public class U {
 		System.out.println("hello world");
 	}
 
+	public static void rethrow(Exception e) {
+		Error er = new Error(e.getMessage());
+		er.setStackTrace(e.getStackTrace());
+		throw er;
+	}
+
 	public static Random r = new Random();
 
 	public static String randomStringOptions = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -166,6 +172,10 @@ public class U {
 		return buf.toString();
 	}
 
+	public static String escapeURL(String s) throws Exception {
+		return URLEncoder.encode(s, "UTF-8");
+	}
+
 	public static String unescapeURL(String url) {
 		StringBuffer buf = new StringBuffer();
 		for (int i = 0; i < url.length(); i++) {
@@ -237,7 +247,7 @@ public class U {
 		// debugOut = new PrintWriter(new FileWriter("c:/Working/debugOut.txt"),
 		// true);
 		// } catch (IOException e) {
-		// throw new Error(e);
+		// rethrow(e);
 		// }
 		// }
 		// debugOut.println(blah);

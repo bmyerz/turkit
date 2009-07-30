@@ -58,6 +58,13 @@ $(function () {
             $('input').attr("disabled", "true")
             $('textarea').attr("disabled", "true")
             $('button').attr("disabled", "true")
+        } else {
+        	if ($('*[name]').length < 2) {
+        		$('input[type=submit]').attr('name', 'submit')
+        	}
+        	if ($('*[name]').length < 2) {
+        		$('#assignmentId').after('<input type="hidden" name="default" value="default"></input>')
+        	}
         }
         $('#assignmentId').attr('value', params.assignmentId)
         $('form').attr('method', 'POST')

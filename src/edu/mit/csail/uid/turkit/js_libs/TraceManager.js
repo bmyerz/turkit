@@ -144,7 +144,7 @@ TraceManager.prototype.attempt = function(func, frameName) {
 		if ("" + e == "stop") {
 			return false
 		} else {
-			throw e
+			rethrow(e)
 		}
 	} finally {
 		this.popFrame()

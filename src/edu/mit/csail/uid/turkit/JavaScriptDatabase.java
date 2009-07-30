@@ -187,7 +187,7 @@ public class JavaScriptDatabase {
 				}
 			} catch (InterruptedException e) {
 			} catch (Exception e) {
-				throw new Error(e);
+				U.rethrow(e);
 			}
 			thread = null;
 		}

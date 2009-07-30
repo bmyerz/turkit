@@ -7,7 +7,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.io.File;
-import java.net.URL;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -61,7 +60,7 @@ public class Main implements SimpleEventListener {
 				try {
 					new Main();
 				} catch (Exception e) {
-					throw new Error(e);
+					U.rethrow(e);
 				}
 			}
 		});
@@ -188,7 +187,7 @@ public class Main implements SimpleEventListener {
 							try {
 								onDeleteAllHITs("sandbox");
 							} catch (Exception ee) {
-								throw new Error(ee);
+								U.rethrow(ee);
 							}
 						}
 					});
@@ -202,7 +201,7 @@ public class Main implements SimpleEventListener {
 							try {
 								onDeleteAllHITs("real");
 							} catch (Exception ee) {
-								throw new Error(ee);
+								U.rethrow(ee);
 							}
 						}
 					});
@@ -219,7 +218,7 @@ public class Main implements SimpleEventListener {
 				try {
 					onResetDatabase();
 				} catch (Exception ee) {
-					throw new Error(ee);
+					U.rethrow(ee);
 				}
 			}
 		});
@@ -238,7 +237,7 @@ public class Main implements SimpleEventListener {
 					try {
 						propertiesPane.setMode(mode);
 					} catch (Exception ee) {
-						throw new Error(ee);
+						U.rethrow(ee);
 					}
 				}
 			});
@@ -497,7 +496,7 @@ public class Main implements SimpleEventListener {
 									}
 								}
 							} catch (Exception e) {
-								throw new Error(e);
+								U.rethrow(e);
 							}
 						}
 					});

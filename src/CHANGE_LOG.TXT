@@ -1,5 +1,29 @@
 
 -------------------------------
+version 0.1.34
+
+- added function to write a string to a file (called write)
+- added function called "read" which is the same as "slurp"
+- the "read" and "slurp" functions can now read from a URL
+
+
+low level stuff:
+
+- created MTurk.java, which will eventually replace reliance on Amazon's Java API,
+	hopefully reducing the size of the JAR by quite a bit.
+
+- added function "rethrow" to JavaScript API
+	- this function keeps the original stack trace of the exception,
+		making bugs easier to find
+		
+- added utilities for converting Base64 encoding (used by MTurk.java)
+
+- minor bug fixes:
+	- highlightDiff now works with empty-string parameters
+	- task-template.html now adds a hidden form parameter, if you don't add any,
+		so that MTurk doesn't complain about there not being any form parameters.
+
+-------------------------------
 version 0.1.33
 
 - function added to JavaScript API called getFile that accepts a relative path name,

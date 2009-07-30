@@ -75,7 +75,7 @@ MTurk.prototype.keepTrying = function(func) {
 				sleep(waitTime)
 				waitTime += 0.1
 			} else {
-				throw e
+				rethrow(e)
 			}
 		}
 	}
@@ -396,7 +396,7 @@ MTurk.prototype.deleteHITRaw = function(hit) {
 			if (/AWS\.MechanicalTurk\.HITDoesNotExist/.exec("" + e)) {
 				verbosePrint("HIT not found: " + hitId)
 			} else {
-				throw e
+				rethrow(e)
 			}
 		}
 	}

@@ -1,5 +1,21 @@
 
 /**
+	Re-throws the given exception, with an attempt to preserve the original stack trace.
+ */
+function rethrow(e) {
+	if (e.rhinoException) {
+		throw e.rhinoException.getMessage() + "\n" + e.rhinoException.getScriptStackTrace()
+	} else if ((typeof e) == "object") {
+		var b = new Packages.java.io.ByteArrayOutputStream()
+		var w = new Packages.java.io.PrintStream(b, true)
+		e.printStackTrace(w)
+		w.flush()
+		w.close()
+		throw e.getMessage() + "\n" + b.toString()
+	}
+}
+
+/**
     A thin wrapper around Java's System.out.println(s).
     If <code>s</code> is an object, then it is converted into a string using {@link json}.
 */
@@ -22,13 +38,6 @@ function sleep(seconds) {
 */
 function time() {
     return Packages.java.lang.System.currentTimeMillis()
-}
-
-/**
-	Reads the contents of the file indicated by <code>filename</code> into a string.
- */
-function slurp(filename) {
-	return "" + Packages.edu.mit.csail.uid.turkit.util.U.slurp(getFile(filename))
 }
 
 /**
@@ -443,7 +452,9 @@ unescapeXml = function (s) {
  */
 function highlightDiff(a, b) {
     a = a.match(/\S+|\s+/g)
+    if (!a) a = []
     b = b.match(/\S+|\s+/g)
+    if (!b) b = []
     mapToSelf(a, function (e) { return ":" + e })
     mapToSelf(b, function (e) { return ":" + e })
     diff(a, b)

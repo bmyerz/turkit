@@ -176,7 +176,7 @@ ul.inheritsList
 	<body>
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
-		<div id="header" style="width:100%;text-align:right"><h3><i>TurKit JavaScript API v0.1.33</i></h3></div>
+		<div id="header" style="width:100%;text-align:right"><h3><i>TurKit JavaScript API v0.1.34</i></h3></div>
 		<!-- end static/header.html -->
 
 <!-- ============================== classes index ============================ -->
@@ -502,9 +502,27 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#read">read</a></b>(src)
+								</div>
+								<div class="description">Reads the contents of the file or url indicated by <code>src</code> into a string.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#resetTrace">resetTrace</a></b>(traceName)
 								</div>
 								<div class="description">Wrapper around <a href="../symbols/TraceManager.html#resetTrace">TraceManager#resetTrace</a>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#rethrow">rethrow</a></b>(e)
+								</div>
+								<div class="description">Re-throws the given exception, with an attempt to preserve the original stack trace.</div>
 							</td>
 						</tr>
 					
@@ -556,9 +574,10 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/_global_.html#slurp">slurp</a></b>(filename)
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#slurp">slurp</a></b>(src)
 								</div>
-								<div class="description">Reads the contents of the file indicated by <code>filename</code> into a string.</div>
+								<div class="description">Reads the contents of the file or url indicated by <code>src</code> into a string,
+	same as <a href="../symbols/_global_.html#read">read</a>.</div>
 							</td>
 						</tr>
 					
@@ -613,6 +632,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#verbosePrint">verbosePrint</a></b>(s)
 								</div>
 								<div class="description">This function prints <i>s</i> if and only if TurKit is in "verbose" mode.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#write">write</a></b>(dest, s)
+								</div>
+								<div class="description">Writes the contents of the string <code>s</code> to the file indicated by <code>dest</code>.</div>
 							</td>
 						</tr>
 					
@@ -1720,6 +1748,45 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="read"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>read</b>(src)
+					
+					</div>
+					<div class="description">
+						Reads the contents of the file or url indicated by <code>src</code> into a string.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_turkit_base.js.html">turkit_base.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>src</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="resetTrace"> </a>
 					<div class="fixedFont">
 					
@@ -1744,6 +1811,45 @@ ul.inheritsList
 							
 								<dt>
 									<b>traceName</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="rethrow"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>rethrow</b>(e)
+					
+					</div>
+					<div class="description">
+						Re-throws the given exception, with an attempt to preserve the original stack trace.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>e</b>
 									
 								</dt>
 								<dd></dd>
@@ -1958,14 +2064,15 @@ ul.inheritsList
 					<div class="fixedFont">
 					
 					
-					<b>slurp</b>(filename)
+					<b>slurp</b>(src)
 					
 					</div>
 					<div class="description">
-						Reads the contents of the file indicated by <code>filename</code> into a string.
+						Reads the contents of the file or url indicated by <code>src</code> into a string,
+	same as <a href="../symbols/_global_.html#read">read</a>.
 						
 							<br />
-							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_turkit_base.js.html">turkit_base.js</a>.
 						
 						
 					</div>
@@ -1977,7 +2084,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>filename</b>
+									<b>src</b>
 									
 								</dt>
 								<dd></dd>
@@ -2209,6 +2316,51 @@ ul.inheritsList
 						
 						
 
+					<hr />
+				
+					<a name="write"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>write</b>(dest, s)
+					
+					</div>
+					<div class="description">
+						Writes the contents of the string <code>s</code> to the file indicated by <code>dest</code>.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_turkit_base.js.html">turkit_base.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>dest</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>s</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
 					
 				
 			
@@ -2223,7 +2375,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Tue Jul 21 2009 03:35:37 GMT-0400 (EDT)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Thu Jul 30 2009 18:34:23 GMT-0400 (EDT)
 		</div>
 	</body>
 </html>
