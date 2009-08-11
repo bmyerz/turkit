@@ -33,6 +33,8 @@ import com.javadocking.dockable.Dockable;
 import com.javadocking.dockable.DockingMode;
 import com.javadocking.model.FloatDockModel;
 
+import org.apache.commons.cli.*;
+
 import edu.mit.csail.uid.turkit.JavaScriptDatabase;
 import edu.mit.csail.uid.turkit.TurKit;
 import edu.mit.csail.uid.turkit.util.U;
@@ -55,15 +57,20 @@ public class Main implements SimpleEventListener {
 	public Dockable propertiesDock;
 
 	public static void main(String[] args) throws Exception {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					new Main();
-				} catch (Exception e) {
-					U.rethrow(e);
+		if(args.length > 0) {
+			CommandLineInterface cli = new CommandLineInterface();
+			cli.run(args);
+		} else {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						new Main();
+					} catch (Exception e) {
+						U.rethrow(e);
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	public Main() throws Exception {
