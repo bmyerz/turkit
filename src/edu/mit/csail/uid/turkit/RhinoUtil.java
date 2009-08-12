@@ -14,6 +14,7 @@ import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.Undefined;
+import org.mozilla.javascript.WrappedException;
 
 import edu.mit.csail.uid.turkit.util.U;
 
@@ -32,6 +33,9 @@ public class RhinoUtil {
 		try {
 			return cx.evaluateString(scope, source, sourceName, 1, null);
 		} catch (EvaluatorException ee) {
+			if (ee instanceof WrappedException) throw ee;
+			
+			System.out.println("Retrying Script Evaluation: " + ee.getMessage());			
 			int oldOp = cx.getOptimizationLevel();
 			cx.setOptimizationLevel(-1);
 			Object ret = cx.evaluateString(scope, source, sourceName, 1, null);
@@ -51,6 +55,9 @@ public class RhinoUtil {
 			return cx.evaluateReader(scope, new FileReader(file), file
 					.getAbsolutePath(), 1, null);
 		} catch (EvaluatorException ee) {
+			if (ee instanceof WrappedException) throw ee;
+			
+			System.out.println("Retrying Script Evaluation: " + ee.getMessage());			
 			int oldOp = cx.getOptimizationLevel();
 			cx.setOptimizationLevel(-1);
 			Object ret = cx.evaluateReader(scope, new FileReader(file), file
@@ -71,6 +78,9 @@ public class RhinoUtil {
 			return cx.evaluateReader(scope, new InputStreamReader(url
 					.openStream()), url.toString(), 1, null);
 		} catch (EvaluatorException ee) {
+			if (ee instanceof WrappedException) throw ee;
+			
+			System.out.println("Retrying Script Evaluation: " + ee.getMessage());			
 			int oldOp = cx.getOptimizationLevel();
 			cx.setOptimizationLevel(-1);
 			Object ret = cx.evaluateReader(scope, new InputStreamReader(url

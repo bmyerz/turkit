@@ -87,11 +87,12 @@ public class MTurk {
 
 		for (int t = 0; t < 100; t++) {
 			try {
-				return U.slurp(new URL(url));
+				String s = U.slurp(new URL(url));
+				return s.substring(s.indexOf("?>\n") + 3);
 			} catch (IOException e) {
 				if (e.getMessage().startsWith(
 						"Server returned HTTP response code: 503")) {
-					Thread.sleep(100 + (int)Math.pow(t, 3));
+					Thread.sleep(100 + (int) Math.pow(t, 3));
 				} else {
 					throw e;
 				}

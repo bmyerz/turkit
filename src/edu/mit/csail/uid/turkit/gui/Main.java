@@ -7,7 +7,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.PrintStream;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -138,8 +147,8 @@ public class Main implements SimpleEventListener {
 
 			U.save(propertiesFile, U.slurp(
 					this.getClass().getResource("default.properties"))
-					.replaceAll("___ID___", id).replaceAll("___SECRET___",
-							secret));
+					.replaceAll("___MODE___", "sandbox").replaceAll("___ID___",
+							id).replaceAll("___SECRET___", secret));
 		}
 		boolean showPropsPane = false;
 		String mode = "offline";
@@ -207,6 +216,20 @@ public class Main implements SimpleEventListener {
 						public void actionPerformed(ActionEvent e) {
 							try {
 								onDeleteAllHITs("real");
+							} catch (Exception ee) {
+								U.rethrow(ee);
+							}
+						}
+					});
+				}
+				{
+					JMenuItem mi = new JMenuItem("Export");
+					m.add(mi);
+
+					mi.addActionListener(new ActionListener() {
+						public void actionPerformed(ActionEvent e) {
+							try {
+								export();
 							} catch (Exception ee) {
 								U.rethrow(ee);
 							}
@@ -509,6 +532,67 @@ public class Main implements SimpleEventListener {
 					});
 			timer.setRepeats(false);
 			timer.start();
+		}
+	}
+
+	public void export() throws Exception {
+		// get a list of all the files we want to archive
+		Vector<File> files = new Vector();
+		{
+			for (File f : jsFile.getParentFile().listFiles()) {
+				if (!f.isDirectory() && !f.getName().endsWith(".zip")
+						&& !f.getName().matches("^.*\\.old\\d+$")) {
+					files.add(f);
+				}
+			}
+		}
+
+		// get a list of all the worker id's
+		Map<String, String> workerIdMap = new HashMap();
+		{
+			String seed = U.getRandomString(20);
+			turkit.database.consolidate();
+			String s = U.slurp(turkit.database.storageFile);
+			Matcher m = Pattern.compile(
+					"(?msi)^\\s*\"workerId\" : \"([A-Z0-9]+)\",?\\s*$")
+					.matcher(s);
+			while (m.find()) {
+				workerIdMap.put(m.group(1), "FAKE_" + U.md5(seed + m.group(1)).substring(
+						0, 9).toUpperCase());
+			}
+		}
+
+		// create the zip file
+		{
+			String name = jsFile.getAbsolutePath();
+			name = name.substring(0, name.length() - 3) + ".zip";
+			FileOutputStream o = new FileOutputStream(name);
+
+			ZipOutputStream z = new ZipOutputStream(o);
+			PrintStream p = new PrintStream(z);
+			for (File f : files) {
+				z.putNextEntry(new ZipEntry(f.getName()));
+				if (f.getName().matches("^.*\\.(js|database)$")) {
+					String s = U.slurp(f);
+					for (Map.Entry<String, String> e : workerIdMap.entrySet()) {
+						s = s.replaceAll(e.getKey(), e.getValue());
+					}
+					p.print(s);
+				} else if (f.equals(propertiesFile)) {
+					p.print(U.slurp(
+							this.getClass().getResource("default.properties"))
+							.replaceAll("___MODE___", "offline").replaceAll(
+									"___ID___", "not_exported").replaceAll(
+									"___SECRET___", "not_exported"));
+				} else {
+					FileReader in = new FileReader(f);
+					while (in.ready()) {
+						p.write(in.read());
+					}
+				}
+				z.closeEntry();
+			}
+			z.close();
 		}
 	}
 }

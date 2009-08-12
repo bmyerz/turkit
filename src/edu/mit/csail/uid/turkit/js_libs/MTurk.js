@@ -10,13 +10,6 @@
  * </p>
  */
 function MTurk() {
-	this.init()
-}
-
-/**
- * Initialize fields of the MTurk class.
- */
-MTurk.prototype.init = function() {
 	this.requesterService = javaTurKit.requesterService
 }
 
@@ -46,13 +39,13 @@ MTurk.prototype.assertWeCanSpend = function(money, hits, callbackBeforeCrash) {
 	if (safety.moneySpent > javaTurKit.maxMoney) {
 		if (callbackBeforeCrash)
 			callbackBeforeCrash()
-		throw "TurKit has detected a safety violation: spending too much money."
+		throw "TurKit has detected a safety violation: spending too much money. "
 				+ "You need to increase your spending limit with TurKit (not with MTurk) to overcome this problem."
 	}
 	if (safety.hitsCreated > javaTurKit.maxHITs) {
 		if (callbackBeforeCrash)
 			callbackBeforeCrash()
-		throw "TurKit has detected a safety violation: creating too many HITs."
+		throw "TurKit has detected a safety violation: creating too many HITs. "
 				+ "You need to increase your hit limit with TurKit (not with MTurk) to overcome this problem."
 	}
 	safety = database.query("__safetyCounters = " + json(safety))
@@ -208,8 +201,7 @@ MTurk.prototype.createHITRaw = function(params) {
 		if (params.hitTypeId) {
 			ensure(params, 'responseGroup', []).push('HITDetail')
 		} else {
-			this.assertWeCanSpend(params.reward * params.maxAssignments,
-					params.maxAssignments)
+			this.assertWeCanSpend(params.reward * params.maxAssignments, 1)
 		}
 	}
 
@@ -236,7 +228,7 @@ MTurk.prototype.createHITRaw = function(params) {
 	if (javaTurKit.safety) {
 		if (params.hitTypeId) {
 			this.assertWeCanSpend(parseFloat(hit.getReward().getAmount())
-							* params.maxAssignments, params.maxAssignments,
+							* params.maxAssignments, 1,
 					function() {
 						mturk.disableHITRaw(hit)
 					})
@@ -266,11 +258,39 @@ MTurk.prototype.createHIT = function(params) {
 
 /**
  * Returns a list of HIT Ids of HITs that are ready to be reviewed.
+ * You may optionally specify <code>maxPages</code>,
+ * to limit the number of pages of results returned.
+ * Each page will have up to 100 reviewable HIT Ids.
+ * If <code>maxPages</code> is specified,
+ * then the return value will have a property called <code>totalNumResults</code>,
+ * which indicates how many HITs are reviewable.
  */
-MTurk.prototype.getReviewableHITs = function() {
-	return convertJavaArray(this.keepTrying(function() {
-				return mturk.requesterService.getAllReviewableHITs(null)
-			}))
+MTurk.prototype.getReviewableHITs = function(maxPages) {
+    var all = new XMLList()
+    var page = 1
+    var processedResults = 0
+    var totalNumResults = 0
+    while (!maxPages || (page <= maxPages)) {
+        var x = new XML(javaTurKit.restRequest("GetReviewableHITs",
+            "SortProperty", "CreationTime",
+            "PageSize", "100",
+            "PageNumber", "" + page))
+        all += x..HITId
+        var numResults = parseInt(x..NumResults)
+        if (numResults <= 0) break
+        processedResults += numResults
+        totalNumResults = parseInt(x..TotalNumResults)
+        if (processedResults >= totalNumResults) break
+        page++
+    }
+    var a = []
+    for each (var id in all) {
+        a.push("" + id)
+    }
+    if (maxPages) {
+    	a.totalNumResults = totalNumResults
+    }
+    return a
 }
 
 /**
@@ -335,8 +355,7 @@ MTurk.prototype.extendHITRaw = function(hit, moreAssignments, moreSeconds) {
 			} else {
 				hit = this.getHIT(hit)
 			}
-			this.assertWeCanSpend(parseFloat(hit.reward) * moreAssignments,
-					moreAssignments)
+			this.assertWeCanSpend(parseFloat(hit.reward) * moreAssignments, 0)
 		}
 	}
 
@@ -638,12 +657,54 @@ MTurk.prototype.getHIT = function(hit) {
  * progress.
  */
 MTurk.prototype.waitForHIT = function(hit) {
+	var me = this
 	var hitId = this.tryToGetHITId(hit)
 	return once(function() {
+				// the idea of this logic
+				// is to minimize the number of calls to MTurk
+				// to see if HITs are done.
+				// 
+				// if we are going to be calling waitForHIT a lot,
+				// then we'd like to get a list of all reviewable HITs,
+				// and check for the current HIT against that list,
+				// and refresh that list only if enough time has passed.
+				//
+				// of course, if the list of reviewable HITs is very long,
+				// then we'd rather not retrieve it,
+				// unless we will be calling this function a lot,
+				// so to figure out how many times we should wait before
+				// retrieving the list,
+				// we start by seeing how many pages of results that list has,
+				// and if we call this function that many times,
+				// then we go ahead and get the list
+	
+				if (!me.waitForHIT_callCount) {
+					me.waitForHIT_callCount = 0
+					var a = me.getReviewableHITs(1)
+					if (a.totalNumResults == a.length) {
+						me.waitForHIT_reviewableHITs = new Set(a)
+						me.waitForHIT_reviewableHITsTime = time()
+					}
+					me.waitForHIT_waitCount = Math.ceil(a.totalNumResults / 100)
+				}
+				me.waitForHIT_callCount++
+				if (me.waitForHIT_callCount >= me.waitForHIT_waitCount) {
+					if (!me.waitForHIT_reviewableHITs ||
+						(time() > me.waitForHIT_reviewableHITsTime + (1000 * 60))) {
+						me.waitForHIT_reviewableHITs = new Set(me.getReviewableHITs())
+						me.waitForHIT_reviewableHITsTime = time()
+					}
+				}
+				if (me.waitForHIT_reviewableHITs) {
+					if (!me.waitForHIT_reviewableHITs[hitId]) {
+						stop()
+					}
+				}
+	
 				var hit = mturk.getHIT(hitId);
 				if (!hit.done) {
 					stop()
-				};
+				}
 				verbosePrint("hit completed: " + hitId)
 				return hit
 			})

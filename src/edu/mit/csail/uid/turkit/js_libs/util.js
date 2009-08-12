@@ -12,7 +12,9 @@ function rethrow(e) {
 		w.flush()
 		w.close()
 		throw e.getMessage() + "\n" + b.toString()
-	}
+	} else {
+        throw e
+    }
 }
 
 /**
@@ -284,10 +286,29 @@ function mapToSelf(a, test) {
 }
 
 /**
+    Removes whitespace from the front and back of the string.
+*/
+function trim(s) {
+    return s.replace(/^\s+|\s+$/g,"");
+}
+/**
+    Removes whitespace from the front and back of the string.
+*/
+String.prototype.trim = function() {
+    return trim(this)
+}
+
+/**
+    Returns the last element of this array.
+*/
+function last(a) {
+	return a[a.length - 1]
+}
+/**
     Returns the last element of this array.
 */
 Array.prototype.last = function() {
-	return this[this.length - 1]
+	return last(this)
 }
 
 /**
@@ -530,4 +551,15 @@ function highlightDiff(a, b) {
       
       return { o: o, n: n };
     }
+}
+
+/**
+	Creates a set from an array of values;
+	all the values become keys in an object,
+	and the corresponding value is "true"
+ */
+function Set(a) {
+	for (var i = 0; i < a.length; i++) {
+		this[a[i]] = true
+	}
 }

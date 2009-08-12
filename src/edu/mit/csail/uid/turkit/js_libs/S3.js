@@ -9,13 +9,6 @@
  * </p>
  */
 function S3() {
-	this.init()
-}
-
-/**
- * Initialize fields of the S3 class.
- */
-S3.prototype.init = function() {
 	this.s3Service = javaTurKit.s3Service
 	this.defaultBucketName = javaTurKit.awsAccessKeyID + ".TurKit"
 }
@@ -137,7 +130,7 @@ S3.prototype.deleteObject = function(bucketName, key) {
 	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
 	
 	<p><code>key</code> is optional.
-	If you do not provide it, the key will be the md5 hash of the <code>stringData</code>,
+	If you do not provide it, the key will be a random string of characters
 	with an .html extension.</p>
 	
 	<p>If there is only 1 parameter, it will be interpreted as <code>stringData</code>.</p>
@@ -150,7 +143,7 @@ S3.prototype.putStringRaw = function(bucketName, key, stringData) {
 		bucketName = this.defaultBucketName
 	}
 	if (!key) {
-		key = md5(stringData) + ".html"
+		key = Packages.edu.mit.csail.uid.turkit.util.U.getRandomString(32, "0123456789abcdefghijklmnopqrstuvwxyz") + ".html"
 	}
 	
 	var o = new Packages.org.jets3t.service.model.S3Object(key, stringData)

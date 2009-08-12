@@ -68,6 +68,6 @@ function createWebpageFromTemplate(html, blockWorkers, bucketName) {
  */
 function setMode(mode) {
 	javaTurKit.setMode(mode)
-	mturk.init()
-	s3.init()
+	mturk = new MTurk()
+	s3 = new S3()
 }
