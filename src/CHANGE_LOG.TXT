@@ -1,5 +1,52 @@
 
 -------------------------------
+version 0.1.42
+
+JavaScript
+
+- printed call stacks are better now (before they sometimes pointed to places that re-threw exceptions, as opposed to the original exceptions)
+
+- createHIT nows warns you when you pass keys to it that it doesn't understand
+
+- approving and rejecting assignments without a message should no longer give people the message "undefined"
+
+- files put into S3 now get random names, instead of their original file names
+	- this is done so that TurKit processes using files with the same names do not conflict with each other...
+		- perhaps each TurKit process should have it's own bucket? hm...
+		
+- added Stats.js with basic statistics functions
+
+- TraceManager a little more efficient (uses queryRaw)
+	- added peekFrame function to return information about the current frame
+	
+- utils
+	- added "group", "fold", "Set", "Bag" and "jsonPath"
+
+- added queryRaw function, that runs non-side-effecting queries (essentially "reads" as opposed to "writes" to the JavaScript database)
+	
+Java UI
+
+- "Run Repeatedly" should now stop if the program runs through without throwing any "stop" exceptions
+
+- added confirmations before deleting HITs from the Tools menu
+
+- export command improved
+	- doesn't export "turkit.properties"
+	- and more... I think it is more consistent about changing workerId's
+
+Java
+
+- added utility function for reflectively listing resources
+
+- fixed threading bug
+	- sometimes "Run Repeatedly" would deadlock, and now it doesn't.. or shouldn't
+
+- added Apache commons-math-2.0.jar (because 10mb isn't big enough ;)
+	- this has support for t-testing, among other things
+	
+- minor refactorings and code optimization
+
+-------------------------------
 version 0.1.36
 
 - efficiency improvement to waitForHIT:

@@ -39,14 +39,14 @@ MTurk.prototype.assertWeCanSpend = function(money, hits, callbackBeforeCrash) {
 	if (safety.moneySpent > javaTurKit.maxMoney) {
 		if (callbackBeforeCrash)
 			callbackBeforeCrash()
-		throw "TurKit has detected a safety violation: spending too much money. "
-				+ "You need to increase your spending limit with TurKit (not with MTurk) to overcome this problem."
+		throw new java.lang.Exception("TurKit has detected a safety violation: spending too much money. "
+				+ "You need to increase your spending limit with TurKit (not with MTurk) to overcome this problem.")
 	}
 	if (safety.hitsCreated > javaTurKit.maxHITs) {
 		if (callbackBeforeCrash)
 			callbackBeforeCrash()
-		throw "TurKit has detected a safety violation: creating too many HITs. "
-				+ "You need to increase your hit limit with TurKit (not with MTurk) to overcome this problem."
+		throw new java.lang.Exception("TurKit has detected a safety violation: creating too many HITs. "
+				+ "You need to increase your hit limit with TurKit (not with MTurk) to overcome this problem.")
 	}
 	safety = database.query("__safetyCounters = " + json(safety))
 }
@@ -63,7 +63,8 @@ MTurk.prototype.keepTrying = function(func) {
 			var ret = func()
 			return ret
 		} catch (e) {
-			if (/throttled/.exec("" + e)) {
+			var m = "" + e
+			if (/throttled/.exec(m) || /Connection timed out: connect/.exec(m)) {
 				verbosePrint("throttled")
 				sleep(waitTime)
 				waitTime += 0.1
@@ -124,6 +125,36 @@ MTurk.prototype.getAccountBalance = function() {
 MTurk.prototype.createHITRaw = function(params) {
 	if (!params)
 		params = {}
+		
+	// let them know if they provide param names that are not on the list
+	var badKeys = keys(new Set(keys(params)).remove([
+		"HITTypeID",
+		"hitTypeId",
+		"title",
+		"desc",
+		"description",
+		"reward",
+		"assignmentDurationInSeconds",
+		"minApproval",
+		"html",
+		"bucket",
+		"url",
+		"blockWorkers",
+		"height",
+		"question",
+		"lifetimeInSeconds",
+		"assignments",
+		"maxAssignments",
+		"numAssignments",
+		"autoApprovalDelayInSeconds",
+		"requesterAnnotation",
+		"keywords",
+		"qualificationRequirements",
+		"responseGroup"
+	]))
+	if (badKeys.length > 0) {
+		throw new java.lang.Exception("some parameters to createHIT are not understood: " + badKeys.join(', '))
+	}
 
 	if (params.HITTypeID)
 		params.hitTypeId = params.HITTypeID
@@ -131,15 +162,15 @@ MTurk.prototype.createHITRaw = function(params) {
 	} else {
 		params.hitTypeId = null
 		if (!params.title)
-			throw "createHIT requires a title"
+			throw new java.lang.Exception("createHIT requires a title")
 
 		if (params.desc)
 			params.description = params.desc
 		if (!params.description)
-			throw "createHIT requires a description"
+			throw new java.lang.Exception("createHIT requires a description")
 
-		if (!params.reward)
-			throw "createHIT requires a reward"
+		if (params.reward == null)
+			throw new java.lang.Exception("createHIT requires a reward")
 
 		if (!params.assignmentDurationInSeconds)
 			params.assignmentDurationInSeconds = 60 * 60 // one hour
@@ -184,13 +215,15 @@ MTurk.prototype.createHITRaw = function(params) {
 	}
 
 	if (!params.question)
-		throw "createHIT requires a question (or a url, or html)"
+		throw new java.lang.Exception("createHIT requires a question (or a url, or html)")
 
 	if (!params.lifetimeInSeconds)
 		params.lifetimeInSeconds = 60 * 60 * 24 * 7 // one week
 		
 	if (params.assignments)
 		params.maxAssignments = params.assignments
+	if (params.numAssignments)
+		params.maxAssignments = params.numAssignments 
 	if (!params.maxAssignments)
 		params.maxAssignments = 1
 
@@ -480,6 +513,7 @@ MTurk.prototype.grantBonus = function(assignment, amount, reason) {
  * <code>reason</code>.
  */
 MTurk.prototype.approveAssignmentRaw = function(assignment, reason) {
+	if (reason === undefined) reason = null
 	assignmentId = this.tryToGetAssignmentId(assignment)
 	this.keepTrying(function() {
 				mturk.requesterService.approveAssignment(assignmentId, reason)
@@ -511,6 +545,7 @@ MTurk.prototype.approveAssignments = function(assignments, reason) {
  * <code>reason</code>.
  */
 MTurk.prototype.rejectAssignmentRaw = function(assignment, reason) {
+	if (reason === undefined) reason = null
 	assignmentId = this.tryToGetAssignmentId(assignment)
 	this.keepTrying(function() {
 				mturk.requesterService.rejectAssignment(assignmentId, reason)
@@ -616,12 +651,12 @@ MTurk.prototype.getHIT = function(hit) {
 					var a = answers.get(ai)
 
 					var rhs = a.getFreeText()
-					if (rhs) {
+					if (rhs != null) {
 						rhs = "" + rhs
 					}
-					if (!rhs) {
+					if (rhs == null) {
 						rhs = a.getUploadedFileKey()
-						if (rhs) {
+						if (rhs != null) {
 							rhs = {
 								uploadedFileKey : "" + rhs,
 								uploadedFileSizeInBytes : a
@@ -629,7 +664,7 @@ MTurk.prototype.getHIT = function(hit) {
 							}
 						}
 					}
-					if (!rhs) {
+					if (rhs == null) {
 						rhs = []
 						var sels = a.getSelectionIdentifier()
 						for (var si = 0; si < sels.size(); si++) {

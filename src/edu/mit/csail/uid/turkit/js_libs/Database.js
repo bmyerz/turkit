@@ -31,6 +31,18 @@ Database.prototype.query = function(s) {
 }
 
 /**
+ * Evaluates <i>s</i> in the context of the JavaScript database, without change.
+ * This version does not wrap your code in a function body.
+ * It also does not guarantee that the results will be persisted on disk before the function returns,
+ * so you should only use this for calls that read from the database.
+ * Note that this version still evaluates the string of
+ * JSON returned from the JavaScript database, and returns the result.
+ */
+Database.prototype.queryRaw = function(s) {
+	return eval("" + Packages.edu.mit.csail.uid.turkit.RhinoUtil.json(this.database.queryRaw(s)))
+}
+
+/**
  * This is a reference to the {@link Database} associated with this TurKit file.
  */
 var database = new Database()

@@ -62,20 +62,21 @@
 <span class='line'> 55</span> </span><span class="WHIT">	</span><span class="KEYW">var</span><span class="WHIT"> </span><span class="NAME">s</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="PUNC">(</span><span class="STRN">""</span><span class="WHIT"> </span><span class="PUNC">+</span><span class="WHIT"> </span><span class="NAME">javaTurKit.taskTemplate</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="WHIT">
 <span class='line'> 56</span> </span><span class="WHIT">		</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/___CONTENT___/</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">html</span><span class="PUNC">)</span><span class="PUNC">.</span><span class="WHIT">
 <span class='line'> 57</span> </span><span class="WHIT">		</span><span class="NAME">replace</span><span class="PUNC">(</span><span class="REGX">/___BLOCK_WORKERS___/</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">blockWorkers</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'> 58</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">s3.putString</span><span class="PUNC">(</span><span class="NAME">bucketName</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">s</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'> 59</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'> 60</span> 
-<span class='line'> 61</span> </span><span class="COMM">/**
-<span class='line'> 62</span>  * Changes the mode. Possible values include "offline", "sandbox" and "real".
-<span class='line'> 63</span>  * &lt;ul>
-<span class='line'> 64</span>  * &lt;li>"offline" will not let you access MTurk or S3.&lt;/li>
-<span class='line'> 65</span>  * &lt;li>"sandbox" will let you access the MTurk sandbox, and the real S3.&lt;/li>
-<span class='line'> 66</span>  * &lt;li>"real" mode accesses the real MTurk and the real S3.&lt;/li>
-<span class='line'> 67</span>  * &lt;/ul>
-<span class='line'> 68</span>  */</span><span class="WHIT">
-<span class='line'> 69</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">setMode</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
-<span class='line'> 70</span> </span><span class="WHIT">	</span><span class="NAME">javaTurKit.setMode</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'> 71</span> </span><span class="WHIT">	</span><span class="NAME">mturk</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">MTurk</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'> 72</span> </span><span class="WHIT">	</span><span class="NAME">s3</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">S3</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
-<span class='line'> 73</span> </span><span class="PUNC">}</span><span class="WHIT">
-<span class='line'> 74</span> </span></pre></body></html>
+<span class='line'> 58</span> </span><span class="WHIT">	</span><span class="NAME">createWebpageFromTemplate_html</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="NAME">s</span><span class="WHIT">
+<span class='line'> 59</span> </span><span class="WHIT">	</span><span class="KEYW">return</span><span class="WHIT"> </span><span class="NAME">s3.putString</span><span class="PUNC">(</span><span class="NAME">bucketName</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="KEYW">null</span><span class="PUNC">,</span><span class="WHIT"> </span><span class="NAME">s</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 60</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 61</span> 
+<span class='line'> 62</span> </span><span class="COMM">/**
+<span class='line'> 63</span>  * Changes the mode. Possible values include "offline", "sandbox" and "real".
+<span class='line'> 64</span>  * &lt;ul>
+<span class='line'> 65</span>  * &lt;li>"offline" will not let you access MTurk or S3.&lt;/li>
+<span class='line'> 66</span>  * &lt;li>"sandbox" will let you access the MTurk sandbox, and the real S3.&lt;/li>
+<span class='line'> 67</span>  * &lt;li>"real" mode accesses the real MTurk and the real S3.&lt;/li>
+<span class='line'> 68</span>  * &lt;/ul>
+<span class='line'> 69</span>  */</span><span class="WHIT">
+<span class='line'> 70</span> </span><span class="KEYW">function</span><span class="WHIT"> </span><span class="NAME">setMode</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="PUNC">)</span><span class="WHIT"> </span><span class="PUNC">{</span><span class="WHIT">
+<span class='line'> 71</span> </span><span class="WHIT">	</span><span class="NAME">javaTurKit.setMode</span><span class="PUNC">(</span><span class="NAME">mode</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 72</span> </span><span class="WHIT">	</span><span class="NAME">mturk</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">MTurk</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 73</span> </span><span class="WHIT">	</span><span class="NAME">s3</span><span class="WHIT"> </span><span class="PUNC">=</span><span class="WHIT"> </span><span class="KEYW">new</span><span class="WHIT"> </span><span class="NAME">S3</span><span class="PUNC">(</span><span class="PUNC">)</span><span class="WHIT">
+<span class='line'> 74</span> </span><span class="PUNC">}</span><span class="WHIT">
+<span class='line'> 75</span> </span></pre></body></html>

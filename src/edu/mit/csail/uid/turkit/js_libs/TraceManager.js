@@ -36,13 +36,38 @@ TraceManager.prototype.pushFrame = function(frameName) {
 
 	// make sure we haven't already been here
 	if (this.visitedStackFrames[path]) {
-		throw "visiting the same stack frame twice: " + path
+		throw new java.lang.Exception("visiting the same stack frame twice: " + path)
 	}
 	this.visitedStackFrames[path] = true
 
-	return database.query("return prune(ensure(null, " + path + ", " + json({
+	return database.queryRaw("prune(ensure(null, " + path + ", " + json({
 				creationTime : time()
 			}) + "))")
+}
+
+/**
+ * Returns the frame we would see if we called pushFrame.
+ */
+TraceManager.prototype.peekFrame = function(frameName) {
+	if (frameName) {
+		this.stackFramePath.push("namedFrames")
+		this.stackFramePath.push(frameName)
+	} else {
+		this.stackFramePath.push("sequencialFrames")
+		this.stackFramePath
+				.push(this.stackIndexes[this.stackIndexes.length - 1])
+	}
+	this.stackIndexes.push(0)
+
+	var path = json(this.stackFramePath)
+
+	var ret = database.queryRaw("prune(ensure(null, " + path + ", " + json({}) + "))")
+	
+	this.stackFramePath.pop()
+	this.stackFramePath.pop()
+	this.stackIndexes.pop()
+	
+	return ret
 }
 
 /**
@@ -58,7 +83,7 @@ TraceManager.prototype.setFrameValue = function(name, value) {
  * Gets the value of a "local variable" in the current memoized stack frame.
  */
 TraceManager.prototype.getFrameValue = function(name) {
-	database.query("return ensure(null, "
+	database.queryRaw("ensure(null, "
 			+ json(this.stackFramePath.concat(["values"])) + ")[" + json(name)
 			+ "]")
 }
@@ -91,7 +116,7 @@ TraceManager.prototype.once = function(func, frameName) {
 	try {
 		if ("onceFunc" in frame) {
 			if (frame.onceFunc != "" + func) {
-				throw "The memoized stack is inconsistent with the program. The program is running: " + func + "\nBut on a previous run, it ran: " + frame.onceFunc 
+				throw new java.lang.Exception("The memoized stack is inconsistent with the program. The program is running: " + func + "\nBut on a previous run, it ran: " + frame.onceFunc) 
 			}
 		} else {
 			database.query("merge(ensure(null, " + json(this.stackFramePath)
@@ -99,7 +124,7 @@ TraceManager.prototype.once = function(func, frameName) {
 		}
 	
 		if ("returnValue" in frame) {
-			frame.returnValue = database.query("return ensure(null, "
+			frame.returnValue = database.queryRaw("ensure(null, "
 					+ json(this.stackFramePath) + ").returnValue")
 			if ("printOutput" in frame) {
 				Packages.java.lang.System.out["print(java.lang.String)"](frame.printOutput)
@@ -166,10 +191,10 @@ function attempt(func, frameName) {
  */
 TraceManager.prototype.setTrace = function(traceName) {
 	if (!this.beforePushFrame) {
-		throw "you may not call setTrace from within a once or attempt, or after pushing a frame"
+		throw new java.lang.Exception("you may not call setTrace from within a once or attempt, or after pushing a frame")
 	}
 	if (!traceName) {
-		throw "you must provide an identifier or version number of some sort"
+		throw new java.lang.Exception("you must provide an identifier or version number of some sort")
 	}
 	this.stackFramePath[1] = "for-real:" + traceName
 }
@@ -187,10 +212,10 @@ function setTrace(traceName) {
  */
 TraceManager.prototype.resetTrace = function(traceName) {
 	if (!this.beforePushFrame) {
-		throw "you may not call resetTrace from within a once or attempt, or after pushing a frame"
+		throw new java.lang.Exception("you may not call resetTrace from within a once or attempt, or after pushing a frame")
 	}
 	if (!traceName) {
-		throw "you must provide an identifier or version number of some sort"
+		throw new java.lang.Exception("you must provide an identifier or version number of some sort")
 	}
 	this.stackFramePath[1] = "for-real:" + traceName
 	database.query("var a = " + this.stackFramePath[0]

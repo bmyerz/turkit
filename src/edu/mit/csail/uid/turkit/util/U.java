@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
@@ -30,8 +31,10 @@ import java.io.Serializable;
 import java.io.StringBufferInputStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
@@ -50,11 +53,14 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
@@ -76,7 +82,45 @@ public class U {
 		System.out.println("hello world");
 	}
 
-	public static void rethrow(Exception e) {
+	/**
+	 * adapted from: http://www.uofr.net/~greg/java/get-resource-listing.html
+	 * 
+	 * List files (not directories) in a resource folder. Not recursive.
+	 * You may pass any path that would work with <code>clazz.getResource(path)</code>.
+	 */
+	public static String[] getResourceListing(Class clazz, String path)
+			throws Exception {
+		URL dirURL = clazz.getResource(path);
+		if (dirURL != null && dirURL.getProtocol().equals("file")) {
+			return new File(dirURL.toURI()).list();
+		}
+		if (dirURL.getProtocol().equals("jar")) {
+			String jarPath = URLDecoder.decode(dirURL.getPath().substring(5,
+					dirURL.getPath().indexOf("!")), "UTF-8"); //strip out only the JAR file
+			path = URLDecoder.decode(dirURL.getPath().substring(
+					dirURL.getPath().indexOf("!") + 2)
+					+ "/", "UTF-8");
+			JarFile jar = new JarFile(jarPath);
+			Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+			Vector<String> result = new Vector<String>();
+			while (entries.hasMoreElements()) {
+				String name = entries.nextElement().getName();
+				if (name.startsWith(path) && (name.length() > path.length())) { //filter according to the path
+					String entry = name.substring(path.length());
+					if (entry.indexOf("/") < 0) {
+						result.add(entry);
+					}
+				}
+			}
+			return result.toArray(new String[result.size()]);
+		}
+
+		throw new UnsupportedOperationException("Cannot list files for URL "
+				+ dirURL);
+	}
+
+	public static void rethrow(Throwable e) {
+		if (e instanceof Error) throw (Error)e;
 		Error er = new Error(e.getMessage());
 		er.setStackTrace(e.getStackTrace());
 		throw er;

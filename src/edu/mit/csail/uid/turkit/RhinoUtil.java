@@ -1,8 +1,10 @@
 package edu.mit.csail.uid.turkit;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,25 +25,75 @@ public class RhinoUtil {
 	private static StringBuffer result;
 	private static StringBuffer appendAtEnd;
 
+	interface Func {
+		public Object func() throws Exception;
+	}
+
+	private static Object evaluate(Context cx, Func f) throws Exception {
+		try {
+			return f.func();
+		} catch (Throwable t) {
+			boolean retry = false;
+
+			if (!retry) {
+				if ((t instanceof EvaluatorException)
+						&& !(t instanceof WrappedException)) {
+					retry = true;
+				}
+			}
+
+			if (!retry) {
+				if ((t instanceof IllegalArgumentException)
+						&& (t.getMessage().equals("out of range index"))) {
+					retry = true;
+				}
+			}
+			
+			if (false && !retry) {
+				
+				// it would be nice to have some generic way of knowing
+				// if the error was caused by the limitations of the optimizer 
+				
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				PrintStream ps = new PrintStream(out);
+				t.printStackTrace(ps);
+				ps.close();
+				if (out.toString().contains("org.mozilla.javascript.optimizer")) {
+					retry = true;
+				}
+			}
+			
+			if (retry) {
+				System.out.println("Retrying Script Evaluation: "
+						+ t.getMessage());
+
+				int oldOp = cx.getOptimizationLevel();
+				cx.setOptimizationLevel(-1);
+				Object ret = f.func();
+				cx.setOptimizationLevel(oldOp);
+				return ret;
+			} else {
+				if (t instanceof Exception)
+					throw (Exception) t;
+				U.rethrow(t);
+				return null;
+			}
+		}
+	}
+
 	/**
 	 * Wrapper around <code>Context.evaluateString</code> which tries to evaluate the code first with optimization turned on,
 	 * and if that doesn't work, tries executing it again with optimization turned off.
 	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
 	 */
-	public static Object evaluateString(Context cx, Scriptable scope,
-			String source, String sourceName) {
-		try {
-			return cx.evaluateString(scope, source, sourceName, 1, null);
-		} catch (EvaluatorException ee) {
-			if (ee instanceof WrappedException) throw ee;
-			
-			System.out.println("Retrying Script Evaluation: " + ee.getMessage());			
-			int oldOp = cx.getOptimizationLevel();
-			cx.setOptimizationLevel(-1);
-			Object ret = cx.evaluateString(scope, source, sourceName, 1, null);
-			cx.setOptimizationLevel(oldOp);
-			return ret;
-		}
+	public static Object evaluateString(final Context cx,
+			final Scriptable scope, final String source, final String sourceName)
+			throws Exception {
+		return evaluate(cx, new Func() {
+			public Object func() {
+				return cx.evaluateString(scope, source, sourceName, 1, null);
+			}
+		});
 	}
 
 	/**
@@ -49,22 +101,14 @@ public class RhinoUtil {
 	 * and if that doesn't work, tries executing it again with optimization turned off.
 	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
 	 */
-	public static Object evaluateFile(Context cx, Scriptable scope, File file)
-			throws Exception {
-		try {
-			return cx.evaluateReader(scope, new FileReader(file), file
-					.getAbsolutePath(), 1, null);
-		} catch (EvaluatorException ee) {
-			if (ee instanceof WrappedException) throw ee;
-			
-			System.out.println("Retrying Script Evaluation: " + ee.getMessage());			
-			int oldOp = cx.getOptimizationLevel();
-			cx.setOptimizationLevel(-1);
-			Object ret = cx.evaluateReader(scope, new FileReader(file), file
-					.getAbsolutePath(), 1, null);
-			cx.setOptimizationLevel(oldOp);
-			return ret;
-		}
+	public static Object evaluateFile(final Context cx, final Scriptable scope,
+			final File file) throws Exception {
+		return evaluate(cx, new Func() {
+			public Object func() throws Exception {
+				return cx.evaluateReader(scope, new FileReader(file), file
+						.getAbsolutePath(), 1, null);
+			}
+		});
 	}
 
 	/**
@@ -72,22 +116,14 @@ public class RhinoUtil {
 	 * and if that doesn't work, tries executing it again with optimization turned off.
 	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
 	 */
-	public static Object evaluateURL(Context cx, Scriptable scope, URL url)
-			throws Exception {
-		try {
-			return cx.evaluateReader(scope, new InputStreamReader(url
-					.openStream()), url.toString(), 1, null);
-		} catch (EvaluatorException ee) {
-			if (ee instanceof WrappedException) throw ee;
-			
-			System.out.println("Retrying Script Evaluation: " + ee.getMessage());			
-			int oldOp = cx.getOptimizationLevel();
-			cx.setOptimizationLevel(-1);
-			Object ret = cx.evaluateReader(scope, new InputStreamReader(url
-					.openStream()), url.toString(), 1, null);
-			cx.setOptimizationLevel(oldOp);
-			return ret;
-		}
+	public static Object evaluateURL(final Context cx, final Scriptable scope,
+			final URL url) throws Exception {
+		return evaluate(cx, new Func() {
+			public Object func() throws Exception {
+				return cx.evaluateReader(scope, new InputStreamReader(url
+						.openStream()), url.toString(), 1, null);
+			}
+		});
 	}
 
 	/**

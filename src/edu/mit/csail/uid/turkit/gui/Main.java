@@ -6,7 +6,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.PrintStream;
@@ -66,7 +68,7 @@ public class Main implements SimpleEventListener {
 	public Dockable propertiesDock;
 
 	public static void main(String[] args) throws Exception {
-		if(args.length > 0) {
+		if (args.length > 0) {
 			CommandLineInterface cli = new CommandLineInterface();
 			cli.run(args);
 		} else {
@@ -127,6 +129,10 @@ public class Main implements SimpleEventListener {
 				U.save(jsFile, U.slurp(this.getClass().getResource(
 						"default-file-contents.js")));
 			}
+			
+			// save as most recent
+			turkitProperties.query("recentFile = \""
+					+ U.escapeString(jsFile.getAbsolutePath()) + "\"");
 		} else {
 			return;
 		}
@@ -201,7 +207,14 @@ public class Main implements SimpleEventListener {
 					mi.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							try {
-								onDeleteAllHITs("sandbox");
+								if (JOptionPane
+										.showConfirmDialog(
+												f,
+												"Pressing 'Ok' will result in deleting all of your HITs from the sandbox.",
+												"Delete all sandbox HITs?",
+												JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+									onDeleteAllHITs("sandbox");
+								}
 							} catch (Exception ee) {
 								U.rethrow(ee);
 							}
@@ -215,7 +228,14 @@ public class Main implements SimpleEventListener {
 					mi.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							try {
-								onDeleteAllHITs("real");
+								if (JOptionPane
+										.showConfirmDialog(
+												f,
+												"Pressing 'Ok' will result in deleting all of your real HITs.",
+												"Delete all real HITs?",
+												JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+									onDeleteAllHITs("real");
+								}
 							} catch (Exception ee) {
 								U.rethrow(ee);
 							}
@@ -442,22 +462,27 @@ public class Main implements SimpleEventListener {
 
 	public void onRun() throws Exception {
 		sem.fireEvent("save", null, null);
+		
+		boolean done = false;
 
 		outputPane.startCapture();
 		try {
 			Map m = reinitTurKit();
-			turkit.runOnce((Double) m.get("maxMoney"), ((Double) m
+			done = turkit.runOnce((Double) m.get("maxMoney"), ((Double) m
 					.get("maxHITs")).intValue());
-		} catch (Exception e) {
+			sem.fireEvent("updateDatabase", null, null);
+		} catch (Throwable e) {
 			System.out.println("ERROR: ----------------------------------");
 			e.printStackTrace();
 		} finally {
 			outputPane.stopCapture();
 		}
-
-		sem.fireEvent("updateDatabase", null, null);
-
-		runInABit(runDelaySeconds);
+		
+		if (!done) {
+			runInABit(runDelaySeconds);
+		} else {
+			sem.fireEvent("stop", null, null);
+		}
 	}
 
 	public void onResetDatabase() throws Exception {
@@ -470,6 +495,9 @@ public class Main implements SimpleEventListener {
 			sem.fireEvent("updateDatabase", null, null);
 			System.out
 					.println("Done reseting database. (Backup database file created.)");
+		} catch (Throwable e) {
+			System.out.println("ERROR: ----------------------------------");
+			e.printStackTrace();
 		} finally {
 			outputPane.stopCapture();
 		}
@@ -484,6 +512,9 @@ public class Main implements SimpleEventListener {
 			turkit.setMode(mode);
 			turkit.deleteAllHITs();
 			System.out.println("Done deleting all " + mode + " HITs.");
+		} catch (Throwable e) {
+			System.out.println("ERROR: ----------------------------------");
+			e.printStackTrace();
 		} finally {
 			outputPane.stopCapture();
 		}
@@ -510,7 +541,7 @@ public class Main implements SimpleEventListener {
 			if (timer != null) {
 				timer.stop();
 			}
-			timer = new Timer((int) Math.min(delta, 1000),
+			timer = new Timer((int) Math.max(Math.min(delta, 1000), 0),
 					new ActionListener() {
 						public void actionPerformed(ActionEvent arg0) {
 							try {
@@ -526,7 +557,16 @@ public class Main implements SimpleEventListener {
 									}
 								}
 							} catch (Exception e) {
-								U.rethrow(e);
+								// print this error to the output pane
+								ByteArrayOutputStream out = new ByteArrayOutputStream();								
+								PrintStream ps = new PrintStream(out);
+								e.printStackTrace(ps);
+								ps.close();
+								String s = out.toString();
+								outputPane.setText("Unexpected Error:\n" + s);
+								
+								// let's press on
+								runInABit(60);
 							}
 						}
 					});
@@ -540,8 +580,9 @@ public class Main implements SimpleEventListener {
 		Vector<File> files = new Vector();
 		{
 			for (File f : jsFile.getParentFile().listFiles()) {
-				if (!f.isDirectory() && !f.getName().endsWith(".zip")
-						&& !f.getName().matches("^.*\\.old\\d+$")) {
+				if (!f.isDirectory()
+						&& !f.getName().equals("turkit.properties")
+						&& !f.getName().matches("^.*\\.(zip|jar|old\\d*)$")) {
 					files.add(f);
 				}
 			}
@@ -552,13 +593,16 @@ public class Main implements SimpleEventListener {
 		{
 			String seed = U.getRandomString(20);
 			turkit.database.consolidate();
-			String s = U.slurp(turkit.database.storageFile);
-			Matcher m = Pattern.compile(
-					"(?msi)^\\s*\"workerId\" : \"([A-Z0-9]+)\",?\\s*$")
-					.matcher(s);
-			while (m.find()) {
-				workerIdMap.put(m.group(1), "FAKE_" + U.md5(seed + m.group(1)).substring(
-						0, 9).toUpperCase());
+			for (File f : files) {
+				String s = U.slurp(f);
+				Matcher m = Pattern.compile(
+						"(?msi)^\\s*\"workerId\" ?: ?\"([A-Z0-9]+)\",?\\s*$")
+						.matcher(s);
+				while (m.find()) {
+					workerIdMap.put(m.group(1), "FAKE_"
+							+ U.md5(seed + m.group(1)).substring(0, 9)
+									.toUpperCase());
+				}
 			}
 		}
 
@@ -572,24 +616,33 @@ public class Main implements SimpleEventListener {
 			PrintStream p = new PrintStream(z);
 			for (File f : files) {
 				z.putNextEntry(new ZipEntry(f.getName()));
-				if (f.getName().matches("^.*\\.(js|database)$")) {
-					String s = U.slurp(f);
-					for (Map.Entry<String, String> e : workerIdMap.entrySet()) {
-						s = s.replaceAll(e.getKey(), e.getValue());
-					}
-					p.print(s);
-				} else if (f.equals(propertiesFile)) {
+				
+				if (f.equals(propertiesFile)) {
 					p.print(U.slurp(
 							this.getClass().getResource("default.properties"))
 							.replaceAll("___MODE___", "offline").replaceAll(
 									"___ID___", "not_exported").replaceAll(
 									"___SECRET___", "not_exported"));
 				} else {
-					FileReader in = new FileReader(f);
-					while (in.ready()) {
-						p.write(in.read());
+					String s = U.slurp(f);
+					String s_ = s;
+					for (Map.Entry<String, String> e : workerIdMap.entrySet()) {
+						s_ = s_.replaceAll(e.getKey(), e.getValue());
+					}
+					if (!s_.equals(s)) {
+						// it contains some worker ids, so it's probably text,
+						// and we want to write out the version with the fake ids
+						p.print(s_);
+					} else {
+						// it didn't have any worker ids, so it could be anything,
+						// so let's write it out byte for byte
+						FileInputStream in = new FileInputStream(f);
+						while (in.available() > 0) {
+							p.write(in.read());
+						}
 					}
 				}
+				
 				z.closeEntry();
 			}
 			z.close();

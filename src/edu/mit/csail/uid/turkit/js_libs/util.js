@@ -17,6 +17,27 @@ function rethrow(e) {
     }
 }
 
+
+/**
+	Groups the values in the object or array <code>a</code>
+	by the key defined for each value by running <code>func</code> on that value.
+	The result is a map of keys to arrays, where each array holds all the values associated with that key.	
+ */
+function group(a, func) {
+    var m = {}
+    foreach(a, function (e) {
+        var key = func(e)
+        var arr = m[key]
+        if (!arr) {
+            arr = []
+            m[key] = arr
+        }
+        arr.push(e)
+    })
+    return m
+}
+
+
 /**
     A thin wrapper around Java's System.out.println(s).
     If <code>s</code> is an object, then it is converted into a string using {@link json}.
@@ -286,6 +307,49 @@ function mapToSelf(a, test) {
 }
 
 /**
+	<p>Here is an example of <code>fold</code>:<br>
+	<code>fold([1, 1, 1, 1], function (x, y) { return x + y }, 0)</code><br>
+	returns <code>4</code>.</p>
+	
+	<p>The value of <code>x</code> in the function will always come from
+	an element of <code>a</code>.</p>
+	
+	<p>If the parameter <code>def</code> is used,
+	then the value of <code>y</code> in the function
+	will always come from <code>def</code>,
+	or from a return value of <code>func</code>.
+	If <code>a</code> has no elements, then <code>def</code> will be returned.</p>
+	
+	<p>If <code>def</code> is not supplied,
+	then both <code>x</code> and <code>y</code> will come from <code>a</code>.
+	If <code>a</code> has only 1 element,
+	then <code>func</code> will not be called,
+	and that one element will be returned.
+	If <code>a</code> has no elements, then <code>null</code> will be returned.</p> 
+*/
+function fold(a, func, def) {
+	if (def === undefined) {
+		var ret = null
+		var first = true
+		foreach(a, function (e, i) {
+			if (first) {
+				ret = e
+				first = false
+			} else {
+				ret = func(e, ret, i)
+			}
+		})
+		return ret	
+	} else {
+		var ret = def
+		foreach(a, function (e, i) {
+			ret = func(e, ret, i)
+		})	
+		return ret
+	}
+}
+
+/**
     Removes whitespace from the front and back of the string.
 */
 function trim(s) {
@@ -460,7 +524,7 @@ unescapeXml = function (s) {
                         return String.fromCharCode(parseInt(s.substring(2, s.length - 1)));
                     }
                 } else {
-                    throw "unknown XML escape sequence: " + s
+                    throw new java.lang.Exception("unknown XML escape sequence: " + s)
                 }
         }
     })
@@ -472,9 +536,9 @@ unescapeXml = function (s) {
 	There are two resulting strings of HTML, returned in an object with two properties, <code>a</code> and <code>b</code>.</p>
  */
 function highlightDiff(a, b) {
-    a = a.match(/\S+|\s+/g)
+    a = a.match(/\w+|\S+|\s+/g)
     if (!a) a = []
-    b = b.match(/\S+|\s+/g)
+    b = b.match(/\w+|\S+|\s+/g)
     if (!b) b = []
     mapToSelf(a, function (e) { return ":" + e })
     mapToSelf(b, function (e) { return ":" + e })
@@ -554,12 +618,249 @@ function highlightDiff(a, b) {
 }
 
 /**
-	Creates a set from an array of values;
-	all the values become keys in an object,
-	and the corresponding value is "true"
+	Returns a new Set. A set is represented as an object where the values are true for keys in the set.
+	If <code>a</code> is a set, add it's elements to this set.
+	If <code>a</code> is an object, add it's values to this set.
+	If <code>a</code> is an element, add it to this set.
  */
 function Set(a) {
-	for (var i = 0; i < a.length; i++) {
-		this[a[i]] = true
+	if (a) {
+    	this.add(a)
+    }
+}
+
+/**
+	Returns a clone of the Set.
+ */
+Set.prototype.clone = function () {
+    return new Set(this)
+}
+
+/**
+	If <code>a</code> is a set, remove it's elements from this set.
+	If <code>a</code> is an object, remove it's values from this set.
+	If <code>a</code> is an element, remove it from this set.
+	
+	Returns this Set, after the removal.
+	If removing a single element, returns <code>true</code> iff the element existed before.
+ */
+Set.prototype.remove = function (a) {
+    if ((typeof a) == "object") {
+        var me = this
+        if (a instanceof Set) {
+            foreach(a, function (_, a) {
+                delete me[a]
+            })
+        } else {
+            foreach(a, function (a) {
+                delete me[a]
+            })
+        }
+    } else {
+        if (!this[a]) return false
+        delete this[a]
+        return true
+    }
+    return this
+}
+
+/**
+	If <code>a</code> is a set, add it's elements to this set.
+	If <code>a</code> is an object, add it's values to this set.
+	If <code>a</code> is an element, add it to this set.
+	
+	Returns this Set, after the addition.
+	If adding a single element, returns <code>true</code> iff the element didn't exist before.
+ */
+Set.prototype.add = function (a) {
+    if ((typeof a) == "object") {
+        var me = this
+        if (a instanceof Set) {
+            foreach(a, function (_, a) {
+                me[a] = true
+            })
+        } else {
+            foreach(a, function (a) {
+                me[a] = true
+            })
+        }
+    } else {
+        if (this[a]) return false
+        this[a] = true
+        return true
+    }
+    return this
+}
+
+/**
+	Returns a new Set representing the intersection of this Set with <code>a</code>.
+	If <code>a</code> is an object, a set is created from its values, and the intersection is done with that.
+	If <code>a</code> is an element, a set is created containing this element, and the intersection is done with that.
+ */
+Set.prototype.intersect = function (b) {
+    var i = new Set()
+    if ((typeof a) == "object") {
+        var me = this
+        if (a instanceof Set) {
+            foreach(a, function (_, a) {
+            	if (me[a]) i[a] = true
+            })
+        } else {
+            foreach(a, function (a) {
+            	if (me[a]) i[a] = true
+            })
+        }
+    } else {
+    	if (this[a]) i[a] = true
+    }
+    return i
+}
+
+/**
+	Returns a new Bag data structure,
+	which is an unordered collection of objects,
+	where objects can appear multiple times.
+	The bag is really a map of keys,
+	where the value associated with each key
+	represents the number of times that key appears in the bag.
+	
+	If <code>a</code> is a bag, add it's elements to this bag.
+	If <code>a</code> is an object, add it's values to this bag.
+	If <code>a</code> is an element, add it to this bag.
+ */
+function Bag(a) {
+	if (a) {
+		this.add(a)
 	}
 }
+
+/**
+	Returns a clone of the bag.
+ */
+Bag.prototype.clone = function () {
+    return new Bag(this)
+}
+
+/**
+	If <code>a</code> is a bag, add it's elements to this bag, and returns the new bag.
+	If <code>a</code> is an object, add it's values to this bag, and returns the new bag.
+	If <code>a</code> is an element, add it to this bag, and return the new number of times it appears.
+	
+	The parameter <code>count</code> defaults to 1,
+	but can be changed to add multiple copies of <code>a</code> to the bag.
+ */
+Bag.prototype.add = function (a, count) {
+	if (count === undefined) count = 1
+	if ((typeof a) == "object") {
+		var me = this
+		if (a instanceof Bag) {
+			foreach(a, function (v, a) {
+				me.add(a, v * count)
+			})
+		} else {
+			foreach(a, function (a) {
+				me.add(a, count)
+			})
+		}
+	} else {
+		var v = this[a]
+		if (!v) v = 0
+		v += count
+		this[a] = v
+		return v
+	}
+	return this
+}
+
+/**
+ * see documentation here: <a href="http://goessner.net/articles/JsonPath/">http://goessner.net/articles/JsonPath/</a>
+ * 
+ * from: http://code.google.com/p/jsonpath/
+ * 
+ * JSONPath 0.8.0 - XPath for JSON
+ *
+ * Copyright (c) 2007 Stefan Goessner (goessner.net)
+ * Licensed under the MIT (MIT-LICENSE.txt) licence.
+ */
+function jsonPath(obj, expr, arg) {
+   var P = {
+      resultType: arg && arg.resultType || "VALUE",
+      result: [],
+      normalize: function(expr) {
+         var subx = [];
+         return expr.replace(/[\['](\??\(.*?\))[\]']/g, function($0,$1){return "[#"+(subx.push($1)-1)+"]";})
+                    .replace(/'?\.'?|\['?/g, ";")
+                    .replace(/;;;|;;/g, ";..;")
+                    .replace(/;$|'?\]|'$/g, "")
+                    .replace(/#([0-9]+)/g, function($0,$1){return subx[$1];});
+      },
+      asPath: function(path) {
+         var x = path.split(";"), p = "$";
+         for (var i=1,n=x.length; i<n; i++)
+            p += /^[0-9*]+$/.test(x[i]) ? ("["+x[i]+"]") : ("['"+x[i]+"']");
+         return p;
+      },
+      store: function(p, v) {
+         if (p) P.result[P.result.length] = P.resultType == "PATH" ? P.asPath(p) : v;
+         return !!p;
+      },
+      trace: function(expr, val, path) {
+         if (expr) {
+            var x = expr.split(";"), loc = x.shift();
+            x = x.join(";");
+            if (val && val.hasOwnProperty(loc))
+               P.trace(x, val[loc], path + ";" + loc);
+            else if (loc === "*")
+               P.walk(loc, x, val, path, function(m,l,x,v,p) { P.trace(m+";"+x,v,p); });
+            else if (loc === "..") {
+               P.trace(x, val, path);
+               P.walk(loc, x, val, path, function(m,l,x,v,p) { typeof v[m] === "object" && P.trace("..;"+x,v[m],p+";"+m); });
+            }
+            else if (/,/.test(loc)) { // [name1,name2,...]
+               for (var s=loc.split(/'?,'?/),i=0,n=s.length; i<n; i++)
+                  P.trace(s[i]+";"+x, val, path);
+            }
+            else if (/^\(.*?\)$/.test(loc)) // [(expr)]
+               P.trace(P.eval(loc, val, path.substr(path.lastIndexOf(";")+1))+";"+x, val, path);
+            else if (/^\?\(.*?\)$/.test(loc)) // [?(expr)]
+               P.walk(loc, x, val, path, function(m,l,x,v,p) { if (P.eval(l.replace(/^\?\((.*?)\)$/,"$1"),v[m],m)) P.trace(m+";"+x,v,p); });
+            else if (/^(-?[0-9]*):(-?[0-9]*):?([0-9]*)$/.test(loc)) // [start:end:step]  phyton slice syntax
+               P.slice(loc, x, val, path);
+         }
+         else
+            P.store(path, val);
+      },
+      walk: function(loc, expr, val, path, f) {
+         if (val instanceof Array) {
+            for (var i=0,n=val.length; i<n; i++)
+               if (i in val)
+                  f(i,loc,expr,val,path);
+         }
+         else if (typeof val === "object") {
+            for (var m in val)
+               if (val.hasOwnProperty(m))
+                  f(m,loc,expr,val,path);
+         }
+      },
+      slice: function(loc, expr, val, path) {
+         if (val instanceof Array) {
+            var len=val.length, start=0, end=len, step=1;
+            loc.replace(/^(-?[0-9]*):(-?[0-9]*):?(-?[0-9]*)$/g, function($0,$1,$2,$3){start=parseInt($1||start);end=parseInt($2||end);step=parseInt($3||step);});
+            start = (start < 0) ? Math.max(0,start+len) : Math.min(len,start);
+            end   = (end < 0)   ? Math.max(0,end+len)   : Math.min(len,end);
+            for (var i=start; i<end; i+=step)
+               P.trace(i+";"+expr, val, path);
+         }
+      },
+      eval: function(x, _v, _vname) {
+         try { return $ && _v && eval(x.replace(/@/g, "_v")); }
+         catch(e) { throw new SyntaxError("jsonPath: " + e.message + ": " + x.replace(/@/g, "_v").replace(/\^/g, "_a")); }
+      }
+   };
+
+   var $ = obj;
+   if (expr && obj && (P.resultType == "VALUE" || P.resultType == "PATH")) {
+      P.trace(P.normalize(expr).replace(/^\$;/,""), obj, "$");
+      return P.result.length ? P.result : false;
+   }
+} 

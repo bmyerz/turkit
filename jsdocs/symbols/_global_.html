@@ -176,7 +176,7 @@ ul.inheritsList
 	<body>
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
-		<div id="header" style="width:100%;text-align:right"><h3><i>TurKit JavaScript API v0.1.36</i></h3></div>
+		<div id="header" style="width:100%;text-align:right"><h3><i>TurKit JavaScript API v0.1.42</i></h3></div>
 		<!-- end static/header.html -->
 
 <!-- ============================== classes index ============================ -->
@@ -333,6 +333,17 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#Bag">Bag</a></b>(a)
+								</div>
+								<div class="description">Returns a new Bag data structure,
+	which is an unordered collection of objects,
+	where objects can appear multiple times.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#convertJavaArray">convertJavaArray</a></b>(ja)
 								</div>
 								<div class="description">Returns a JavaScript array given a Java array.</div>
@@ -378,6 +389,17 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#fold">fold</a></b>(a, func, def)
+								</div>
+								<div class="description"><p>Here is an example of <code>fold</code>:<br>
+	<code>fold([1, 1, 1, 1], function (x, y) { return x + y }, 0)</code><br>
+	returns <code>4</code>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#foreach">foreach</a></b>(a, test)
 								</div>
 								<div class="description">Processes values of an array or object using the <i>test</i> function; the original object is not affected.</div>
@@ -405,6 +427,16 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#group">group</a></b>(a, func)
+								</div>
+								<div class="description">Groups the values in the object or array <code>a</code>
+	by the key defined for each value by running <code>func</code> on that value.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#highlightDiff">highlightDiff</a></b>(a, b)
 								</div>
 								<div class="description"><p>Takes two strings <code>a</code> and <code>b</code>, and calculates their differences.</div>
@@ -417,6 +449,15 @@ ul.inheritsList
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#json">json</a></b>(o)
 								</div>
 								<div class="description">Returns a JSON-like representation of the JavaScript data value.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#jsonPath">jsonPath</a></b>(obj, expr, arg)
+								</div>
+								<div class="description">see documentation here: <a href="http://goessner.net/articles/JsonPath/">http://goessner.net/articles/JsonPath/</a>from: http://code.google.com/p/jsonpath/JSONPath 0.8.0 - XPath for JSONCopyright (c) 2007 Stefan Goessner (goessner.net)Licensed under the MIT (MIT-LICENSE.txt) licence.</div>
 							</td>
 						</tr>
 					
@@ -551,9 +592,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/_global_.html#Set">Set</a></b>(a)
 								</div>
-								<div class="description">Creates a set from an array of values;
-	all the values become keys in an object,
-	and the corresponding value is "true"</div>
+								<div class="description">Returns a new Set.</div>
 							</td>
 						</tr>
 					
@@ -600,6 +639,15 @@ ul.inheritsList
 								</div>
 								<div class="description">Reads the contents of the file or url indicated by <code>src</code> into a string,
 	same as <a href="../symbols/_global_.html#read">read</a>.</div>
+							</td>
+						</tr>
+					
+						<tr>
+							<td class="attributes">&nbsp;</td>
+							<td class="nameDescription">
+								<div class="fixedFont"><b><a href="../symbols/_global_.html#Stats">Stats</a></b>()
+								</div>
+								<div class="description">Utility methods for doing statistics.</div>
 							</td>
 						</tr>
 					
@@ -896,6 +944,54 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="Bag"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>Bag</b>(a)
+					
+					</div>
+					<div class="description">
+						Returns a new Bag data structure,
+	which is an unordered collection of objects,
+	where objects can appear multiple times.
+	The bag is really a map of keys,
+	where the value associated with each key
+	represents the number of times that key appears in the bag.
+	
+	If <code>a</code> is a bag, add it's elements to this bag.
+	If <code>a</code> is an object, add it's values to this bag.
+	If <code>a</code> is an element, add it to this bag.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>a</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="convertJavaArray"> </a>
 					<div class="fixedFont">
 					
@@ -1152,6 +1248,75 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="fold"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>fold</b>(a, func, def)
+					
+					</div>
+					<div class="description">
+						<p>Here is an example of <code>fold</code>:<br>
+	<code>fold([1, 1, 1, 1], function (x, y) { return x + y }, 0)</code><br>
+	returns <code>4</code>.</p>
+	
+	<p>The value of <code>x</code> in the function will always come from
+	an element of <code>a</code>.</p>
+	
+	<p>If the parameter <code>def</code> is used,
+	then the value of <code>y</code> in the function
+	will always come from <code>def</code>,
+	or from a return value of <code>func</code>.
+	If <code>a</code> has no elements, then <code>def</code> will be returned.</p>
+	
+	<p>If <code>def</code> is not supplied,
+	then both <code>x</code> and <code>y</code> will come from <code>a</code>.
+	If <code>a</code> has only 1 element,
+	then <code>func</code> will not be called,
+	and that one element will be returned.
+	If <code>a</code> has no elements, then <code>null</code> will be returned.</p>
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>a</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>func</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>def</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="foreach"> </a>
 					<div class="fixedFont">
 					
@@ -1293,6 +1458,53 @@ ul.inheritsList
 
 					<hr />
 				
+					<a name="group"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>group</b>(a, func)
+					
+					</div>
+					<div class="description">
+						Groups the values in the object or array <code>a</code>
+	by the key defined for each value by running <code>func</code> on that value.
+	The result is a map of keys to arrays, where each array holds all the values associated with that key.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>a</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>func</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
 					<a name="highlightDiff"> </a>
 					<div class="fixedFont">
 					
@@ -1380,6 +1592,57 @@ ul.inheritsList
 								<dd>A JSON-like representation of o.</dd>
 							
 							</dl>
+						
+						
+						
+
+					<hr />
+				
+					<a name="jsonPath"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>jsonPath</b>(obj, expr, arg)
+					
+					</div>
+					<div class="description">
+						see documentation here: <a href="http://goessner.net/articles/JsonPath/">http://goessner.net/articles/JsonPath/</a>from: http://code.google.com/p/jsonpath/JSONPath 0.8.0 - XPath for JSONCopyright (c) 2007 Stefan Goessner (goessner.net)Licensed under the MIT (MIT-LICENSE.txt) licence.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
+						
+						
+					</div>
+					
+					
+					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>obj</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>expr</b>
+									
+								</dt>
+								<dd></dd>
+							
+								<dt>
+									<b>arg</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
+						
+						
+						
+						
 						
 						
 						
@@ -1982,9 +2245,10 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Creates a set from an array of values;
-	all the values become keys in an object,
-	and the corresponding value is "true"
+						Returns a new Set. A set is represented as an object where the values are true for keys in the set.
+	If <code>a</code> is a set, add it's elements to this set.
+	If <code>a</code> is an object, add it's values to this set.
+	If <code>a</code> is an element, add it to this set.
 						
 							<br />
 							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_util.js.html">util.js</a>.
@@ -2201,6 +2465,34 @@ ul.inheritsList
 								<dd></dd>
 							
 							</dl>
+						
+						
+						
+						
+						
+						
+						
+
+					<hr />
+				
+					<a name="Stats"> </a>
+					<div class="fixedFont">
+					
+					
+					<b>Stats</b>()
+					
+					</div>
+					<div class="description">
+						Utility methods for doing statistics. More to come here in the future.
+						
+							<br />
+							<i>Defined in: </i> <a href="../symbols/src/src_edu_mit_csail_uid_turkit_js_libs_Stats.js.html">Stats.js</a>.
+						
+						
+					</div>
+					
+					
+					
 						
 						
 						
@@ -2525,7 +2817,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Tue Aug 11 2009 22:39:14 GMT-0400 (EDT)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Thu Oct 15 2009 18:21:01 GMT-0400 (EDT)
 		</div>
 	</body>
 </html>

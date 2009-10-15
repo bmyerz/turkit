@@ -142,33 +142,39 @@ public class JavaScriptDatabase {
 		public ConsolidationTimer() {
 		}
 
-		synchronized public void onQuery() {
-			if ((thread != null) && !thread.isInterrupted()) {
-				long time = System.currentTimeMillis();
-				movingSaveTime = time + movingSaveTime_delta;
-			} else {
-				long time = System.currentTimeMillis();
-				staticSaveTime = time + staticSaveTime_delta;
-				movingSaveTime = time + movingSaveTime_delta;
-				thread = new Thread(this);
-				thread.start();
+		public void onQuery() {
+			synchronized (JavaScriptDatabase.this) {
+				if ((thread != null) && !thread.isInterrupted()) {
+					long time = System.currentTimeMillis();
+					movingSaveTime = time + movingSaveTime_delta;
+				} else {
+					long time = System.currentTimeMillis();
+					staticSaveTime = time + staticSaveTime_delta;
+					movingSaveTime = time + movingSaveTime_delta;
+					thread = new Thread(this);
+					thread.start();
+				}
 			}
 		}
 
-		synchronized public void onConsolidate() {
-			close();
+		public void onConsolidate() {
+			synchronized (JavaScriptDatabase.this) {
+				close();
+			}
 		}
 
-		synchronized public void close() {
-			if (thread != null) {
-				thread.interrupt();
+		public void close() {
+			synchronized (JavaScriptDatabase.this) {
+				if (thread != null) {
+					thread.interrupt();
+				}
 			}
 		}
 
 		public void run() {
 			try {
 				while (true) {
-					synchronized (this) {
+					synchronized (JavaScriptDatabase.this) {
 						if (Thread.interrupted()) {
 							break;
 						}
@@ -181,7 +187,7 @@ public class JavaScriptDatabase {
 							thread = null;
 							break;
 						} else {
-							wait(nearestSaveTime - currentTime);
+							JavaScriptDatabase.this.wait(nearestSaveTime - currentTime);
 						}
 					}
 				}

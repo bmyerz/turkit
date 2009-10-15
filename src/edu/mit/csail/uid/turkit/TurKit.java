@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+
 import org.jets3t.service.S3Service;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
 import org.jets3t.service.security.AWSCredentials;
@@ -288,20 +290,10 @@ public class TurKit {
 
 			scope.put("javaTurKit", scope, this);
 
-			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-					"js_libs/util.js"));
-			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-					"js_libs/turkit_base.js"));
-			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-					"js_libs/Database.js"));
-			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-					"js_libs/TraceManager.js"));
-			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-					"js_libs/MTurk.js"));
-			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-					"js_libs/S3.js"));
-			RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
-					"js_libs/highlevel_utils.js"));
+			for (String s : U.getResourceListing(this.getClass(), "js_libs")) {
+				RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+						"js_libs/" + s));
+			}
 
 			stopped = false;
 			if (source instanceof URL) {

@@ -35,6 +35,10 @@ public class OutputPane extends JPanel implements SimpleEventListener {
 		text.setText(wireTap.close());
 		wireTap = null;
 	}
+	
+	public void setText(String text) {
+		this.text.setText(text);
+	}
 
 	public void onEvent(SimpleEvent e) throws Exception {
 	}

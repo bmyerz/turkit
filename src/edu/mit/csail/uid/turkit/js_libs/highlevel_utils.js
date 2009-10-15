@@ -55,6 +55,7 @@ function createWebpageFromTemplate(html, blockWorkers, bucketName) {
 	var s = ("" + javaTurKit.taskTemplate).
 		replace(/___CONTENT___/, html).
 		replace(/___BLOCK_WORKERS___/, blockWorkers)
+	createWebpageFromTemplate_html = s
 	return s3.putString(bucketName, null, s)
 }
 

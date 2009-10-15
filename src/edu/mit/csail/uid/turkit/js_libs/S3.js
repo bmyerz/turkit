@@ -166,6 +166,7 @@ S3.prototype.putString = function(bucketName, key, stringData) {
 
 /**
 	Create a public object in S3 based on a file.
+	The name given to this object will be randomly generated.
 	Returns the URL for the object.
 	
 	<p><code>bucketName</code> is optional.
@@ -184,7 +185,16 @@ S3.prototype.putFileRaw = function(bucketName, file) {
 	if ((typeof file) == "string") {
 		file = getFile(file)
 	}
-	return this.putObjectRaw(bucketName, new Packages.org.jets3t.service.model.S3Object(file))
+	
+	var s3Object = new Packages.org.jets3t.service.model.S3Object(file)
+	
+	var key = Packages.edu.mit.csail.uid.turkit.util.U.getRandomString(32, "0123456789abcdefghijklmnopqrstuvwxyz")
+	// add the original extension, if there was one
+	var m = ("" + s3Object.getKey()).match(/\.([^\.]+)$/)
+	if (m) key += '.' + m[1]
+	s3Object.setKey(key)
+	
+	return this.putObjectRaw(bucketName, s3Object)
 }
 
 /**
