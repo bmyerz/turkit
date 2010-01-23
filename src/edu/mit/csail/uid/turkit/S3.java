@@ -1,4 +1,4 @@
-package edu.mit.csail.uid.turkit.util;
+package edu.mit.csail.uid.turkit;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -21,6 +21,10 @@ import java.util.regex.Pattern;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
+import edu.mit.csail.uid.turkit.util.Base64;
+import edu.mit.csail.uid.turkit.util.MyMap;
+import edu.mit.csail.uid.turkit.util.U;
 
 public class S3 {
 

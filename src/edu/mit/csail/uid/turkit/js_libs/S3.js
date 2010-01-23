@@ -57,7 +57,7 @@ S3.prototype.deleteObjectRaw = function(bucketName, key) {
 		key = a.key
 	}
 
-	Packages.edu.mit.csail.uid.turkit.util.S3.deleteObject(
+	Packages.edu.mit.csail.uid.turkit.S3.deleteObject(
 		javaTurKit.awsAccessKeyID, javaTurKit.awsSecretAccessKey,
 		bucketName, key)
 	
@@ -103,7 +103,7 @@ S3.prototype.putObjectRaw = function(bucketName, key, data) {
 		key = Packages.edu.mit.csail.uid.turkit.util.U.getRandomString(32, "0123456789abcdefghijklmnopqrstuvwxyz") + ".html"
 	}
 	
-	Packages.edu.mit.csail.uid.turkit.util.S3.putObject(
+	Packages.edu.mit.csail.uid.turkit.S3.putObject(
 		javaTurKit.awsAccessKeyID, javaTurKit.awsSecretAccessKey,
 		bucketName, key, data)
 		

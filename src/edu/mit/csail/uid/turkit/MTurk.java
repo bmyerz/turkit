@@ -1,4 +1,4 @@
-package edu.mit.csail.uid.turkit.util;
+package edu.mit.csail.uid.turkit;
 
 import java.io.IOException;
 import java.net.URL;
@@ -10,6 +10,9 @@ import java.util.TimeZone;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
+import edu.mit.csail.uid.turkit.util.Base64;
+import edu.mit.csail.uid.turkit.util.U;
 
 
 public class MTurk {

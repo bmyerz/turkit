@@ -9,8 +9,6 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.Scriptable;
 
-import edu.mit.csail.uid.turkit.util.MTurk;
-import edu.mit.csail.uid.turkit.util.S3;
 import edu.mit.csail.uid.turkit.util.U;
 
 public class TurKit {
