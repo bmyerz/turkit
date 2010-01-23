@@ -1,5 +1,39 @@
 
 -------------------------------
+version 0.2.0
+
+- hot-keys
+	- Ctrl-R to run
+	- Ctrl-Shift-R  to run repeatedly
+	- Ctrl-S to stop
+	
+- added property "repeatInterval" to adjust how many seconds to wait before re-running
+
+- export is now recursive (zips up subdirectories as well)
+	- put an "_" in front of the names of any directories you don't want to export
+
+- much smaller
+	- dropped dependence on
+		- Amazon's MTurk Java API
+		- jetS3t
+		- most of apache commons (except commons-cli) 
+
+
+-------------------------------
+version 0.1.44
+
+- export command exports directories as well
+	- you can hide directories from this process by
+		making their name begin with either a '.' or a '_'
+
+-------------------------------
+version 0.1.43
+
+- export command hides the Amazon keys from *all* .js.properties files,
+	not just the one associated with the currently running file
+
+
+-------------------------------
 version 0.1.42
 
 JavaScript

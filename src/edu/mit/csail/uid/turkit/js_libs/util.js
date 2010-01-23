@@ -190,6 +190,15 @@ function filter(a, test) {
 			}
 		}
 		return b
+	} else if ((typeof a) == "xml") {
+		var b = []
+		for (var i = 0; i < a.length(); i++) {
+			var v = a[i]
+			if (test(v, i)) {
+				b.push(v)
+			}
+		}
+		return b
 	} else {
 		var b = {}
 		for (var k in a) {
@@ -227,6 +236,11 @@ function foreach(a, test) {
 			if (test(a[i], i) == false)
 				break
 		}
+	} else if ((typeof a) == "xml") {
+		for (var i = 0; i < a.length(); i++) {
+			if (test(a[i], i) == false)
+				break
+		}
 	} else {
 		for (var k in a) {
 			if (a.hasOwnProperty(k)) {
@@ -259,6 +273,12 @@ function map(a, test) {
 	if (a instanceof Array) {
 		var b = []
 		for (var i = 0; i < a.length; i++) {
+			b.push(test(a[i], i))
+		}
+		return b
+	} else if ((typeof a) == "xml") {
+		var b = []
+		for (var i = 0; i < a.length(); i++) {
 			b.push(test(a[i], i))
 		}
 		return b

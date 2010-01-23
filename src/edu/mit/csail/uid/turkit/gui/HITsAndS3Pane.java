@@ -18,12 +18,14 @@ public class HITsAndS3Pane extends JPanel implements SimpleEventListener {
 	TurKit turkit;
 	public static String getOnlineObjectsJs = null;
 
-	public HITsAndS3Pane(SimpleEventManager _sem, TurKit turkit)
+	public void init(TurKit turkit) {
+		this.turkit = turkit;
+	}
+	
+	public HITsAndS3Pane(SimpleEventManager _sem)
 			throws Exception {
 		this.sem = _sem;
 		sem.addListener(this);
-
-		this.turkit = turkit;
 
 		html = new JEditorPane("text/html", "");
 		html.setEditable(false);

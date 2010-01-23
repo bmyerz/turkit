@@ -176,7 +176,7 @@ ul.inheritsList
 	<body>
 <!-- ============================== header ================================= -->	
 		<!-- begin static/header.html -->
-		<div id="header" style="width:100%;text-align:right"><h3><i>TurKit JavaScript API v0.1.42</i></h3></div>
+		<div id="header" style="width:100%;text-align:right"><h3><i>TurKit JavaScript API v0.2.0</i></h3></div>
 		<!-- end static/header.html -->
 
 <!-- ============================== classes index ============================ -->
@@ -250,34 +250,6 @@ ul.inheritsList
 			
 
 <!-- ============================== properties summary ===================== -->
-			
-				
-				
-				<table class="summaryTable" cellspacing="0" summary="A summary of the fields documented in the class MTurk.">
-					<caption>Field Summary</caption>
-					<thead>
-						<tr>
-							<th scope="col">Field Attributes</th>
-							<th scope="col">Field Name and Description</th>
-						</tr>
-					</thead>
-					<tbody>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont">
-								<b><a href="../symbols/MTurk.html#requesterService">requesterService</a></b>
-								</div>
-								<div class="description">A reference to a Java RequesterService object from the Java MTurk API.</div>
-							</td>
-						</tr>
-					
-					</tbody>
-				</table>
-				
-				
-				
 			
 
 <!-- ============================== methods summary ======================== -->
@@ -414,16 +386,7 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/MTurk.html#getAssignmentsForHIT">getAssignmentsForHIT</a></b>(hit)
-								</div>
-								<div class="description">Returns an array of assignments for the given <code>hit</code>.</div>
-							</td>
-						</tr>
-					
-						<tr>
-							<td class="attributes">&nbsp;</td>
-							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/MTurk.html#getHIT">getHIT</a></b>(hit)
+								<div class="fixedFont"><b><a href="../symbols/MTurk.html#getHIT">getHIT</a></b>(hit, getAssignments)
 								</div>
 								<div class="description">Returns an object representing all of the information MTurk has on the givenHIT, including the assigments, and the associated answer data.</div>
 							</td>
@@ -432,9 +395,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/MTurk.html#getHITs">getHITs</a></b>()
+								<div class="fixedFont"><b><a href="../symbols/MTurk.html#getHITs">getHITs</a></b>(maxPages)
 								</div>
-								<div class="description">Returns an array of HIT Ids for all the HITs you currently have on MTurk.</div>
+								<div class="description">Returns an array of HIT data for all the HITs you currently have on MTurk.</div>
 							</td>
 						</tr>
 					
@@ -468,9 +431,9 @@ ul.inheritsList
 						<tr>
 							<td class="attributes">&nbsp;</td>
 							<td class="nameDescription">
-								<div class="fixedFont"><b><a href="../symbols/MTurk.html#keepTrying">keepTrying</a></b>(func)
+								<div class="fixedFont"><b><a href="../symbols/MTurk.html#parseHIT">parseHIT</a></b>(hit)
 								</div>
-								<div class="description">Repeatedly tries to execute the given <i>func</i>, and returns the resultonce it succeeds.</div>
+								<div class="description"></div>
 							</td>
 						</tr>
 					
@@ -524,7 +487,7 @@ ul.inheritsList
 							<td class="nameDescription">
 								<div class="fixedFont"><b><a href="../symbols/MTurk.html#tryToGetHITId">tryToGetHITId</a></b>(hit)
 								</div>
-								<div class="description">Tries to determine the type of <code>hit</code> and return the HIT Id.</div>
+								<div class="description">Tries to determine the type of <code>hit</code>, and return the HIT Id.</div>
 							</td>
 						</tr>
 					
@@ -586,33 +549,6 @@ ul.inheritsList
 			
 
 <!-- ============================== field details ========================== -->		
-			
-				<div class="sectionTitle">
-					Field Detail
-				</div>
-				
-					<a name="requesterService"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>requesterService</b>
-					
-					</div>
-					<div class="description">
-						A reference to a Java RequesterService object from the Java MTurk API.
-						
-						
-					</div>
-					
-					
-
-						
-						
-						
-						
-
-					
-				
 			
 
 <!-- ============================== method details ========================= -->		
@@ -845,7 +781,7 @@ ul.inheritsList
  <li><b>height</b>: (optional) height of the iFrame embedded in MTurk, in pixels (default is 600).</li>
  </ul>
  
- </li><li><b>reward</b>: how many dollars you want to pay per assignment for thisHIT.</ul>The following properties are optional:<ul><li><b>hitTypeId</b>: this may be given instead of the information above;usually it is not known or needed.</li><li><b>keywords</b>: keywords to help people search for your HIT.</li><li><b>assignmentDurationInSeconds</b>: default is 1 hour's worth ofseconds.</li><li><b>autoApprovalDelayInSeconds</b>: default is 1 month's worth ofseconds.</li><li><b>lifetimeInSeconds</b>: default is 1 week's worth of seconds.</li><li><b>maxAssignments</b>: <b>assignments</b> is also accepted. default is 1.</li><li><b>requesterAnnotation</b>: default is no annotation.</li><li><b>qualificationRequirements</b>: default is no requirements.</li><li><b>minApproval</b>: minimum approval percentage. The appropriaterequirement will be added if you supply a percentage here.</li><li><b>responseGroup</b>: default is no response group.</li></ul>
+ </li><li><b>reward</b>: how many dollars you want to pay per assignment for thisHIT.</ul>The following properties are optional:<ul><li><b>keywords</b>: keywords to help people search for your HIT.</li><li><b>assignmentDurationInSeconds</b>: default is 1 hour's worth ofseconds.</li><li><b>autoApprovalDelayInSeconds</b>: default is 1 month's worth ofseconds.</li><li><b>lifetimeInSeconds</b>: default is 1 week's worth of seconds.</li><li><b>maxAssignments</b>: <b>assignments</b> is also accepted. default is 1.</li><li><b>requesterAnnotation</b>: default is no annotation.</li><li><b>qualificationRequirements</b>: default is no requirements.</li><li><b>minApproval</b>: minimum approval percentage. The appropriaterequirement will be added if you supply a percentage here.</li></ul>
 						
 						
 					</div>
@@ -1139,15 +1075,15 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="getAssignmentsForHIT"> </a>
+					<a name="getHIT"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>getAssignmentsForHIT</b>(hit)
+					<b>getHIT</b>(hit, getAssignments)
 					
 					</div>
 					<div class="description">
-						Returns an array of assignments for the given <code>hit</code>.
+						Returns an object representing all of the information MTurk has on the givenHIT, including the assigments, and the associated answer data. The returnedobject will have a value called <i>done</i> set to true iff all the pendingassigments for this HIT have been completed (unless <code>getAssignments</code> is false).<p>Note that the <i>answer</i> data structure associated with each assigment issimplified. It is recommended that you print out the result of this functionusing <a href="../symbols/_global_.html#json">json</a>, in order to know what it looks like for your specificsituation.</p>
 						
 						
 					</div>
@@ -1164,38 +1100,8 @@ ul.inheritsList
 								</dt>
 								<dd></dd>
 							
-							</dl>
-						
-						
-						
-						
-						
-						
-						
-
-					<hr />
-				
-					<a name="getHIT"> </a>
-					<div class="fixedFont">
-					
-					
-					<b>getHIT</b>(hit)
-					
-					</div>
-					<div class="description">
-						Returns an object representing all of the information MTurk has on the givenHIT, including the assigments, and the associated answer data. The returnedobject will have a value called <i>done</i> set to true iff all the pendingassigments for this HIT have been completed.<p>Note that the <i>answer</i> data structure associated with each assigment issimplified. It is recommended that you print out the result of this functionusing <a href="../symbols/_global_.html#json">json</a>, in order to know what it looks like for your specificsituation.</p>
-						
-						
-					</div>
-					
-					
-					
-						
-							<dl class="detailList">
-							<dt class="heading">Parameters:</dt>
-							
 								<dt>
-									<b>hit</b>
+									<b>getAssignments</b>
 									
 								</dt>
 								<dd></dd>
@@ -1215,17 +1121,28 @@ ul.inheritsList
 					<div class="fixedFont">
 					
 					
-					<b>getHITs</b>()
+					<b>getHITs</b>(maxPages)
 					
 					</div>
 					<div class="description">
-						Returns an array of HIT Ids for all the HITs you currently have on MTurk.
+						Returns an array of HIT data for all the HITs you currently have on MTurk.
 						
 						
 					</div>
 					
 					
 					
+						
+							<dl class="detailList">
+							<dt class="heading">Parameters:</dt>
+							
+								<dt>
+									<b>maxPages</b>
+									
+								</dt>
+								<dd></dd>
+							
+							</dl>
 						
 						
 						
@@ -1368,15 +1285,15 @@ ul.inheritsList
 
 					<hr />
 				
-					<a name="keepTrying"> </a>
+					<a name="parseHIT"> </a>
 					<div class="fixedFont">
 					
 					
-					<b>keepTrying</b>(func)
+					<b>parseHIT</b>(hit)
 					
 					</div>
 					<div class="description">
-						Repeatedly tries to execute the given <i>func</i>, and returns the resultonce it succeeds.
+						
 						
 						
 					</div>
@@ -1388,7 +1305,7 @@ ul.inheritsList
 							<dt class="heading">Parameters:</dt>
 							
 								<dt>
-									<b>func</b>
+									<b>hit</b>
 									
 								</dt>
 								<dd></dd>
@@ -1616,7 +1533,7 @@ ul.inheritsList
 					
 					</div>
 					<div class="description">
-						Tries to determine the type of <code>hit</code> and return the HIT Id.
+						Tries to determine the type of <code>hit</code>, and return the HIT Id.
 						
 						
 					</div>
@@ -1734,7 +1651,7 @@ ul.inheritsList
 <!-- ============================== footer ================================= -->
 		<div class="fineprint" style="clear:both">
 			
-			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Thu Oct 15 2009 18:21:02 GMT-0400 (EDT)
+			Documentation generated by <a href="http://www.jsdoctoolkit.org/" target="_blank">JsDoc Toolkit</a> 2.1.0 on Sat Jan 23 2010 06:30:13 GMT-0500 (EST)
 		</div>
 	</body>
 </html>

@@ -16,9 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
@@ -31,11 +29,11 @@ import java.io.Serializable;
 import java.io.StringBufferInputStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.util.AbstractCollection;
@@ -60,7 +58,6 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.TransformerFactory;
@@ -85,8 +82,8 @@ public class U {
 	/**
 	 * adapted from: http://www.uofr.net/~greg/java/get-resource-listing.html
 	 * 
-	 * List files (not directories) in a resource folder. Not recursive.
-	 * You may pass any path that would work with <code>clazz.getResource(path)</code>.
+	 * List files (not directories) in a resource folder. Not recursive. You may
+	 * pass any path that would work with <code>clazz.getResource(path)</code>.
 	 */
 	public static String[] getResourceListing(Class clazz, String path)
 			throws Exception {
@@ -96,16 +93,22 @@ public class U {
 		}
 		if (dirURL.getProtocol().equals("jar")) {
 			String jarPath = URLDecoder.decode(dirURL.getPath().substring(5,
-					dirURL.getPath().indexOf("!")), "UTF-8"); //strip out only the JAR file
+					dirURL.getPath().indexOf("!")), "UTF-8"); // strip out only
+																// the JAR file
 			path = URLDecoder.decode(dirURL.getPath().substring(
 					dirURL.getPath().indexOf("!") + 2)
 					+ "/", "UTF-8");
 			JarFile jar = new JarFile(jarPath);
-			Enumeration<JarEntry> entries = jar.entries(); //gives ALL entries in jar
+			Enumeration<JarEntry> entries = jar.entries(); // gives ALL entries
+															// in jar
 			Vector<String> result = new Vector<String>();
 			while (entries.hasMoreElements()) {
 				String name = entries.nextElement().getName();
-				if (name.startsWith(path) && (name.length() > path.length())) { //filter according to the path
+				if (name.startsWith(path) && (name.length() > path.length())) { // filter
+																				// according
+																				// to
+																				// the
+																				// path
 					String entry = name.substring(path.length());
 					if (entry.indexOf("/") < 0) {
 						result.add(entry);
@@ -120,7 +123,8 @@ public class U {
 	}
 
 	public static void rethrow(Throwable e) {
-		if (e instanceof Error) throw (Error)e;
+		if (e instanceof Error)
+			throw (Error) e;
 		Error er = new Error(e.getMessage());
 		er.setStackTrace(e.getStackTrace());
 		throw er;
@@ -176,11 +180,22 @@ public class U {
 		return a;
 	}
 
+	public static String md5_base64(byte[] data) throws Exception {
+		MessageDigest m = MessageDigest.getInstance("MD5");
+		m.update(data);
+		return Base64.encodeBytes(m.digest());
+	}
+
+	// adapted from http://snippets.dzone.com/posts/show/3686
+	public static String md5(byte[] data) throws Exception {
+		MessageDigest m = MessageDigest.getInstance("MD5");
+		m.update(data);
+		return new BigInteger(1, m.digest()).toString(16);
+	}
+
 	// from http://snippets.dzone.com/posts/show/3686
 	public static String md5(String s) throws Exception {
-		MessageDigest m = MessageDigest.getInstance("MD5");
-		m.update(s.getBytes());
-		return new BigInteger(1, m.digest()).toString(16);
+		return md5(s.getBytes("UTF8"));
 	}
 
 	public static void escapeString(StringBuffer buf, String s) {
@@ -1420,17 +1435,22 @@ public class U {
 		}
 	}
 
-	public static String slurp(String filename) throws Exception {
-		return slurp(new File(filename));
+	public static byte[] slurpBytes(BufferedInputStream in) throws Exception {
+		ByteArrayOutputStream buf = new ByteArrayOutputStream();
+		while (true) {
+			int b = in.read();
+			if (b == -1) {
+				break;
+			} else {
+				buf.write(b);
+			}
+		}
+		in.close();
+		return buf.toByteArray();
 	}
 
-	public static String slurp(File f) throws Exception {
-		int length = (int) f.length();
-		char buf[] = new char[length];
-		BufferedReader in = new BufferedReader(new FileReader(f));
-		in.read(buf, 0, length);
-		in.close();
-		return new String(buf);
+	public static byte[] slurpBytes(File file) throws Exception {
+		return slurpBytes(new BufferedInputStream(new FileInputStream(file)));
 	}
 
 	public static String slurp(BufferedReader in) throws Exception {
@@ -1447,8 +1467,22 @@ public class U {
 		return buf.toString();
 	}
 
+	public static String slurp(InputStream in, String enc) throws Exception {
+		if (enc == null)
+			enc = Charset.defaultCharset().name();
+		return slurp(new BufferedReader(new InputStreamReader(in, enc)));
+	}
+
+	public static String slurp(File f) throws Exception {
+		return slurp(new FileInputStream(f), "UTF8");
+	}
+
+	public static String slurp(String filename) throws Exception {
+		return slurp(new File(filename));
+	}
+
 	public static String slurp(URL url) throws Exception {
-		return slurp(new BufferedReader(new InputStreamReader(url.openStream())));
+		return slurp(url.openStream(), "UTF8");
 	}
 
 	public static String webPost(URL url, String... args) throws Exception {
@@ -1466,12 +1500,8 @@ public class U {
 		out.write(argString);
 		out.flush();
 
-		BufferedReader in = new BufferedReader(new InputStreamReader(c
-				.getInputStream()));
+		String text = slurp(c.getInputStream(), "UTF8");
 
-		String text = slurp(in);
-
-		in.close();
 		out.close();
 		return text;
 	}
@@ -1481,7 +1511,8 @@ public class U {
 	}
 
 	public static void save(File f, String s) throws Exception {
-		PrintWriter out = new PrintWriter(new FileWriter(f), true);
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(
+				new FileOutputStream(f), "UTF8"));
 		out.print(s);
 		out.close();
 	}

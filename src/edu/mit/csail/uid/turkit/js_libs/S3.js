@@ -9,14 +9,8 @@
  * </p>
  */
 function S3() {
-	this.s3Service = javaTurKit.s3Service
 	this.defaultBucketName = javaTurKit.awsAccessKeyID + ".TurKit"
 }
-
-/**
- * A reference to an S3Service object in the JetS3t API.
- */
-S3.prototype.s3Service = null
 
 /**
  * The default name used for buckets: <code>your-aws-access-key-id.TurKit</code>.
@@ -24,56 +18,9 @@ S3.prototype.s3Service = null
 S3.prototype.defaultBucketName = null
 
 /**
-	Add public permissions to the given S3Object, and upload it to S3.
-	This function will create the bucket if it doesn't exist.
-	Returns the URL for the object.
-	
-	<p><code>bucketName</code> is optional.
-	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
-	
-	<p>If you provide only 1 parameter, it will be interpreted as the <code>s3Object</code>.</p>
- */
-S3.prototype.putObjectRaw = function(bucketName, s3Object) {
-	if (!s3Object && bucketName) {
-		this.putObjectRaw(null, bucketName)
-	}
-	if (!bucketName) {
-		bucketName = this.defaultBucketName
-	}
-
-	var bucket = this.s3Service.getOrCreateBucket(bucketName)
-	var acl = this.s3Service.getBucketAcl(bucket)
-	acl.grantPermission(org.jets3t.service.acl.GroupGrantee.ALL_USERS,
-		org.jets3t.service.acl.Permission.PERMISSION_READ)
-	s3Object.setAcl(acl)
-	this.s3Service.putObject(bucket, s3Object);
-	var url = this.getURL(bucket, s3Object)
-	database.query("ensure(null, ['__S3_Objects', " + json(url) + "], " + json({}) + ")")
-	if (verbose) {
-		print("S3 object put at: " + url)
-	}
-	return url
-}
-
-/**
- * Calls {@link S3#putObjectRaw} inside of {@link TraceManager#once}.
- */
-S3.prototype.putObject = function(bucketName, s3Object) {
-	return once(function() {
-				return s3.putObjectRaw(bucketName, s3Object)
-			})
-}
-
-/**
 	Creates an S3 URL given a <code>bucket</code> and a <code>key</code>.
  */
 S3.prototype.getURL = function(bucket, key) {
-	if ((typeof bucket) == "object") {
-		bucket = bucket.getName()
-	}
-	if ((typeof key) == "object") {
-		key = key.getKey()
-	}
 	return "http://s3.amazonaws.com/" + bucket + "/" + key
 }
 
@@ -98,6 +45,9 @@ S3.prototype.getBucketAndKey = function(url) {
 	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
  */
 S3.prototype.deleteObjectRaw = function(bucketName, key) {
+
+	if (javaTurKit.mode == "offline") throw "Not allowed in offline mode."
+
 	if (!bucketName) {
 		bucketName = this.defaultBucketName
 	}
@@ -106,7 +56,10 @@ S3.prototype.deleteObjectRaw = function(bucketName, key) {
 		bucketName = a.bucket
 		key = a.key
 	}
-	this.s3Service.deleteObject(bucketName, key)
+
+	Packages.edu.mit.csail.uid.turkit.util.S3.deleteObject(
+		javaTurKit.awsAccessKeyID, javaTurKit.awsSecretAccessKey,
+		bucketName, key)
 	
 	var url = this.getURL(bucketName, key)
 	verbosePrint("deleted S3 object at: " + url)
@@ -119,6 +72,56 @@ S3.prototype.deleteObjectRaw = function(bucketName, key) {
 S3.prototype.deleteObject = function(bucketName, key) {
 	return once(function() {
 				return s3.deleteObjectRaw(bucketName, key)
+			})
+}
+
+/**
+	Create a public object in S3 based on the suplied data.
+	Returns the URL for the object.
+
+	This function will create the bucket if it doesn't exist.
+	
+	<p><code>bucketName</code> is optional.
+	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
+	
+	<p><code>key</code> is optional.
+	If you do not provide it, the key will be a random string of characters
+	with an .html extension.</p>
+	
+	<p>If there is only 1 parameter, it will be interpreted as <code>stringData</code>.</p>
+ */
+S3.prototype.putObjectRaw = function(bucketName, key, data) {
+	if (javaTurKit.mode == "offline") throw "Not allowed in offline mode."
+	
+	if (!data && !key && bucketName) {
+		return this.putObjectRaw(null, null, bucketName)
+	}
+	if (!bucketName) {
+		bucketName = this.defaultBucketName
+	}
+	if (!key) {
+		key = Packages.edu.mit.csail.uid.turkit.util.U.getRandomString(32, "0123456789abcdefghijklmnopqrstuvwxyz") + ".html"
+	}
+	
+	Packages.edu.mit.csail.uid.turkit.util.S3.putObject(
+		javaTurKit.awsAccessKeyID, javaTurKit.awsSecretAccessKey,
+		bucketName, key, data)
+		
+	var url = this.getURL(bucketName, key) 
+	database.query("ensure(null, ['__S3_Objects', " + json(url) + "], " + json({}) + ")")
+	if (verbose) {
+		print("S3 object put at: " + url)
+	}
+		
+	return url
+}
+
+/**
+ * Calls {@link S3#putObjectRaw} inside of {@link TraceManager#once}.
+ */
+S3.prototype.putObject = function(bucketName, s3Object) {
+	return once(function() {
+				return s3.putObjectRaw(bucketName, s3Object)
 			})
 }
 
@@ -136,23 +139,7 @@ S3.prototype.deleteObject = function(bucketName, key) {
 	<p>If there is only 1 parameter, it will be interpreted as <code>stringData</code>.</p>
  */
 S3.prototype.putStringRaw = function(bucketName, key, stringData) {
-	if (!stringData && !key && bucketName) {
-		return this.putStringRaw(null, null, bucketName)
-	}
-	if (!bucketName) {
-		bucketName = this.defaultBucketName
-	}
-	if (!key) {
-		key = Packages.edu.mit.csail.uid.turkit.util.U.getRandomString(32, "0123456789abcdefghijklmnopqrstuvwxyz") + ".html"
-	}
-	
-	var o = new Packages.org.jets3t.service.model.S3Object(key, stringData)
-	if (key.match(/\.html$/)) {
-		o.setContentType("text/html")
-	} else {
-		o.setContentType("text/plain")
-	}
-	return this.putObjectRaw(bucketName, o)
+	return this.putObjectRaw(bucketName, key, stringData)
 }
 
 /**
@@ -175,6 +162,9 @@ S3.prototype.putString = function(bucketName, key, stringData) {
 	<p>If there is only 1 parameter, it will be interpreted as <code>file</code>.</p>
  */
 S3.prototype.putFileRaw = function(bucketName, file) {
+
+	if (javaTurKit.mode == "offline") throw "Not allowed in offline mode."
+	
 	if (!file && bucketName) {
 		return this.putFileRaw(null, bucketName)
 	}
@@ -186,15 +176,13 @@ S3.prototype.putFileRaw = function(bucketName, file) {
 		file = getFile(file)
 	}
 	
-	var s3Object = new Packages.org.jets3t.service.model.S3Object(file)
-	
 	var key = Packages.edu.mit.csail.uid.turkit.util.U.getRandomString(32, "0123456789abcdefghijklmnopqrstuvwxyz")
+
 	// add the original extension, if there was one
-	var m = ("" + s3Object.getKey()).match(/\.([^\.]+)$/)
+	var m = file.getName().match(/\.([^\.]+)$/)
 	if (m) key += '.' + m[1]
-	s3Object.setKey(key)
 	
-	return this.putObjectRaw(bucketName, s3Object)
+	return this.putObjectRaw(bucketName, key, file)
 }
 
 /**

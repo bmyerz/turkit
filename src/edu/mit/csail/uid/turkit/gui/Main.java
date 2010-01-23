@@ -3,6 +3,7 @@ package edu.mit.csail.uid.turkit.gui;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
@@ -10,7 +11,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +20,10 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -30,6 +32,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.WindowConstants;
@@ -43,8 +46,6 @@ import com.javadocking.dockable.DefaultDockable;
 import com.javadocking.dockable.Dockable;
 import com.javadocking.dockable.DockingMode;
 import com.javadocking.model.FloatDockModel;
-
-import org.apache.commons.cli.*;
 
 import edu.mit.csail.uid.turkit.JavaScriptDatabase;
 import edu.mit.csail.uid.turkit.TurKit;
@@ -62,10 +63,13 @@ public class Main implements SimpleEventListener {
 	public DatabasePane databasePane;
 	public CodePane codePane;
 	public PropertiesPane propertiesPane;
+	public HITsAndS3Pane hitsAndS3Pane;
 	public long runAgainAtThisTime;
-	public long runDelaySeconds = 60;
 	public Timer timer;
 	public Dockable propertiesDock;
+	public Dockable codeDock;
+	public TabDock leftTabDock;
+	public JComboBox modeDropdown;
 
 	public static void main(String[] args) throws Exception {
 		if (args.length > 0) {
@@ -85,99 +89,54 @@ public class Main implements SimpleEventListener {
 	}
 
 	public Main() throws Exception {
-
 		if (turkitProperties == null) {
 			turkitProperties = new JavaScriptDatabase(new File(
 					"turkit.properties"), new File("turkit.properties.tmp"));
 		}
 
-		JFileChooser chooser = new JFileChooser();
-		chooser.setFileFilter(new FileFilter() {
-			@Override
-			public boolean accept(File f) {
-				return f.isDirectory() || f.getName().endsWith(".js");
-			}
-
-			@Override
-			public String getDescription() {
-				return "JavaScript Files";
-			}
-		});
-		{
-			String recentFilename = (String) turkitProperties
-					.queryRaw("ensure(null, 'recentFile', '')");
-			if (!recentFilename.isEmpty()) {
-				File f = new File(recentFilename);
-				if (f.exists()) {
-					chooser.setCurrentDirectory(f);
-				} else {
-					f = f.getParentFile();
-					if (f.exists()) {
-						chooser.setCurrentDirectory(f);
-					} else {
-						chooser.setCurrentDirectory(new File("."));
-					}
-				}
-			} else {
-				chooser.setCurrentDirectory(new File("."));
-			}
-		}
-		int returnVal = chooser.showOpenDialog(null);
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			jsFile = chooser.getSelectedFile();
-			if (!jsFile.exists()) {
-				U.save(jsFile, U.slurp(this.getClass().getResource(
-						"default-file-contents.js")));
-			}
-			
-			// save as most recent
-			turkitProperties.query("recentFile = \""
-					+ U.escapeString(jsFile.getAbsolutePath()) + "\"");
-		} else {
-			return;
-		}
-
-		sem = new SimpleEventManager();
-		sem.addListener(this);
-
-		// properties
-		propertiesFile = new File(jsFile.getAbsolutePath() + ".properties");
-		String defaultKey = "change_me";
-		if (!propertiesFile.exists()) {
-			String id = turkitProperties.queryRaw(
-					"ensure(null, 'awsAccessKeyID', '" + defaultKey + "')")
-					.toString();
-			String secret = turkitProperties.queryRaw(
-					"ensure(null, 'awsSecretAccessKey', 'change_me_too')")
-					.toString();
-
-			U.save(propertiesFile, U.slurp(
-					this.getClass().getResource("default.properties"))
-					.replaceAll("___MODE___", "sandbox").replaceAll("___ID___",
-							id).replaceAll("___SECRET___", secret));
-		}
-		boolean showPropsPane = false;
-		String mode = "offline";
-		{
-			Map props = PropertiesReader.read(U.slurp(propertiesFile), false);
-			if (props != null) {
-				mode = ((String) props.get("mode")).toLowerCase();
-				if (props.get("awsAccessKeyID").toString().equals(defaultKey)) {
-					showPropsPane = true;
-				}
-			} else {
-				showPropsPane = true;
-			}
-		}
-
-		// create turkit
-		turkit = new TurKit(jsFile, "", "", "Offline");
-
 		// create gui
 		f = new JFrame();
 		U.exitOnClose(f);
-		f.setTitle("" + jsFile.getName() + "  -  TurKit");
+		f.setTitle("TurKit");
 		f.getContentPane().setLayout(new BorderLayout());
+
+		// actions
+		sem = new SimpleEventManager();
+		sem.addListener(this);
+		{
+			JComponent r = f.getRootPane();
+
+			r.getActionMap().put("new", new AbstractAction() {
+				public void actionPerformed(ActionEvent e) {
+					sem.fireEvent("new", null, null);
+				}
+			});
+			r.getActionMap().put("open", new AbstractAction() {
+				public void actionPerformed(ActionEvent e) {
+					sem.fireEvent("open", null, null);
+				}
+			});
+			r.getActionMap().put("save", new AbstractAction() {
+				public void actionPerformed(ActionEvent e) {
+					sem.fireEvent("save", null, null);
+				}
+			});
+			r.getActionMap().put("stop", new AbstractAction() {
+				public void actionPerformed(ActionEvent e) {
+					sem.fireEvent("stop", null, null);
+				}
+			});
+			r.getActionMap().put("run", new AbstractAction() {
+				public void actionPerformed(ActionEvent e) {
+					sem.fireEvent("run", null, null);
+				}
+			});
+			r.getActionMap().put("run-repeat", new AbstractAction() {
+				public void actionPerformed(ActionEvent e) {
+					sem.fireEvent("run", true, null);
+				}
+			});
+		}
 
 		// menubar
 		{
@@ -187,14 +146,31 @@ public class Main implements SimpleEventListener {
 				JMenu m = new JMenu("File");
 				menubar.add(m);
 				{
-					JMenuItem mi = new JMenuItem("Save", 'S');
+					JMenuItem mi = new JMenuItem("New", 'N');
+					mi.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+							ActionEvent.CTRL_MASK));
 					m.add(mi);
-
-					mi.addActionListener(new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							sem.fireEvent("save", null, null);
-						}
-					});
+					mi.addActionListener(f.getRootPane().getActionMap().get(
+							"new"));
+				}
+				{
+					JMenuItem mi = new JMenuItem("Open", 'O');
+					mi.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+							ActionEvent.CTRL_MASK));
+					m.add(mi);
+					mi.addActionListener(f.getRootPane().getActionMap().get(
+							"open"));
+				}
+				{
+					JMenuItem mi = new JMenuItem("Save", 'S');
+					mi.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+							ActionEvent.CTRL_MASK));
+					m.add(mi);
+					mi.addActionListener(f.getRootPane().getActionMap().get(
+							"save"));
+					mi.getInputMap(mi.WHEN_IN_FOCUSED_WINDOW).put(
+							KeyStroke.getKeyStroke(KeyEvent.VK_S,
+									ActionEvent.CTRL_MASK), "save");
 				}
 			}
 			{
@@ -261,7 +237,7 @@ public class Main implements SimpleEventListener {
 
 		// toolbar
 		JPanel toolbar = new JPanel(new BorderLayout());
-		runControls = new RunControls(sem);
+		runControls = new RunControls(sem, f);
 		JButton deleteDatabase = new JButton("Reset Database");
 		deleteDatabase.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -274,11 +250,10 @@ public class Main implements SimpleEventListener {
 		});
 		JPanel toolbarCenter = new JPanel();
 		{
-			JComboBox modeDropdown = new JComboBox(new String[] { "offline",
-					"sandbox", "real" });
+			modeDropdown = new JComboBox(new String[] { "offline", "sandbox",
+					"real" });
 			toolbarCenter.add(modeDropdown);
-			modeDropdown.setSelectedIndex(mode.equals("real") ? 2 : mode
-					.equals("sandbox") ? 1 : 0);
+			modeDropdown.setSelectedIndex(0);
 
 			modeDropdown.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -301,14 +276,14 @@ public class Main implements SimpleEventListener {
 		f.getContentPane().add(toolbar, BorderLayout.NORTH);
 
 		// dockables
-		codePane = new CodePane(sem, jsFile);
-		propertiesPane = new PropertiesPane(sem, propertiesFile);
+		codePane = new CodePane(sem);
+		propertiesPane = new PropertiesPane(sem);
 		outputPane = new OutputPane(sem);
-		databasePane = new DatabasePane(sem, turkit);
-		HITsAndS3Pane hitsAndS3Pane = new HITsAndS3Pane(sem, turkit);
+		databasePane = new DatabasePane(sem);
+		hitsAndS3Pane = new HITsAndS3Pane(sem);
 
-		Dockable codeDock = new DefaultDockable("input", codePane, "input",
-				null, DockingMode.ALL);
+		codeDock = new DefaultDockable("input", codePane, "input", null,
+				DockingMode.ALL);
 		propertiesDock = new DefaultDockable("properties", propertiesPane,
 				"properties", null, DockingMode.ALL);
 		Dockable outputDock = new DefaultDockable("output", outputPane,
@@ -318,17 +293,12 @@ public class Main implements SimpleEventListener {
 		Dockable hitsAndS3Dock = new DefaultDockable("HITs / S3",
 				hitsAndS3Pane, "HITs / S3", null, DockingMode.ALL);
 
-		TabDock leftTabDock = new TabDock();
+		leftTabDock = new TabDock();
 		TabDock topTabDock = new TabDock();
 		TabDock bottomTabDock = new TabDock();
 
-		if (showPropsPane) {
-			leftTabDock.addDockable(codeDock, new Position(0));
-			leftTabDock.addDockable(propertiesDock, new Position(1));
-		} else {
-			leftTabDock.addDockable(propertiesDock, new Position(1));
-			leftTabDock.addDockable(codeDock, new Position(0));
-		}
+		leftTabDock.addDockable(propertiesDock, new Position(1));
+		leftTabDock.addDockable(codeDock, new Position(0));
 
 		topTabDock.addDockable(outputDock, new Position(0));
 		bottomTabDock.addDockable(databaseDock, new Position(1));
@@ -362,7 +332,6 @@ public class Main implements SimpleEventListener {
 		f.getContentPane().add(splitPane, BorderLayout.CENTER);
 
 		f.setSize(800, 600);
-		f.setVisible(true);
 
 		{
 			Timer filePoller = new Timer(1000, new ActionListener() {
@@ -405,7 +374,147 @@ public class Main implements SimpleEventListener {
 			}
 		});
 
+		// open a file, either the most recent, or a new file
+		if (jsFile == null) {
+			String recentFilename = (String) turkitProperties
+					.queryRaw("ensure(null, 'recentFile', '')");
+			if (!recentFilename.isEmpty()) {
+				File f = new File(recentFilename);
+				if (f.exists()) {
+					openFile(f);
+				}
+			}
+		}
+
+		if (jsFile == null) {
+			newFile();
+		}
+	}
+
+	public void newFile() throws Exception {
+		File dir = new File(".");
+		if (jsFile != null) {
+			dir = jsFile.getParentFile();
+		}
+		int i = 0;
+		while (true) {
+			String name = "code" + (i > 0 ? i : "") + ".js";
+			File f = new File(dir.getAbsolutePath() + "/" + name);
+			if (!f.exists()) {
+				openFile(f);
+				break;
+			}
+			i++;
+		}
+	}
+
+	public void openFile(File jsFile) throws Exception {
+		this.jsFile = jsFile;
+
+		if (!jsFile.exists()) {
+			U.save(jsFile, U.slurp(this.getClass().getResource(
+					"default-file-contents.js")));
+		}
+
+		// save as most recent
+		turkitProperties.query("recentFile = \""
+				+ U.escapeString(jsFile.getAbsolutePath()) + "\"");
+
+		// properties
+		propertiesFile = new File(jsFile.getAbsolutePath() + ".properties");
+		String defaultKey = "change_me";
+		if (!propertiesFile.exists()) {
+			String id = turkitProperties.queryRaw(
+					"ensure(null, 'awsAccessKeyID', '" + defaultKey + "')")
+					.toString();
+			String secret = turkitProperties.queryRaw(
+					"ensure(null, 'awsSecretAccessKey', 'change_me_too')")
+					.toString();
+
+			U.save(propertiesFile, U.slurp(
+					this.getClass().getResource("default.properties"))
+					.replaceAll("___MODE___", "sandbox").replaceAll("___ID___",
+							id).replaceAll("___SECRET___", secret));
+		}
+		boolean showPropsPane = false;
+		String mode = "offline";
+		{
+			Map props = PropertiesReader.read(U.slurp(propertiesFile), false);
+			if (props != null) {
+				mode = ((String) props.get("mode")).toLowerCase();
+				if (props.get("awsAccessKeyID").toString().equals(defaultKey)) {
+					showPropsPane = true;
+				}
+			} else {
+				showPropsPane = true;
+			}
+		}
+
+		if (showPropsPane) {
+			sem.fireEvent("showProperties", null, null);
+		}
+
+		// create turkit
+		turkit = new TurKit(jsFile, "", "", "offline");
+
+		// dockables
+		codePane.init(jsFile);
+		propertiesPane.init(propertiesFile);
+		databasePane.init(turkit);
+		hitsAndS3Pane.init(turkit);
+
+		for (int i = 0; i < modeDropdown.getItemCount(); i++) {
+			if (((String) modeDropdown.getItemAt(i)).equalsIgnoreCase(mode)) {
+				modeDropdown.setSelectedIndex(i);
+			}
+		}
+
 		sem.fireEvent("updateDatabase", null, null);
+
+		if (!f.isVisible())
+			f.setVisible(true);
+	}
+
+	public void onNew() throws Exception {
+		newFile();
+	}
+
+	public void onOpen() throws Exception {
+		JFileChooser chooser = new JFileChooser();
+		chooser.setFileFilter(new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.isDirectory() || f.getName().endsWith(".js");
+			}
+
+			@Override
+			public String getDescription() {
+				return "JavaScript Files";
+			}
+		});
+		{
+			String recentFilename = (String) turkitProperties
+					.queryRaw("ensure(null, 'recentFile', '')");
+			if (!recentFilename.isEmpty()) {
+				File f = new File(recentFilename);
+				if (f.exists()) {
+					chooser.setCurrentDirectory(f);
+				} else {
+					f = f.getParentFile();
+					if (f.exists()) {
+						chooser.setCurrentDirectory(f);
+					} else {
+						chooser.setCurrentDirectory(new File("."));
+					}
+				}
+			} else {
+				chooser.setCurrentDirectory(new File("."));
+			}
+		}
+		int returnVal = chooser.showOpenDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			openFile(chooser.getSelectedFile());
+		}
 	}
 
 	public void updateTitle() {
@@ -420,11 +529,14 @@ public class Main implements SimpleEventListener {
 	}
 
 	public void onEvent(SimpleEvent e) throws Exception {
-		if (e.name == "run") {
-			onRun();
-		} else if (e.name == "stop") {
-			onStop();
+		if (e.name == "open") {
+			onOpen();
+		} else if (e.name == "new") {
+			onNew();
+		} else if (e.name == "run") {
+			onRun(e.a == Boolean.TRUE);
 		} else if (e.name == "save") {
+			onStop();
 		} else if (e.name == "updateTitle") {
 			updateTitle();
 		} else if (e.name == "showProperties") {
@@ -433,7 +545,7 @@ public class Main implements SimpleEventListener {
 	}
 
 	public void showProperties() {
-		//propertiesDock.getDock().
+		leftTabDock.setSelectedDockable(propertiesDock);
 	}
 
 	public Map<String, Object> reinitTurKit() throws Exception {
@@ -460,14 +572,15 @@ public class Main implements SimpleEventListener {
 		return props;
 	}
 
-	public void onRun() throws Exception {
+	public void onRun(boolean repeat) throws Exception {
 		sem.fireEvent("save", null, null);
-		
+
 		boolean done = false;
+		Map m = null;
 
 		outputPane.startCapture();
 		try {
-			Map m = reinitTurKit();
+			m = reinitTurKit();
 			done = turkit.runOnce((Double) m.get("maxMoney"), ((Double) m
 					.get("maxHITs")).intValue());
 			sem.fireEvent("updateDatabase", null, null);
@@ -477,9 +590,11 @@ public class Main implements SimpleEventListener {
 		} finally {
 			outputPane.stopCapture();
 		}
-		
-		if (!done) {
-			runInABit(runDelaySeconds);
+
+		if (repeat && !done && (m != null)) {
+			Object o = m.get("repeatInterval");
+			int delay = o != null ? (int) Math.ceil((Double) o) : 60;
+			runInABit(delay);
 		} else {
 			sem.fireEvent("stop", null, null);
 		}
@@ -551,20 +666,20 @@ public class Main implements SimpleEventListener {
 									long delta = runAgainAtThisTime
 											- System.currentTimeMillis();
 									if (delta <= 0) {
-										onRun();
+										onRun(true);
 									} else {
 										updateRunPrompt();
 									}
 								}
 							} catch (Exception e) {
 								// print this error to the output pane
-								ByteArrayOutputStream out = new ByteArrayOutputStream();								
+								ByteArrayOutputStream out = new ByteArrayOutputStream();
 								PrintStream ps = new PrintStream(out);
 								e.printStackTrace(ps);
 								ps.close();
 								String s = out.toString();
 								outputPane.setText("Unexpected Error:\n" + s);
-								
+
 								// let's press on
 								runInABit(60);
 							}
@@ -575,23 +690,34 @@ public class Main implements SimpleEventListener {
 		}
 	}
 
-	public void export() throws Exception {
-		// get a list of all the files we want to archive
-		Vector<File> files = new Vector();
-		{
-			for (File f : jsFile.getParentFile().listFiles()) {
-				if (!f.isDirectory()
-						&& !f.getName().equals("turkit.properties")
+	public void listFileRecursively(File dir, Vector<File> dest) {
+		for (File f : dir.listFiles()) {
+			if (f.isDirectory()) {
+				if (!f.getName().startsWith(".")
+						&& !f.getName().startsWith("_")) {
+					listFileRecursively(f, dest);
+				}
+			} else {
+				if (!f.getName().equals("turkit.properties")
 						&& !f.getName().matches("^.*\\.(zip|jar|old\\d*)$")) {
-					files.add(f);
+					dest.add(f);
 				}
 			}
 		}
+	}
+
+	public void export() throws Exception {
+		// get seed from user
+		String seed = JOptionPane
+				.showInputDialog("Please provide a seed to append to worker ids before hashing them:");
+
+		// get a list of all the files we want to archive
+		Vector<File> files = new Vector();
+		listFileRecursively(jsFile.getParentFile(), files);
 
 		// get a list of all the worker id's
 		Map<String, String> workerIdMap = new HashMap();
 		{
-			String seed = U.getRandomString(20);
 			turkit.database.consolidate();
 			for (File f : files) {
 				String s = U.slurp(f);
@@ -600,7 +726,7 @@ public class Main implements SimpleEventListener {
 						.matcher(s);
 				while (m.find()) {
 					workerIdMap.put(m.group(1), "FAKE_"
-							+ U.md5(seed + m.group(1)).substring(0, 9)
+							+ U.md5(m.group(1) + seed).substring(0, 9)
 									.toUpperCase());
 				}
 			}
@@ -615,9 +741,15 @@ public class Main implements SimpleEventListener {
 			ZipOutputStream z = new ZipOutputStream(o);
 			PrintStream p = new PrintStream(z);
 			for (File f : files) {
-				z.putNextEntry(new ZipEntry(f.getName()));
-				
-				if (f.equals(propertiesFile)) {
+				z
+						.putNextEntry(new ZipEntry(
+								f.getAbsolutePath()
+										.substring(
+												jsFile.getParentFile()
+														.getAbsolutePath()
+														.length() + 1)));
+
+				if (f.getName().matches("^.*\\.js\\.properties$")) {
 					p.print(U.slurp(
 							this.getClass().getResource("default.properties"))
 							.replaceAll("___MODE___", "offline").replaceAll(
@@ -631,10 +763,12 @@ public class Main implements SimpleEventListener {
 					}
 					if (!s_.equals(s)) {
 						// it contains some worker ids, so it's probably text,
-						// and we want to write out the version with the fake ids
+						// and we want to write out the version with the fake
+						// ids
 						p.print(s_);
 					} else {
-						// it didn't have any worker ids, so it could be anything,
+						// it didn't have any worker ids, so it could be
+						// anything,
 						// so let's write it out byte for byte
 						FileInputStream in = new FileInputStream(f);
 						while (in.available() > 0) {
@@ -642,7 +776,7 @@ public class Main implements SimpleEventListener {
 						}
 					}
 				}
-				
+
 				z.closeEntry();
 			}
 			z.close();

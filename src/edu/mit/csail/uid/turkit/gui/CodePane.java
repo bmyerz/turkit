@@ -24,15 +24,18 @@ public class CodePane extends JPanel implements SimpleEventListener {
 	public boolean saved = true;
 	public long file_lastModified = -1;
 
-	public CodePane(SimpleEventManager _sem, File file) throws Exception {
+	public void init(File file) throws Exception {
+		this.file = file;
+		file_lastModified = -1;
+		reload();
+	}
+
+	public CodePane(SimpleEventManager _sem) throws Exception {
 		this.sem = _sem;
 		sem.addListener(this);
 
-		this.file = file;
-
 		Font font = new Font(Font.MONOSPACED, Font.PLAIN, 12);
 		text = new JEditorPane();
-		reload();
 		text.getDocument().addDocumentListener(new DocumentListener() {
 			public void changedUpdate(DocumentEvent arg0) {
 				onChange();
@@ -68,6 +71,9 @@ public class CodePane extends JPanel implements SimpleEventListener {
 	}
 
 	public void onEvent(SimpleEvent e) throws Exception {
+		if (file == null)
+			return;
+
 		if (e.name == "save") {
 			if (!saved) {
 				save();

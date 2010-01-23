@@ -10,13 +10,7 @@
  * </p>
  */
 function MTurk() {
-	this.requesterService = javaTurKit.requesterService
 }
-
-/**
- * A reference to a Java RequesterService object from the Java MTurk API.
- */
-MTurk.prototype.requesterService = null
 
 /*
  * Throw an exception if we cannot spend the given amount of <i>money</i>, or
@@ -52,38 +46,12 @@ MTurk.prototype.assertWeCanSpend = function(money, hits, callbackBeforeCrash) {
 }
 
 /**
- * Repeatedly tries to execute the given <i>func</i>, and returns the result
- * once it succeeds.
- */
-MTurk.prototype.keepTrying = function(func) {
-	sleep(0.05)
-	var waitTime = 0.1
-	for (var i = 0; i < 10; i++) {
-		try {
-			var ret = func()
-			return ret
-		} catch (e) {
-			var m = "" + e
-			if (/throttled/.exec(m) || /Connection timed out: connect/.exec(m)) {
-				verbosePrint("throttled")
-				sleep(waitTime)
-				waitTime += 0.1
-			} else {
-				rethrow(e)
-			}
-		}
-	}
-	// try one last time (this time don't catch the error)
-	return func()
-}
-
-/**
  * Returns the number of dollars in the user's MTurk account.
  */
 MTurk.prototype.getAccountBalance = function() {
-	return this.keepTrying(function() {
-				return mturk.requesterService.getAccountBalance()
-			})
+	var x = new XML(javaTurKit.restRequest("GetAccountBalance"))
+	if ('' + x..Request.IsValid != "True") throw "GetAccountBalance failed: " + x
+	return parseFloat(x..AvailableBalance.Amount)
 }
 
 /**
@@ -106,8 +74,6 @@ MTurk.prototype.getAccountBalance = function() {
  * </ul>
  * The following properties are optional:
  * <ul>
- * <li><b>hitTypeId</b>: this may be given instead of the information above;
- * usually it is not known or needed.</li>
  * <li><b>keywords</b>: keywords to help people search for your HIT.</li>
  * <li><b>assignmentDurationInSeconds</b>: default is 1 hour's worth of
  * seconds.</li>
@@ -119,7 +85,6 @@ MTurk.prototype.getAccountBalance = function() {
  * <li><b>qualificationRequirements</b>: default is no requirements.</li>
  * <li><b>minApproval</b>: minimum approval percentage. The appropriate
  * requirement will be added if you supply a percentage here.</li>
- * <li><b>responseGroup</b>: default is no response group.</li>
  * </ul>
  */
 MTurk.prototype.createHITRaw = function(params) {
@@ -128,8 +93,6 @@ MTurk.prototype.createHITRaw = function(params) {
 		
 	// let them know if they provide param names that are not on the list
 	var badKeys = keys(new Set(keys(params)).remove([
-		"HITTypeID",
-		"hitTypeId",
 		"title",
 		"desc",
 		"description",
@@ -150,38 +113,34 @@ MTurk.prototype.createHITRaw = function(params) {
 		"requesterAnnotation",
 		"keywords",
 		"qualificationRequirements",
-		"responseGroup"
 	]))
 	if (badKeys.length > 0) {
 		throw new java.lang.Exception("some parameters to createHIT are not understood: " + badKeys.join(', '))
 	}
 
-	if (params.HITTypeID)
-		params.hitTypeId = params.HITTypeID
-	if (params.hitTypeId) {
-	} else {
-		params.hitTypeId = null
-		if (!params.title)
-			throw new java.lang.Exception("createHIT requires a title")
+	if (!params.title)
+		throw new java.lang.Exception("createHIT requires a title")
 
-		if (params.desc)
-			params.description = params.desc
-		if (!params.description)
-			throw new java.lang.Exception("createHIT requires a description")
+	if (params.desc)
+		params.description = params.desc
+	if (!params.description)
+		throw new java.lang.Exception("createHIT requires a description")
 
-		if (params.reward == null)
-			throw new java.lang.Exception("createHIT requires a reward")
+	if (params.reward == null)
+		throw new java.lang.Exception("createHIT requires a reward")
 
-		if (!params.assignmentDurationInSeconds)
-			params.assignmentDurationInSeconds = 60 * 60 // one hour
+	if (!params.assignmentDurationInSeconds)
+		params.assignmentDurationInSeconds = 60 * 60 // one hour
 
-		if (params.minApproval) {
-			ensure(params, "qualificationRequirements", [])
-					.push(new Packages.com.amazonaws.mturk.requester.QualificationRequirement(
-							"000000000000000000L0",
-							Packages.com.amazonaws.mturk.requester.Comparator.GreaterThanOrEqualTo,
-							params.minApproval, null, false))
-		}
+	if (params.minApproval) {
+		var q = ensure(params, "qualificationRequirements", [])
+		var i = (q.length / 3) + 1
+		q.push("QualificationRequirement." + i + ".QualificationTypeId")
+		q.push("000000000000000000L0")
+		q.push("QualificationRequirement." + i + ".Comparator")
+		q.push("GreaterThanOrEqualTo")
+		q.push("QualificationRequirement." + i + ".IntegerValue")
+		q.push(params.minApproval)
 	}
 
 	if (params.html) {
@@ -247,34 +206,30 @@ MTurk.prototype.createHITRaw = function(params) {
 	if (!params.qualificationRequirements)
 		params.qualificationRequirements = null
 
-	var hit = this.keepTrying(function() {
-				return mturk.requesterService.createHIT(params.hitTypeId,
-						params.title, params.description, params.keywords,
-						params.question, params.reward,
-						params.assignmentDurationInSeconds,
-						params.autoApprovalDelayInSeconds,
-						params.lifetimeInSeconds, params.maxAssignments,
-						params.requesterAnnotation,
-						params.qualificationRequirements, params.responseGroup);
-			})
+	var x = new XML(javaTurKit.restRequest("CreateHIT",
+			["Title", params.title,
+			"Description", params.description,
+			"Question", params.question,
+			"Reward.1.Amount", params.reward,
+			"Reward.1.CurrencyCode", "USD",
+			"AssignmentDurationInSeconds", params.assignmentDurationInSeconds,
+			"LifetimeInSeconds", params.lifetimeInSeconds,
+			"Keywords", params.keywords,
+			"MaxAssignments", params.maxAssignments,
+			"AutoApprovalDelayInSeconds", params.autoApprovalDelayInSeconds,
+			"RequesterAnnotation", params.requesterAnnotation].
+			concat(params.qualificationRequirements ? params.qualificationRequirements : [])
+		))
+	if ('' + x..Request.IsValid != "True") throw "Failed to create HIT: " + x
+	var hit = x..HIT
 
-	if (javaTurKit.safety) {
-		if (params.hitTypeId) {
-			this.assertWeCanSpend(parseFloat(hit.getReward().getAmount())
-							* params.maxAssignments, 1,
-					function() {
-						mturk.disableHITRaw(hit)
-					})
-		} else {
-		}
-	}
-
-	var hitId = "" + hit.getHITId()
+	var hitId = this.tryToGetHITId(hit)
+	
 	verbosePrint("created HIT: " + hitId)
 	var url = (javaTurKit.mode == "sandbox"
 					? "https://workersandbox.mturk.com/mturk/preview?groupId="
 					: "https://www.mturk.com/mturk/preview?groupId=")
-			+ hit.getHITTypeId()
+			+ hit.HITTypeId
 	verbosePrint("        url: " + url)
 	database.query("ensure(null, ['__HITs', " + json(javaTurKit.mode + ":" + hitId) + "], " + json({url : url}) + ")")
 	return hitId
@@ -299,7 +254,7 @@ MTurk.prototype.createHIT = function(params) {
  * which indicates how many HITs are reviewable.
  */
 MTurk.prototype.getReviewableHITs = function(maxPages) {
-    var all = new XMLList()
+    var all = []
     var page = 1
     var processedResults = 0
     var totalNumResults = 0
@@ -308,7 +263,10 @@ MTurk.prototype.getReviewableHITs = function(maxPages) {
             "SortProperty", "CreationTime",
             "PageSize", "100",
             "PageNumber", "" + page))
-        all += x..HITId
+        if ('' + x..Request.IsValid != "True") throw "GetReviewableHITs failed: " + x
+        foreach(x..HITId, function (hitId) {
+        	all.push("" + hitId)
+        })
         var numResults = parseInt(x..NumResults)
         if (numResults <= 0) break
         processedResults += numResults
@@ -316,29 +274,23 @@ MTurk.prototype.getReviewableHITs = function(maxPages) {
         if (processedResults >= totalNumResults) break
         page++
     }
-    var a = []
-    for each (var id in all) {
-        a.push("" + id)
-    }
     if (maxPages) {
-    	a.totalNumResults = totalNumResults
+    	all.totalNumResults = totalNumResults
     }
-    return a
+    return all
 }
 
 /**
- * Tries to determine the type of <code>hit</code> and return the HIT Id.
+ * Tries to determine the type of <code>hit</code>, and return the HIT Id.
  */
 MTurk.prototype.tryToGetHITId = function(hit) {
-	if ((typeof hit) == "object") {
+	if ((typeof hit) == "xml") {
+		return '' + hit..HITId
+	} else if ((typeof hit) == "object") {
 		try {
 			if (hit.hitId) {
 				return hit.hitId
 			}
-		} catch (e) {
-		}
-		try {
-			return "" + hit.getHITId()
 		} catch (e) {
 		}
 		return "" + hit
@@ -351,15 +303,13 @@ MTurk.prototype.tryToGetHITId = function(hit) {
  * assignment Id.
  */
 MTurk.prototype.tryToGetAssignmentId = function(assignment) {
-	if ((typeof assignment) == "object") {
+	if ((typeof assignment) == "xml") {
+		return '' + assignment..AssignmentId
+	} else if ((typeof assignment) == "object") {
 		try {
 			if (assignment.assignmentId) {
 				return assignment.assignmentId
 			}
-		} catch (e) {
-		}
-		try {
-			return "" + assignment.getAssignmentId()
 		} catch (e) {
 		}
 		return "" + assignment
@@ -367,14 +317,176 @@ MTurk.prototype.tryToGetAssignmentId = function(assignment) {
 	return assignment
 }
 
-/**
- * Returns an array of assignments for the given <code>hit</code>.
+/*
+input: a string representing a date/time from MTurk
+example: 2010-01-04T01:17:16Z
+output: UNIX time for this time
  */
-MTurk.prototype.getAssignmentsForHIT = function(hit) {
+function parseMTurkTime(s) {
+    var m = s.match(/(\d+)-(\d+)-(\d+)T([0-9:]+)Z/)
+    return Date.parse(m[2] + "/" + m[3] + "/" + m[1] + " " + m[4] + " GMT")
+}
+
+/*
+input: a HIT XML element from MTurk
+output: a JS object representing the HIT
+ */
+MTurk.prototype.parseHIT = function(hit) {
+
+    var xmlNull = new XML()..blah
+    function g(x) {
+        if (x == xmlNull) return null
+        return "" + x
+    }
+    function gi(x) {
+        if (x == xmlNull) return null
+        return parseInt(x)
+    }
+    function gf(x) {
+        if (x == xmlNull) return null
+        return parseFloat(x)
+    }
+    function gt(x) {
+        if (x == xmlNull) return null
+        return parseMTurkTime(x)
+    }
+    
+	return {
+		hitId : g(hit.HITId),
+		hitTypeId : g(hit.HITTypeId),
+		title : g(hit.Title),
+		description : g(hit.Description),
+		keywords : g(hit.Keywords),
+		reward : gf(hit.Reward.Amount),
+		question : g(hit.Question),
+		maxAssignments : parseInt(hit.MaxAssignments),
+		assignmentDurationInSeconds : gi(hit.AssignmentDurationInSeconds),
+        autoApprovalDelayInSeconds : gi(hit.AutoApprovalDelayInSeconds),
+		requesterAnnotation : g(hit.RequesterAnnotation),
+		hitStatus : g(hit.HITStatus),
+		hitReviewStatus : g(hit.HITReviewStatus),
+		creationTime : gt(hit.CreationTime),
+		expiration : gt(hit.Expiration)
+	}
+}
+
+/**
+ * Returns an object representing all of the information MTurk has on the given
+ * HIT, including the assigments, and the associated answer data. The returned
+ * object will have a value called <i>done</i> set to true iff all the pending
+ * assigments for this HIT have been completed (unless <code>getAssignments</code> is false).
+ * 
+ * <p>
+ * Note that the <i>answer</i> data structure associated with each assigment is
+ * simplified. It is recommended that you print out the result of this function
+ * using {@link json}, in order to know what it looks like for your specific
+ * situation.
+ * </p>
+ */
+MTurk.prototype.getHIT = function(hit, getAssignments) {
+
+	if (getAssignments === undefined) getAssignments = true
+
 	var hitId = this.tryToGetHITId(hit)
-	return convertJavaArray(this.keepTrying(function() {
-				return mturk.requesterService.getAllAssignmentsForHIT(hitId)
-			}))
+	var x = new XML(javaTurKit.restRequest("GetHIT", "HITId", hitId))
+    if (x..Request.IsValid.toString() != "True") throw "GetHIT failed"
+    hit = x..HIT
+    
+    var xmlNull = new XML()..blah
+    function g(x) {
+        if (x == xmlNull) return null
+        return "" + x
+    }
+    function gi(x) {
+        if (x == xmlNull) return null
+        return parseInt(x)
+    }
+    function gf(x) {
+        if (x == xmlNull) return null
+        return parseFloat(x)
+    }
+    function gt(x) {
+        if (x == xmlNull) return null
+        return parseMTurkTime(x)
+    }
+    
+    hit = this.parseHIT(hit)
+    
+    if (!getAssignments) return hit
+    
+    hit.assignments = []
+    
+    function processAssignment(a) {
+        // NOTE: we use the singular "answer" instead of "answers"
+        // to be consistent with MTurk
+        var answer = {}
+    
+        var answers = a.Answer
+        answers = answers.substring(answers.indexOf("?>\n") + 3)
+        answers = eval(answers)
+        foreach(answers.*::Answer, function (a) {
+            var rhs = g(a.*::FreeText)
+            if (rhs == null) {
+                rhs = g(a.*::UploadedFileKey)
+                if (rhs != null) {
+                    rhs = {
+                        uploadedFileKey : rhs,
+                        uploadedFileSizeInBytes : gi(a.*::UploadedFileSizeInBytes)
+                    }
+                }
+            }
+            if (rhs == null) {
+                rhs = []
+                foreach(a.*::SelectionIdentifier, function (sel) {
+                    rhs.push("" + sel)
+                })
+                var o = g(a.*::OtherSelectionText)
+                if (o != null) {
+                    rhs.push(o)
+                }
+            }
+
+            answer[g(a.*::QuestionIdentifier)] = rhs
+        })
+    
+        hit.assignments.push({
+            assignmentId : g(a.AssignmentId),
+            workerId : g(a.WorkerId),
+            hitId : g(a.HITId),
+            assignmentStatus : g(a.AssignmentStatus),
+            autoApprovalTime : gt(a.AutoApprovalTime),
+            acceptTime : gt(a.AcceptTime),
+            submitTime : gt(a.SubmitTime),
+            answer : answer,
+            requesterFeedback : g(a.RequesterFeedback),
+            approvalTime : gt(a.ApprovalTime),
+            deadline : gt(a.Deadline),
+            rejectionTime : gt(a.RejectionTime)
+        })
+    }
+    
+    var page = 1
+    var processedResults = 0
+    var totalNumResults = 0
+    while (true) {
+        var x = new XML(javaTurKit.restRequest("GetAssignmentsForHIT",
+            "HITId", hitId,
+            "PageSize", "100",
+            "PageNumber", "" + page))
+        for each (a in x..Assignment) {
+            processAssignment(a)
+        }
+        var numResults = parseInt(x..NumResults)
+        if (numResults <= 0) break
+        processedResults += numResults
+        totalNumResults = parseInt(x..TotalNumResults)
+        if (processedResults >= totalNumResults) break
+        page++
+    }
+
+	hit.done = (hit.hitStatus == "Reviewable")
+			&& (hit.assignments.length == hit.maxAssignments)
+	return hit
 }
 
 /**
@@ -393,10 +505,17 @@ MTurk.prototype.extendHITRaw = function(hit, moreAssignments, moreSeconds) {
 	}
 
 	var hitId = this.tryToGetHITId(hit)
-	this.keepTrying(function() {
-				mturk.requesterService.extendHIT(hitId, moreAssignments,
-						moreSeconds)
-			})
+	var params = ["HITId", hitId]
+    if (moreAssignments) {
+        params.push("MaxAssignmentsIncrement")
+        params.push("" + moreAssignments)
+    }
+    if (moreSeconds) {
+        params.push("ExpirationIncrementInSeconds")
+        params.push(moreSeconds)
+    }
+	var x = new XML(javaTurKit.restRequest("ExtendHIT", params))
+    if (x..Request.IsValid.toString() != "True") throw "GetHIT failed"
 	verbosePrint("extended HIT: " + hitId)
 }
 
@@ -415,44 +534,40 @@ MTurk.prototype.extendHIT = function(hit, moreAssignments, moreSeconds) {
  */
 MTurk.prototype.deleteHITRaw = function(hit) {
 	var hitId = this.tryToGetHITId(hit)
-	
-	// first, try to disable the HIT
-	try {
-		this.keepTrying(function() {
-			mturk.requesterService.disableHIT(hitId)
-		})
-		verbosePrint("disabled HIT: " + hitId)
-	} catch (e) {
-		try {	
-			// check to see if we have already deleted it
-			hit = this.getHIT(hitId)
-			if (hit.hitStatus == "Disposed") {
-				verbosePrint("already deleted HIT: " + hitId)
-			} else {
-				// ok, it must be "Reviewable"
-				// (since we couldn't disable it, and it isn't already deleted)
-				
-				// first, approve all the assignments
-				foreach(hit.assignments, function (a) {
-					if (a.assignmentStatus == "Submitted")
-						mturk.approveAssignmentRaw(a)
-				})
-				
-				// next, dispose of the HIT
-				this.keepTrying(function() {
-					mturk.requesterService.disposeHIT(hitId)
-				})
-				verbosePrint("disposed HIT: " + hitId)
-			}
-		} catch (e) {
-			if (/AWS\.MechanicalTurk\.HITDoesNotExist/.exec("" + e)) {
-				verbosePrint("HIT not found: " + hitId)
-			} else {
-				rethrow(e)
-			}
-		}
-	}
-	
+    ;(function () {
+    
+        // try disabling the HIT
+        var x = new XML(javaTurKit.restRequest("DisableHIT", "HITId", hitId))
+        if (x..Request.IsValid.toString() == "True") {
+            verbosePrint("disabled HIT: " + hitId)
+            return
+        }
+        
+        // see if we already deleted the HIT
+        var hit = mturk.getHIT(hitId)
+        if (hit.hitStatus == "Disposed") {
+            verbosePrint("already deleted HIT: " + hitId)
+            return
+        }
+        
+        // ok, it must be "Reviewable"
+        // (since we couldn't disable it, and it isn't already deleted)
+        
+        // first, approve all the assignments
+        foreach(hit.assignments, function (a) {
+            if (a.assignmentStatus == "Submitted")
+                mturk.approveAssignmentRaw(a)
+        })
+        
+        // next, dispose of the HIT
+        var x = new XML(javaTurKit.restRequest("DisposeHIT", "HITId", hitId))
+        if (x..Request.IsValid.toString() == "True") {
+            verbosePrint("disposed HIT: " + hitId)
+            return
+        }
+        
+        throw "DeleteHIT failed"
+    })()
 	database.query("delete __HITs[" + json(javaTurKit.mode + ":" + hitId) + "]")
 }
 
@@ -491,10 +606,13 @@ MTurk.prototype.deleteHITs = function(hits) {
  * <code>assignment</code> for the stated <code>reason</code>.
  */
 MTurk.prototype.grantBonusRaw = function(assignment, amount, reason) {
-	this.keepTrying(function() {
-				mturk.requesterService.grantBonus(assignment.workerId, amount,
-						assignment.assignmentId, reason)
-			})
+	var x = new XML(javaTurKit.restRequest("GrantBonus",
+		"WorkerId", assignment.workerId,
+		"AssignmentId", assignment.assignmentId,
+		"BonusAmount.1.Amount", amount,
+		"BonusAmount.1.CurrencyCode", "USD",
+		"Reason", reason))
+    if (x..Request.IsValid.toString() != "True") throw "GrantBonus failed: " + x
 	verbosePrint("granted bonus of " + amount + " for assignment "
 			+ assignment.assignmentId)
 }
@@ -513,12 +631,16 @@ MTurk.prototype.grantBonus = function(assignment, amount, reason) {
  * <code>reason</code>.
  */
 MTurk.prototype.approveAssignmentRaw = function(assignment, reason) {
-	if (reason === undefined) reason = null
-	assignmentId = this.tryToGetAssignmentId(assignment)
-	this.keepTrying(function() {
-				mturk.requesterService.approveAssignment(assignmentId, reason)
-			})
-	verbosePrint("approved assignment " + assignment.assignmentId)
+	var assignmentId = this.tryToGetAssignmentId(assignment)
+
+	var params = ["AssignmentId", assignmentId]
+	if (reason) {
+		params.push("RequesterFeedback")
+		params.push(reason)
+	}
+	var x = new XML(javaTurKit.restRequest("ApproveAssignment", params))
+    if (x..Request.IsValid.toString() != "True") throw "ApproveAssignment failed: " + x
+	verbosePrint("approved assignment " + assignmentId)
 }
 
 /**
@@ -545,12 +667,16 @@ MTurk.prototype.approveAssignments = function(assignments, reason) {
  * <code>reason</code>.
  */
 MTurk.prototype.rejectAssignmentRaw = function(assignment, reason) {
-	if (reason === undefined) reason = null
-	assignmentId = this.tryToGetAssignmentId(assignment)
-	this.keepTrying(function() {
-				mturk.requesterService.rejectAssignment(assignmentId, reason)
-			})
-	verbosePrint("rejected assignment " + assignment.assignmentId)
+	var assignmentId = this.tryToGetAssignmentId(assignment)
+
+	var params = ["AssignmentId", assignmentId]
+	if (reason) {
+		params.push("RequesterFeedback")
+		params.push(reason)
+	}
+	var x = new XML(javaTurKit.restRequest("RejectAssignment", params))
+    if (x..Request.IsValid.toString() != "True") throw "RejectAssignment failed: " + x
+	verbosePrint("rejected assignment " + assignmentId)
 }
 
 /**
@@ -573,117 +699,35 @@ MTurk.prototype.rejectAssignments = function(assignments, reason) {
 }
 
 /**
- * Returns an array of HIT Ids for all the HITs you currently have on MTurk.
+ * Returns an array of HIT data for all the HITs you currently have on MTurk.
  */
-MTurk.prototype.getHITs = function() {
-	return convertJavaArray(this.keepTrying(function() {
-				return mturk.requesterService.searchAllHITs()
-			}))
-}
-
-/**
- * Returns an object representing all of the information MTurk has on the given
- * HIT, including the assigments, and the associated answer data. The returned
- * object will have a value called <i>done</i> set to true iff all the pending
- * assigments for this HIT have been completed.
- * 
- * <p>
- * Note that the <i>answer</i> data structure associated with each assigment is
- * simplified. It is recommended that you print out the result of this function
- * using {@link json}, in order to know what it looks like for your specific
- * situation.
- * </p>
- */
-MTurk.prototype.getHIT = function(hit) {
-	var hitId = this.tryToGetHITId(hit)
-	var hit = this.keepTrying(function() {
-				return mturk.requesterService.getHIT(hitId)
-			})
-	var hit = {
-		hitId : "" + hit.getHITId(),
-		hitTypeId : "" + hit.getHITTypeId(),
-		title : "" + hit.getTitle(),
-		description : "" + hit.getDescription(),
-		keywords : "" + hit.getKeywords(),
-		reward : "" + hit.getReward().getAmount(),
-		question : hit.getQuestion(),
-		maxAssignments : "" + hit.getMaxAssignments(),
-		assignmentDurationInSeconds : hit.getAssignmentDurationInSeconds(),
-		autoApprovalDelayInSeconds : hit.getAutoApprovalDelayInSeconds(),
-		requesterAnnotation : hit.getRequesterAnnotation(),
-		hitStatus : "" + hit.getHITStatus(),
-		hitReviewStatus : "" + hit.getHITReviewStatus(),
-		creationTime : hit.getCreationTime().getTimeInMillis(),
-		expiration : hit.getExpiration().getTimeInMillis(),
-		assignments : []
-	}
-	foreach(this.getAssignmentsForHIT(hitId), function(javaAssignment) {
-				function getTime(t) {
-					if (t != null)
-						return t.getTimeInMillis()
-				}
-				var assignment = {
-					assignmentId : "" + javaAssignment.getAssignmentId(),
-					hitId : "" + javaAssignment.getHITId(),
-					assignmentStatus : ""
-							+ javaAssignment.getAssignmentStatus(),
-					requesterFeedback : ""
-							+ javaAssignment.getRequesterFeedback(),
-					workerId : "" + javaAssignment.getWorkerId(),
-					acceptTime : getTime(javaAssignment.getAcceptTime()),
-					approvalTime : getTime(javaAssignment.getApprovalTime()),
-					autoApprovalTime : getTime(javaAssignment
-							.getAutoApprovalTime()),
-					deadline : getTime(javaAssignment.getDeadline()),
-					rejectionTime : getTime(javaAssignment.getRejectionTime()),
-					submitTime : getTime(javaAssignment.getSubmitTime())
-				}
-
-				// deal with answers
-				// NOTE: we use the name "answer" to refer to the set of
-				// answers, because that is how Mechanical Turk refers to them
-				// in the
-				// Assignment data structure
-				assignment.answer = {}
-				var answers = mturk.requesterService.parseAnswers(javaAssignment
-						.getAnswer()).getAnswer()
-				for (var ai = 0; ai < answers.size(); ai++) {
-					var a = answers.get(ai)
-
-					var rhs = a.getFreeText()
-					if (rhs != null) {
-						rhs = "" + rhs
-					}
-					if (rhs == null) {
-						rhs = a.getUploadedFileKey()
-						if (rhs != null) {
-							rhs = {
-								uploadedFileKey : "" + rhs,
-								uploadedFileSizeInBytes : a
-										.getUploadedFileSizeInBytes()
-							}
-						}
-					}
-					if (rhs == null) {
-						rhs = []
-						var sels = a.getSelectionIdentifier()
-						for (var si = 0; si < sels.size(); si++) {
-							rhs.push("" + sels.get(si))
-						}
-						var o = a.getOtherSelectionText()
-						if (o) {
-							rhs.push("" + o)
-						}
-					}
-
-					assignment.answer["" + a.getQuestionIdentifier()] = rhs
-				}
-
-				hit.assignments.push(assignment)
-			})
-	hit.done = (hit.hitStatus == "Reviewable")
-			&& (hit.assignments.length == hit.maxAssignments)
-	return hit
+MTurk.prototype.getHITs = function(maxPages) {
+    var self = this
+    var all = []
+    var page = 1
+    var processedResults = 0
+    var totalNumResults = 0
+    while (!maxPages || (page <= maxPages)) {
+        var x = new XML(javaTurKit.restRequest("SearchHITs",
+            "SortProperty", "CreationTime",
+            "SortDirection", "Descending",
+            "PageSize", "100",
+            "PageNumber", "" + page))
+        if (x..Request.IsValid.toString() != "True") throw "SearchHITs failed: " + x
+        foreach(x..HIT, function (hit) {
+            all.push(self.parseHIT(hit))
+        })
+        var numResults = parseInt(x..NumResults)
+        if (numResults <= 0) break
+        processedResults += numResults
+        totalNumResults = parseInt(x..TotalNumResults)
+        if (processedResults >= totalNumResults) break
+        page++
+    }
+    if (maxPages) {
+    	a.totalNumResults = totalNumResults
+    }
+    return all
 }
 
 /**
@@ -695,54 +739,54 @@ MTurk.prototype.waitForHIT = function(hit) {
 	var me = this
 	var hitId = this.tryToGetHITId(hit)
 	return once(function() {
-				// the idea of this logic
-				// is to minimize the number of calls to MTurk
-				// to see if HITs are done.
-				// 
-				// if we are going to be calling waitForHIT a lot,
-				// then we'd like to get a list of all reviewable HITs,
-				// and check for the current HIT against that list,
-				// and refresh that list only if enough time has passed.
-				//
-				// of course, if the list of reviewable HITs is very long,
-				// then we'd rather not retrieve it,
-				// unless we will be calling this function a lot,
-				// so to figure out how many times we should wait before
-				// retrieving the list,
-				// we start by seeing how many pages of results that list has,
-				// and if we call this function that many times,
-				// then we go ahead and get the list
-	
-				if (!me.waitForHIT_callCount) {
-					me.waitForHIT_callCount = 0
-					var a = me.getReviewableHITs(1)
-					if (a.totalNumResults == a.length) {
-						me.waitForHIT_reviewableHITs = new Set(a)
-						me.waitForHIT_reviewableHITsTime = time()
-					}
-					me.waitForHIT_waitCount = Math.ceil(a.totalNumResults / 100)
-				}
-				me.waitForHIT_callCount++
-				if (me.waitForHIT_callCount >= me.waitForHIT_waitCount) {
-					if (!me.waitForHIT_reviewableHITs ||
-						(time() > me.waitForHIT_reviewableHITsTime + (1000 * 60))) {
-						me.waitForHIT_reviewableHITs = new Set(me.getReviewableHITs())
-						me.waitForHIT_reviewableHITsTime = time()
-					}
-				}
-				if (me.waitForHIT_reviewableHITs) {
-					if (!me.waitForHIT_reviewableHITs[hitId]) {
-						stop()
-					}
-				}
-	
-				var hit = mturk.getHIT(hitId);
-				if (!hit.done) {
-					stop()
-				}
-				verbosePrint("hit completed: " + hitId)
-				return hit
-			})
+		// the idea of this logic
+		// is to minimize the number of calls to MTurk
+		// to see if HITs are done.
+		// 
+		// if we are going to be calling waitForHIT a lot,
+		// then we'd like to get a list of all reviewable HITs,
+		// and check for the current HIT against that list,
+		// and refresh that list only if enough time has passed.
+		//
+		// of course, if the list of reviewable HITs is very long,
+		// then we'd rather not retrieve it,
+		// unless we will be calling this function a lot,
+		// so to figure out how many times we should wait before
+		// retrieving the list,
+		// we start by seeing how many pages of results that list has,
+		// and if we call this function that many times,
+		// then we go ahead and get the list
+
+		if (!me.waitForHIT_callCount) {
+			me.waitForHIT_callCount = 0
+			var a = me.getReviewableHITs(1)
+			if (a.totalNumResults == a.length) {
+				me.waitForHIT_reviewableHITs = new Set(a)
+				me.waitForHIT_reviewableHITsTime = time()
+			}
+			me.waitForHIT_waitCount = Math.ceil(a.totalNumResults / 100)
+		}
+		me.waitForHIT_callCount++
+		if (me.waitForHIT_callCount >= me.waitForHIT_waitCount) {
+			if (!me.waitForHIT_reviewableHITs ||
+				(time() > me.waitForHIT_reviewableHITsTime + (1000 * 60))) {
+				me.waitForHIT_reviewableHITs = new Set(me.getReviewableHITs())
+				me.waitForHIT_reviewableHITsTime = time()
+			}
+		}
+		if (me.waitForHIT_reviewableHITs) {
+			if (!me.waitForHIT_reviewableHITs[hitId]) {
+				stop()
+			}
+		}
+
+		var hit = mturk.getHIT(hitId);
+		if (!hit.done) {
+			stop()
+		}
+		verbosePrint("hit completed: " + hitId)
+		return hit
+	})
 }
 
 // /////////////////////////////////////////////////////////////////////

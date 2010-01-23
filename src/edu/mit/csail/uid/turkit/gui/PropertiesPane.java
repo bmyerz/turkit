@@ -19,11 +19,14 @@ import edu.mit.csail.uid.turkit.util.U;
 
 public class PropertiesPane extends CodePane {
 
-	public PropertiesPane(SimpleEventManager _sem, File file) throws Exception {
-		super(_sem, file);
+	public PropertiesPane(SimpleEventManager _sem) throws Exception {
+		super(_sem);
 	}
 
 	public void setMode(String mode) throws Exception {
+		if (file == null)
+			return;
+
 		reload();
 		String s = text.getText();
 		s = s.replaceFirst("(?m)^mode\\s+=(.*)$", "mode = " + mode);

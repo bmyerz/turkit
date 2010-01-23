@@ -15,11 +15,13 @@ public class DatabasePane extends JPanel implements SimpleEventListener {
 	JTextArea text;
 	TurKit turkit;
 
-	public DatabasePane(SimpleEventManager _sem, TurKit turkit) throws Exception {
+	public void init(TurKit turkit) {
+		this.turkit = turkit;
+	}
+	
+	public DatabasePane(SimpleEventManager _sem) throws Exception {
 		this.sem = _sem;
 		sem.addListener(this);
-		
-		this.turkit = turkit;
 
 		text = new JTextArea();
 		text.setEditable(false);
