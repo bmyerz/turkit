@@ -34,7 +34,7 @@ public class S3 {
 	 * A date formatter for dates in our HTTP requests.
 	 */
 	public static final SimpleDateFormat dateFormat = new SimpleDateFormat(
-			"EEE, d MMM yyyy kk:mm:ss Z");
+			"EEE, d MMM yyyy HH:mm:ss Z");
 
 	static {
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -86,7 +86,7 @@ public class S3 {
 
 		String canonicalizedResource;
 		{
-			canonicalizedResource = (bucket != null ? "/" + bucket : "")
+			canonicalizedResource = (bucket != null ? "/" + bucket : "/")
 					+ (file != null ? "/" + file : "");
 		}
 
@@ -165,9 +165,10 @@ public class S3 {
 				Thread.sleep(100 + (int) Math.min(3000, Math.pow(t, 3)));
 				continue;
 			}
-			
+
 			if (resp / 100 != 2) {
-				throw new Exception("S3 call failed: " + resp);
+				String err = U.slurp(con.getErrorStream(), "UTF8");
+				throw new Exception("S3 call failed: " + resp + ", error message: " + err);
 			}
 
 			String s = U.slurp(con.getInputStream(), "UTF8");

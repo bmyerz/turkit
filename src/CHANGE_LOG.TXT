@@ -1,5 +1,10 @@
 
 -------------------------------
+version 0.2.2
+
+- fixed a couple bugs with S3 API
+
+-------------------------------
 version 0.2.1
 
 - got documentation for MTurk and S3 APIs to show up (moved them out of "utils")
