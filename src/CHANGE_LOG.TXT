@@ -1,5 +1,10 @@
 
 -------------------------------
+version 0.2.3
+
+- bug fix -- if turker responses contained "{"'s, then TurKit would complain
+
+-------------------------------
 version 0.2.2
 
 - fixed a couple bugs with S3 API

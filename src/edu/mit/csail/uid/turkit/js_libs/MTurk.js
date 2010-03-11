@@ -423,7 +423,7 @@ MTurk.prototype.getHIT = function(hit, getAssignments) {
     
         var answers = a.Answer
         answers = answers.substring(answers.indexOf("?>\n") + 3)
-        answers = eval(answers)
+        answers = new XML(answers)
         foreach(answers.*::Answer, function (a) {
             var rhs = g(a.*::FreeText)
             if (rhs == null) {
