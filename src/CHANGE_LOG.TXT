@@ -1,5 +1,10 @@
 
 -------------------------------
+version 0.2.4
+
+- bug fix -- now loads JavaScript files using UTF-8
+
+-------------------------------
 version 0.2.3
 
 - bug fix -- if turker responses contained "{"'s, then TurKit would complain

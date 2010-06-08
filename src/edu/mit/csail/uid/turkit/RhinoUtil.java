@@ -2,10 +2,11 @@ package edu.mit.csail.uid.turkit;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,12 +49,12 @@ public class RhinoUtil {
 					retry = true;
 				}
 			}
-			
+
 			if (false && !retry) {
-				
+
 				// it would be nice to have some generic way of knowing
-				// if the error was caused by the limitations of the optimizer 
-				
+				// if the error was caused by the limitations of the optimizer
+
 				ByteArrayOutputStream out = new ByteArrayOutputStream();
 				PrintStream ps = new PrintStream(out);
 				t.printStackTrace(ps);
@@ -62,7 +63,7 @@ public class RhinoUtil {
 					retry = true;
 				}
 			}
-			
+
 			if (retry) {
 				System.out.println("Retrying Script Evaluation: "
 						+ t.getMessage());
@@ -82,9 +83,11 @@ public class RhinoUtil {
 	}
 
 	/**
-	 * Wrapper around <code>Context.evaluateString</code> which tries to evaluate the code first with optimization turned on,
-	 * and if that doesn't work, tries executing it again with optimization turned off.
-	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
+	 * Wrapper around <code>Context.evaluateString</code> which tries to
+	 * evaluate the code first with optimization turned on, and if that doesn't
+	 * work, tries executing it again with optimization turned off. This is
+	 * convenient when the script may be too large (~200kb) to execute with
+	 * optimization turned on.
 	 */
 	public static Object evaluateString(final Context cx,
 			final Scriptable scope, final String source, final String sourceName)
@@ -97,37 +100,45 @@ public class RhinoUtil {
 	}
 
 	/**
-	 * Wrapper around <code>Context.evaluateReader</code> which tries to evaluate the code first with optimization turned on,
-	 * and if that doesn't work, tries executing it again with optimization turned off.
-	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
+	 * Wrapper around <code>Context.evaluateReader</code> which tries to
+	 * evaluate the code first with optimization turned on, and if that doesn't
+	 * work, tries executing it again with optimization turned off. This is
+	 * convenient when the script may be too large (~200kb) to execute with
+	 * optimization turned on.
 	 */
 	public static Object evaluateFile(final Context cx, final Scriptable scope,
 			final File file) throws Exception {
 		return evaluate(cx, new Func() {
 			public Object func() throws Exception {
-				return cx.evaluateReader(scope, new FileReader(file), file
-						.getAbsolutePath(), 1, null);
+				return cx.evaluateReader(scope, new InputStreamReader(
+						new FileInputStream(file), Charset.forName("UTF-8")),
+						file.getAbsolutePath(), 1, null);
 			}
 		});
 	}
 
 	/**
-	 * Wrapper around <code>Context.evaluateReader</code> which tries to evaluate the code first with optimization turned on,
-	 * and if that doesn't work, tries executing it again with optimization turned off.
-	 * This is convenient when the script may be too large (~200kb) to execute with optimization turned on.
+	 * Wrapper around <code>Context.evaluateReader</code> which tries to
+	 * evaluate the code first with optimization turned on, and if that doesn't
+	 * work, tries executing it again with optimization turned off. This is
+	 * convenient when the script may be too large (~200kb) to execute with
+	 * optimization turned on.
 	 */
 	public static Object evaluateURL(final Context cx, final Scriptable scope,
 			final URL url) throws Exception {
 		return evaluate(cx, new Func() {
 			public Object func() throws Exception {
 				return cx.evaluateReader(scope, new InputStreamReader(url
-						.openStream()), url.toString(), 1, null);
+						.openStream(), Charset.forName("UTF-8")), url
+						.toString(), 1, null);
 			}
 		});
 	}
 
 	/**
-	 * Return a string of JavaScript which, when evaluated, recreates all the variables and data structures in <code>scope</code>.
+	 * Return a string of JavaScript which, when evaluated, recreates all the
+	 * variables and data structures in <code>scope</code>.
+	 * 
 	 * @param scope
 	 * @return
 	 */
@@ -150,11 +161,18 @@ public class RhinoUtil {
 	}
 
 	/**
-	 * Returns a string of JavaScript which, when evaluated, recreates the data value or data structure <code>o</code>.
-	 * Note that works even if <code>o</code> contains circular references.
-	 * This method does not handle functions.
+	 * Returns a string of JavaScript which, when evaluated, recreates the data
+	 * value or data structure <code>o</code>. Note that works even if
+	 * <code>o</code> contains circular references. This method does not handle
+	 * functions.
 	 * 
-	 * <p>NOTE: The result does not conform to standard JSON. It is very close when <code>o</code> is a non-recursive data structure, except that parentheses are included at the beginning and end so that the string can be evaluated.</p>
+	 * <p>
+	 * NOTE: The result does not conform to standard JSON. It is very close when
+	 * <code>o</code> is a non-recursive data structure, except that parentheses
+	 * are included at the beginning and end so that the string can be
+	 * evaluated.
+	 * </p>
+	 * 
 	 * @param o
 	 * @return
 	 */
