@@ -1,5 +1,11 @@
 
 -------------------------------
+version 0.2.5
+
+- bug fix -- MTurk REST API craps out for HITs with a very long "question" field, so we use SOAP API instead,
+	which POSTs the data.
+
+-------------------------------
 version 0.2.4
 
 - bug fix -- now loads JavaScript files using UTF-8

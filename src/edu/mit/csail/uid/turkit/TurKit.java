@@ -173,8 +173,10 @@ public class TurKit {
 		if (mode.equals("offline"))
 			throw new Exception(
 					"You may not make a REST request to MTurk in offline mode.");
-		return MTurk.restRequest(awsAccessKeyID, awsSecretAccessKey, mode
-				.equals("sandbox"), operation, paramsList);
+		
+		MTurkSOAP m = new MTurkSOAP(awsAccessKeyID, awsSecretAccessKey, mode
+				.equals("sandbox"));
+		return m.restRequest(operation, paramsList);
 	}
 
 	/**

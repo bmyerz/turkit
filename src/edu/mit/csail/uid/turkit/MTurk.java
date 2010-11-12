@@ -14,7 +14,6 @@ import javax.crypto.spec.SecretKeySpec;
 import edu.mit.csail.uid.turkit.util.Base64;
 import edu.mit.csail.uid.turkit.util.U;
 
-
 public class MTurk {
 
 	private static final String HMAC_SHA1_ALGORITHM = "HmacSHA1";
@@ -79,7 +78,8 @@ public class MTurk {
 				: "http://mechanicalturk.amazonaws.com/?";
 		boolean first = true;
 		for (Map.Entry<String, String> e : params.entrySet()) {
-			if (e.getValue() == null) continue;
+			if (e.getValue() == null)
+				continue;
 			if (!first) {
 				url += "&";
 			} else {

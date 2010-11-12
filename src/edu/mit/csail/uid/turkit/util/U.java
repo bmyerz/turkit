@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.io.StringBufferInputStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -1486,24 +1487,56 @@ public class U {
 	}
 
 	public static String webPost(URL url, String... args) throws Exception {
-		URLConnection c = url.openConnection();
-		c.setDoOutput(true);
-		OutputStreamWriter out = new OutputStreamWriter(c.getOutputStream());
-		String argString = "";
-		for (int i = 0; i < args.length; i += 2) {
-			if (i != 0) {
-				argString += "&";
+		String s = null;
+		for (int i = -1; i <= 5; i++) {
+			if (i >= 0) {
+				Thread.sleep(100 * (long) Math.pow(2, i));
 			}
-			argString += URLEncoder.encode(args[i], "UTF-8") + "="
-					+ URLEncoder.encode(args[i + 1], "UTF-8");
+			try {
+				s = webPost((HttpURLConnection) url.openConnection(), args);
+				break;
+			} catch (Exception e) {
+				if (e instanceof IllegalArgumentException) {
+					throw e;
+				}
+			}
 		}
-		out.write(argString);
-		out.flush();
+		return s;
+	}
 
-		String text = slurp(c.getInputStream(), "UTF8");
+	public static String webPost(HttpURLConnection c, String... args)
+			throws Exception {
+		if (args.length > 0) {
+			c.setDoOutput(true);
+			OutputStreamWriter out = new OutputStreamWriter(c.getOutputStream());
+			if (args.length == 1) {
+				out.write(args[0]);
+			} else {
+				String argString = "";
+				for (int i = 0; i < args.length; i += 2) {
+					if (i != 0) {
+						argString += "&";
+					}
+					argString += URLEncoder.encode(args[i], "UTF-8") + "="
+							+ URLEncoder.encode(args[i + 1], "UTF-8");
+				}
+				out.write(argString);
+			}
+			out.flush();
+		}
 
-		out.close();
-		return text;
+		if (c.getResponseCode() / 100 == 2) {
+			return slurp(c.getInputStream(), "UTF-8");
+		} else {
+			String s = "ERROR "
+					+ c.getResponseCode()
+					+ ": "
+					+ (c.getErrorStream() != null ? slurp(c.getErrorStream(),
+							"UTF-8") : (c.getInputStream() != null ? slurp(c
+							.getInputStream(), "UTF-8")
+							: "no error information received."));
+			throw new IllegalArgumentException(s);
+		}
 	}
 
 	public static void saveString(File f, String s) throws Exception {
