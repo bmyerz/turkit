@@ -49,7 +49,7 @@ MTurk.prototype.assertWeCanSpend = function(money, hits, callbackBeforeCrash) {
  * Returns the number of dollars in the user's MTurk account.
  */
 MTurk.prototype.getAccountBalance = function() {
-	var x = new XML(javaTurKit.restRequest("GetAccountBalance"))
+	var x = new XML(javaTurKit.soapRequest("GetAccountBalance"))
 	if ('' + x..Request.IsValid != "True") throw "GetAccountBalance failed: " + x
 	return parseFloat(x..AvailableBalance.Amount)
 }
@@ -206,7 +206,7 @@ MTurk.prototype.createHITRaw = function(params) {
 	if (!params.qualificationRequirements)
 		params.qualificationRequirements = null
 
-	var x = new XML(javaTurKit.restRequest("CreateHIT",
+	var x = new XML(javaTurKit.soapRequest("CreateHIT",
 			["Title", params.title,
 			"Description", params.description,
 			"Question", params.question,
@@ -259,7 +259,7 @@ MTurk.prototype.getReviewableHITs = function(maxPages) {
     var processedResults = 0
     var totalNumResults = 0
     while (!maxPages || (page <= maxPages)) {
-        var x = new XML(javaTurKit.restRequest("GetReviewableHITs",
+        var x = new XML(javaTurKit.soapRequest("GetReviewableHITs",
             "SortProperty", "CreationTime",
             "PageSize", "100",
             "PageNumber", "" + page))
@@ -388,7 +388,7 @@ MTurk.prototype.getHIT = function(hit, getAssignments) {
 	if (getAssignments === undefined) getAssignments = true
 
 	var hitId = this.tryToGetHITId(hit)
-	var x = new XML(javaTurKit.restRequest("GetHIT", "HITId", hitId))
+	var x = new XML(javaTurKit.soapRequest("GetHIT", "HITId", hitId))
     if (x..Request.IsValid.toString() != "True") throw "GetHIT failed"
     hit = x..HIT
     
@@ -469,7 +469,7 @@ MTurk.prototype.getHIT = function(hit, getAssignments) {
     var processedResults = 0
     var totalNumResults = 0
     while (true) {
-        var x = new XML(javaTurKit.restRequest("GetAssignmentsForHIT",
+        var x = new XML(javaTurKit.soapRequest("GetAssignmentsForHIT",
             "HITId", hitId,
             "PageSize", "100",
             "PageNumber", "" + page))
@@ -514,7 +514,7 @@ MTurk.prototype.extendHITRaw = function(hit, moreAssignments, moreSeconds) {
         params.push("ExpirationIncrementInSeconds")
         params.push(moreSeconds)
     }
-	var x = new XML(javaTurKit.restRequest("ExtendHIT", params))
+	var x = new XML(javaTurKit.soapRequest("ExtendHIT", params))
     if (x..Request.IsValid.toString() != "True") throw "GetHIT failed"
 	verbosePrint("extended HIT: " + hitId)
 }
@@ -537,7 +537,7 @@ MTurk.prototype.deleteHITRaw = function(hit) {
     ;(function () {
     
         // try disabling the HIT
-        var x = new XML(javaTurKit.restRequest("DisableHIT", "HITId", hitId))
+        var x = new XML(javaTurKit.soapRequest("DisableHIT", "HITId", hitId))
         if (x..Request.IsValid.toString() == "True") {
             verbosePrint("disabled HIT: " + hitId)
             return
@@ -560,7 +560,7 @@ MTurk.prototype.deleteHITRaw = function(hit) {
         })
         
         // next, dispose of the HIT
-        var x = new XML(javaTurKit.restRequest("DisposeHIT", "HITId", hitId))
+        var x = new XML(javaTurKit.soapRequest("DisposeHIT", "HITId", hitId))
         if (x..Request.IsValid.toString() == "True") {
             verbosePrint("disposed HIT: " + hitId)
             return
@@ -606,7 +606,7 @@ MTurk.prototype.deleteHITs = function(hits) {
  * <code>assignment</code> for the stated <code>reason</code>.
  */
 MTurk.prototype.grantBonusRaw = function(assignment, amount, reason) {
-	var x = new XML(javaTurKit.restRequest("GrantBonus",
+	var x = new XML(javaTurKit.soapRequest("GrantBonus",
 		"WorkerId", assignment.workerId,
 		"AssignmentId", assignment.assignmentId,
 		"BonusAmount.1.Amount", amount,
@@ -638,7 +638,7 @@ MTurk.prototype.approveAssignmentRaw = function(assignment, reason) {
 		params.push("RequesterFeedback")
 		params.push(reason)
 	}
-	var x = new XML(javaTurKit.restRequest("ApproveAssignment", params))
+	var x = new XML(javaTurKit.soapRequest("ApproveAssignment", params))
     if (x..Request.IsValid.toString() != "True") throw "ApproveAssignment failed: " + x
 	verbosePrint("approved assignment " + assignmentId)
 }
@@ -674,7 +674,7 @@ MTurk.prototype.rejectAssignmentRaw = function(assignment, reason) {
 		params.push("RequesterFeedback")
 		params.push(reason)
 	}
-	var x = new XML(javaTurKit.restRequest("RejectAssignment", params))
+	var x = new XML(javaTurKit.soapRequest("RejectAssignment", params))
     if (x..Request.IsValid.toString() != "True") throw "RejectAssignment failed: " + x
 	verbosePrint("rejected assignment " + assignmentId)
 }
@@ -708,7 +708,7 @@ MTurk.prototype.getHITs = function(maxPages) {
     var processedResults = 0
     var totalNumResults = 0
     while (!maxPages || (page <= maxPages)) {
-        var x = new XML(javaTurKit.restRequest("SearchHITs",
+        var x = new XML(javaTurKit.soapRequest("SearchHITs",
             "SortProperty", "CreationTime",
             "SortDirection", "Descending",
             "PageSize", "100",

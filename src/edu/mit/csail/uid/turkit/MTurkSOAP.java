@@ -61,13 +61,13 @@ public class MTurkSOAP implements Serializable {
 	}
 
 	/**
-	 * Performs a REST request on MTurk. The <code>paramsList</code> must be a
+	 * Performs a SOAP request on MTurk. The <code>paramsList</code> must be a
 	 * sequence of strings of the form a1, b1, a2, b2, a3, b3 ... Where aN is a
 	 * parameter name, and bN is the value for that parameter. Most common
 	 * parameters have suitable default values, namely: Version, Timestamp,
 	 * Query, and Signature.
 	 */
-	public String restRequest(String operation, String... paramsList)
+	public String soapRequest(String operation, String... paramsList)
 			throws Exception {
 
 		URL url = new URL(

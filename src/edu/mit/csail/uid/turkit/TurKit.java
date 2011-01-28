@@ -159,16 +159,16 @@ public class TurKit {
 	}
 
 	/**
-	 * Performs a REST request on MTurk. The <code>paramsList</code> must be a
+	 * Performs a SOAP request on MTurk. The <code>paramsList</code> must be a
 	 * sequence of strings of the form a1, b1, a2, b2, a3, b3 ... Where aN is a
 	 * parameter name, and bN is the value for that parameter. Most common
 	 * parameters have suitable default values, namely: Version, Timestamp,
 	 * Query, and Signature.
 	 * 
-	 * This is a wrapper around
+	 * This is a replacement for the deprecated
 	 * {@link MTurk#restRequest(String, String, boolean, String, String...)}
 	 */
-	public String restRequest(String operation, String... paramsList)
+	public String soapRequest(String operation, String... paramsList)
 			throws Exception {
 		if (mode.equals("offline"))
 			throw new Exception(
@@ -176,7 +176,7 @@ public class TurKit {
 		
 		MTurkSOAP m = new MTurkSOAP(awsAccessKeyID, awsSecretAccessKey, mode
 				.equals("sandbox"));
-		return m.restRequest(operation, paramsList);
+		return m.soapRequest(operation, paramsList);
 	}
 
 	/**
