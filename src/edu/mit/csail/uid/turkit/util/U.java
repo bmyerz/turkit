@@ -172,7 +172,7 @@ public class U {
 		}
 		return a;
 	}
-
+/*
 	public static int[] toArray(Vector<Integer> v) {
 		int[] a = new int[v.size()];
 		for (int i = 0; i < v.size(); i++) {
@@ -180,7 +180,7 @@ public class U {
 		}
 		return a;
 	}
-
+*/
 	public static String md5_base64(byte[] data) throws Exception {
 		MessageDigest m = MessageDigest.getInstance("MD5");
 		m.update(data);
