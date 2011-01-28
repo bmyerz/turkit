@@ -219,16 +219,15 @@ MTurk.prototype.createHITRaw = function(params) {
 			"AutoApprovalDelayInSeconds", params.autoApprovalDelayInSeconds,
 			"RequesterAnnotation", params.requesterAnnotation	
 	)
-	XMLstring = XMLstring + XMLtag("Reward", XMLstringFromObjs({"Amount": params.reward, "CurrencyCode":"USD"}))
+	XMLstring = XMLstring + XMLstringFromObjs({"Amount": ""+params.reward, "CurrencyCode":"USD"},"Reward")
 	
 	//add qualification requirements
 	
-	XMLstring = XMLstring + (params.qualificationRequirements ? XMLstringFromObjs(params.qualificationRequirements) : "")
+	XMLstring = XMLstring + (params.qualificationRequirements ? XMLstringFromObjs(params.qualificationRequirements, "QualificationRequirement") : "")
 	
-	//Create the SOAP Request XML
 	var x = new XML(javaTurKit.soapRequest("CreateHIT", XMLstring))
 	
-	if ('' + x..Request.IsValid != "True") throw "Failed to create HIT: " + x
+	if ('' + x..Request.IsValid != "True") throw "Failed to create HIT: " + XMLstring
 	var hit = x..HIT
 
 	var hitId = this.tryToGetHITId(hit)
@@ -243,9 +242,26 @@ MTurk.prototype.createHITRaw = function(params) {
 	return hitId
 }
 
+var replaceAll = function(txt, repl, with_this) {
+	var str = ""+txt
+  return str.replace(new RegExp(repl, 'g'),with_this);
+}
+
+var escapeXML = function(s) {
+
+	var s1 = replaceAll(s, "&", "&amp;"); //s.replaceAll("&", "&amp;")
+	var s2 = replaceAll(s1, "<", "&lt;"); //.replaceAll("<", "&lt;")
+	var s3 = replaceAll(s2, ">", "&gt;"); //.replaceAll(">", "&gt;")
+	var s4 = replaceAll(s3, "'", "&apos;"); //.replaceAll("'", "&apos;")
+	var s5 = replaceAll(s4, "\"", "&quot;"); //.replaceAll("\"","&quot;");
+	return s5;	
+	
+	return s;		
+}
+
 var XMLtag = function(parent, child){
 		var x = "<"+parent+">"	
-		x = x + child
+		x = x + escapeXML(child)
 		x = x + "</"+parent+">"
 		return x	
 }

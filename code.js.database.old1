@@ -1,0 +1,27 @@
+// begin:1f23
+__HITs = {
+}
+__S3_Objects = {
+}
+__stackFrames = {
+	"for-real" : {
+		"sequencialFrames" : [
+			{
+				"creationTime" : 1.296227194937E12,
+				"onceFunc" : "\nfunction () {\n    return mturk.createHITRaw(params);\n}\n",
+				"returnValue" : "1B8IRSRLKXI0YPHVN080MPPSJGO939",
+				"returnTime" : 1.296228227143E12,
+				"printOutput" : "created HIT: 1B8IRSRLKXI0YPHVN080MPPSJGO939\r\n        url: https://workersandbox.mturk.com/mturk/preview?groupId=1JKCTNL80QJ1ESEJCL1QCJL5R4VY90\r\n"
+			},
+			{
+				"creationTime" : 1.296227995535E12,
+				"onceFunc" : "\nfunction () {\n    return mturk.createHITRaw(params);\n}\n"
+			}
+		]
+	}
+}
+__safetyCounters = {
+	"moneySpent" : 1.2000000000000002,
+	"hitsCreated" : 8
+}
+// end:1f23

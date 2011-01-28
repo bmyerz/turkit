@@ -96,7 +96,7 @@ public class MTurkSOAP implements Serializable {
 		x.append("<Request>");
 
 		x.append(XMLstring);
-
+		
 		x.append("</Request>");
 		x.append("</");
 		x.append(operation);
@@ -104,6 +104,7 @@ public class MTurkSOAP implements Serializable {
 		x.append("</soapenv:Body></soapenv:Envelope>");
 
 		String soap = x.toString();
+			
 
 		for (int t = 0; t < 100; t++) {
 			try {
@@ -131,5 +132,6 @@ public class MTurkSOAP implements Serializable {
 			}
 		}
 		throw new Exception("MTurk seems to be down.");
+		
 	}
 }
