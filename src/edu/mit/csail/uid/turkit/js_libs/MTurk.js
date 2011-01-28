@@ -53,6 +53,287 @@ MTurk.prototype.getAccountBalance = function() {
 	if ('' + x..Request.IsValid != "True") throw "GetAccountBalance failed: " + x
 	return parseFloat(x..AvailableBalance.Amount)
 }
+/**
+ * Creates a HIT. <i>params</i> is an object with the following properties:
+ * <ul>
+ * <li><b>title</b>: displayed in the list of HITs on MTurk.</li>
+ * <li><b>description</b>: <b>desc</b> is also accepted. A slightly longer
+ * description of the HIT, also shown in the list of HITs on MTurk</li>
+ * <li><b>question</b>: a string of XML specifying what will be shown. <a
+ * href="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/index.html?ApiReference_QuestionFormDataStructureArticle.html">See
+ * documentation here</a>. Instead of <i>question</i>, you may use the following special parameters:
+ <ul>
+ <li><b>url</b>: creates an external question pointing to this URL</li>
+ <li><b>height</b>: (optional) height of the iFrame embedded in MTurk, in pixels (default is 600).</li>
+ </ul>
+ 
+ </li>
+ * <li><b>reward</b>: how many dollars you want to pay per assignment for this
+ * HIT.
+ * </ul>
+ * The following properties are optional:
+ * <ul>
+ * <li><b>keywords</b>: keywords to help people search for your HIT.</li>
+ * <li><b>assignmentDurationInSeconds</b>: default is 1 hour's worth of
+ * seconds.</li>
+ * <li><b>autoApprovalDelayInSeconds</b>: default is 1 month's worth of
+ * seconds.</li>
+ * <li><b>lifetimeInSeconds</b>: default is 1 week's worth of seconds.</li>
+ * <li><b>maxAssignments</b>: <b>assignments</b> is also accepted. default is 1.</li>
+ * <li><b>requesterAnnotation</b>: default is no annotation.</li>
+ * <li><b>qualificationRequirements</b>: an array of objects representing the XML structure of SOAP requirements for including qualification requirements (default is no requirements).</li>
+ * <li><b>minApproval</b>: minimum approval percentage. The appropriate
+ * requirement will be added if you supply a percentage here.</li>
+ * </ul>
+ */
+MTurk.prototype.createHITRaw = function(params) {
+	if (!params)
+		params = {}
+		
+	// let them know if they provide param names that are not on the list
+	var badKeys = keys(new Set(keys(params)).remove([
+		"title",
+		"desc",
+		"description",
+		"reward",
+		"assignmentDurationInSeconds",
+		"minApproval",
+		"html",
+		"bucket",
+		"url",
+		"blockWorkers",
+		"height",
+		"question",
+		"lifetimeInSeconds",
+		"assignments",
+		"maxAssignments",
+		"numAssignments",
+		"autoApprovalDelayInSeconds",
+		"requesterAnnotation",
+		"keywords",
+		"qualificationRequirements",
+	]))
+	if (badKeys.length > 0) {
+		throw new java.lang.Exception("some parameters to createHIT are not understood: " + badKeys.join(', '))
+	}
+
+	if (!params.title)
+		throw new java.lang.Exception("createHIT requires a title")
+
+	if (params.desc)
+		params.description = params.desc
+	if (!params.description)
+		throw new java.lang.Exception("createHIT requires a description")
+
+	if (params.reward == null)
+		throw new java.lang.Exception("createHIT requires a reward")
+
+	if (!params.assignmentDurationInSeconds)
+		params.assignmentDurationInSeconds = 60 * 60 // one hour
+
+	if(typeOf(params.qualificationRequirements) == "object"){
+		//the qualification is an object and not an array
+		var temp = params.qualificationRequirements
+		var q = ensure(params, "qualificationRequirements", [])
+		q.push(temp);
+		
+	}
+
+	if (params.minApproval) {
+		var q = ensure(params, "qualificationRequirements", [])
+		q.push({"QualificationTypeId": "000000000000000000L0", "Comparator":"GreaterThanOrEqualTo", "IntegerValue": ""+params.minApproval})		
+	}
+	
+
+	if (params.html) {
+		if (!params.bucket) {
+			params.bucket = javaTurKit.awsAccessKeyID.toLowerCase() + "-turkit"
+		}
+		var s = ("" + javaTurKit.taskTemplate).replace(/\[\[\[CONTENT\]\]\]/, params.html)
+		var key = Packages.edu.mit.csail.uid.turkit.util.U.md5(s) + ".html"
+		params.url = s3.putString(params.bucket, key, s)
+		
+		if (params.blockWorkers) {
+			if ((typeof params.blockWorkers) != "string") {
+				params.blockWorkers = params.blockWorkers.join(",")
+			}
+			params.url += "?blockWorkers=" + params.blockWorkers
+		}
+	}
+	
+	if (params.url) {
+		if (!params.height)
+			params.height = 600
+
+		params.question = '<ExternalQuestion xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd">'
+				+ '<ExternalURL>'
+				+ escapeXml(params.url)
+				+ '</ExternalURL>'
+				+ '<FrameHeight>'
+				+ params.height
+				+ '</FrameHeight>'
+				+ '</ExternalQuestion>'
+	}
+
+	if (!params.question)
+		throw new java.lang.Exception("createHIT requires a question (or a url, or html)")
+
+	if (!params.lifetimeInSeconds)
+		params.lifetimeInSeconds = 60 * 60 * 24 * 7 // one week
+		
+	if (params.assignments)
+		params.maxAssignments = params.assignments
+	if (params.numAssignments)
+		params.maxAssignments = params.numAssignments 
+	if (!params.maxAssignments)
+		params.maxAssignments = 1
+
+	if (!params.autoApprovalDelayInSeconds)
+		params.autoApprovalDelayInSeconds = null
+
+	if (javaTurKit.safety) {
+		if (params.hitTypeId) {
+			ensure(params, 'responseGroup', []).push('HITDetail')
+		} else {
+			this.assertWeCanSpend(params.reward * params.maxAssignments, 1)
+		}
+	}
+
+	if (!params.requesterAnnotation)
+		params.requesterAnnotation = null
+
+	if (!params.responseGroup)
+		params.responseGroup = null
+
+	if (!params.qualificationRequirements)
+		params.qualificationRequirements = null
+		
+	var XMLstring = XMLtags(
+			"Title", params.title,
+			"Description", params.description,
+			"Question", params.question,
+			"AssignmentDurationInSeconds", params.assignmentDurationInSeconds,
+			"LifetimeInSeconds", params.lifetimeInSeconds,
+			"Keywords", params.keywords,
+			"MaxAssignments", params.maxAssignments,
+			"AutoApprovalDelayInSeconds", params.autoApprovalDelayInSeconds,
+			"RequesterAnnotation", params.requesterAnnotation	
+	)
+	XMLstring = XMLstring + XMLtag("Reward", XMLstringFromObjs({"Amount": params.reward, "CurrencyCode":"USD"}))
+	
+	//add qualification requirements
+	
+	XMLstring = XMLstring + (params.qualificationRequirements ? XMLstringFromObjs(params.qualificationRequirements) : "")
+	
+	//Create the SOAP Request XML
+	var x = new XML(javaTurKit.soapRequest("CreateHIT", XMLstring))
+	
+	if ('' + x..Request.IsValid != "True") throw "Failed to create HIT: " + x
+	var hit = x..HIT
+
+	var hitId = this.tryToGetHITId(hit)
+	
+	verbosePrint("created HIT: " + hitId)
+	var url = (javaTurKit.mode == "sandbox"
+					? "https://workersandbox.mturk.com/mturk/preview?groupId="
+					: "https://www.mturk.com/mturk/preview?groupId=")
+			+ hit.HITTypeId
+	verbosePrint("        url: " + url)
+	database.query("ensure(null, ['__HITs', " + json(javaTurKit.mode + ":" + hitId) + "], " + json({url : url}) + ")")
+	return hitId
+}
+
+var XMLtag = function(parent, child){
+		var x = "<"+parent+">"	
+		x = x + child
+		x = x + "</"+parent+">"
+		return x	
+}
+
+var XMLtags = function(paramsList){
+		var x = ""	
+		for (var i = 0; i < arguments.length; i += 2) {
+			x= x+ XMLtag(arguments[i], arguments[i + 1]);
+		}
+		return x	
+}
+
+/*
+This function makes a string that looks like XML, although it has no header or namespace meta-data 
+Objects can either be an associative array specifying all the tags and values the XML will have
+or an array of objects.
+
+Values can either be a string (Value), or (recursively) an object or array of objects to make into XML.
+
+Wrapper is an optional string parameter.  If you want *each* objects in the array wrapped in an tag 
+(such as you would want with multiple qualification requirements), the wrapper in the parent tag text.
+
+Example:
+var t = [
+	{"LocaleValue" : {"Country": "US"}, "Comparator" : "EqualTo", "QualificationTypeId": "000071"},
+	{"LocaleValue" : {"Country": "AR"}, "Comparator" : "EqualTo", "QualificationTypeId": "000072"}
+		]
+
+console.log(XMLstringFromObjs(t, "QualificationRequirement"))
+
+*/
+var XMLstringFromObjs = function(objects, wrapper){
+	var x = "";
+	var openWrapper = ""
+	var closeWrapper = ""
+	if(wrapper){
+		var openWrapper = "<"+wrapper+">"	
+		var closeWrapper = "</"+wrapper+">"	
+	}	
+	
+	//put all the objects in an array
+	var arr = []
+
+	if(typeOf(objects) == "object"){
+		arr.push(objects)
+	}else{
+		arr = objects
+	}
+
+	for(var i = 0; i< arr.length; i++){
+		var thisObject = arr[i];
+		var y = ""
+		if(wrapper){
+			y = y + openWrapper	
+		}
+		for(key in thisObject){
+			
+						
+			var openTag = "<"+key+">"	
+			var closeTag = "</"+key+">"	
+			y = y + openTag
+			var thisValue = thisObject[key]
+			if(typeof(thisValue)== "string"){
+				y = y + thisValue	
+			}else{			
+				y = y + XMLstringFromObjs(thisObject[key], "")
+				
+			}
+			y = y + closeTag			
+		}
+		if(wrapper){
+			y = y + closeWrapper	
+		}
+		x = x + y
+	}
+	
+	return x;
+}
+
+function typeOf(obj) {
+  if ( typeof(obj) == 'object' )
+    if (obj.length)
+      return 'array';
+    else
+      return 'object';
+    else
+		return typeof(obj);
+}
 
 /**
  * Creates a HIT. <i>params</i> is an object with the following properties:
@@ -87,6 +368,8 @@ MTurk.prototype.getAccountBalance = function() {
  * requirement will be added if you supply a percentage here.</li>
  * </ul>
  */
+ 
+ /*
 MTurk.prototype.createHITRaw = function(params) {
 	if (!params)
 		params = {}
@@ -234,6 +517,7 @@ MTurk.prototype.createHITRaw = function(params) {
 	database.query("ensure(null, ['__HITs', " + json(javaTurKit.mode + ":" + hitId) + "], " + json({url : url}) + ")")
 	return hitId
 }
+*/
 
 /**
  * Calls {@link MTurk#createHITRaw} inside of {@link TraceManager#once}.
@@ -259,10 +543,14 @@ MTurk.prototype.getReviewableHITs = function(maxPages) {
     var processedResults = 0
     var totalNumResults = 0
     while (!maxPages || (page <= maxPages)) {
-        var x = new XML(javaTurKit.soapRequest("GetReviewableHITs",
-            "SortProperty", "CreationTime",
+    	var XMLstring = XMLtags(
+			"SortProperty", "CreationTime",
             "PageSize", "100",
-            "PageNumber", "" + page))
+            "PageNumber", "" + page	
+		)
+	 
+        var x = new XML(javaTurKit.soapRequest("GetReviewableHITs",
+            XMLstring))
         if ('' + x..Request.IsValid != "True") throw "GetReviewableHITs failed: " + x
         foreach(x..HITId, function (hitId) {
         	all.push("" + hitId)
@@ -388,7 +676,11 @@ MTurk.prototype.getHIT = function(hit, getAssignments) {
 	if (getAssignments === undefined) getAssignments = true
 
 	var hitId = this.tryToGetHITId(hit)
-	var x = new XML(javaTurKit.soapRequest("GetHIT", "HITId", hitId))
+	
+	var XMLstring = XMLtags(
+		"HITId", hitId	
+	)
+	var x = new XML(javaTurKit.soapRequest("GetHIT", XMLstring))
     if (x..Request.IsValid.toString() != "True") throw "GetHIT failed"
     hit = x..HIT
     
@@ -469,10 +761,12 @@ MTurk.prototype.getHIT = function(hit, getAssignments) {
     var processedResults = 0
     var totalNumResults = 0
     while (true) {
-        var x = new XML(javaTurKit.soapRequest("GetAssignmentsForHIT",
-            "HITId", hitId,
-            "PageSize", "100",
-            "PageNumber", "" + page))
+        var x = new XML(javaTurKit.soapRequest("GetAssignmentsForHIT",	
+        	XMLtags(		
+	            "HITId", hitId,
+	            "PageSize", "100",
+	            "PageNumber", "" + page)
+            ))
         for each (a in x..Assignment) {
             processAssignment(a)
         }
@@ -514,7 +808,7 @@ MTurk.prototype.extendHITRaw = function(hit, moreAssignments, moreSeconds) {
         params.push("ExpirationIncrementInSeconds")
         params.push(moreSeconds)
     }
-	var x = new XML(javaTurKit.soapRequest("ExtendHIT", params))
+	var x = new XML(javaTurKit.soapRequest("ExtendHIT", XMLtags(params) ))
     if (x..Request.IsValid.toString() != "True") throw "GetHIT failed"
 	verbosePrint("extended HIT: " + hitId)
 }
@@ -537,7 +831,7 @@ MTurk.prototype.deleteHITRaw = function(hit) {
     ;(function () {
     
         // try disabling the HIT
-        var x = new XML(javaTurKit.soapRequest("DisableHIT", "HITId", hitId))
+        var x = new XML(javaTurKit.soapRequest("DisableHIT", XMLtags("HITId", hitId) ))
         if (x..Request.IsValid.toString() == "True") {
             verbosePrint("disabled HIT: " + hitId)
             return
@@ -560,7 +854,7 @@ MTurk.prototype.deleteHITRaw = function(hit) {
         })
         
         // next, dispose of the HIT
-        var x = new XML(javaTurKit.soapRequest("DisposeHIT", "HITId", hitId))
+        var x = new XML(javaTurKit.soapRequest("DisposeHIT", XMLtags("HITId", hitId) ))
         if (x..Request.IsValid.toString() == "True") {
             verbosePrint("disposed HIT: " + hitId)
             return
@@ -606,12 +900,12 @@ MTurk.prototype.deleteHITs = function(hits) {
  * <code>assignment</code> for the stated <code>reason</code>.
  */
 MTurk.prototype.grantBonusRaw = function(assignment, amount, reason) {
-	var x = new XML(javaTurKit.soapRequest("GrantBonus",
+	var x = new XML(javaTurKit.soapRequest("GrantBonus", XMLtags(
 		"WorkerId", assignment.workerId,
 		"AssignmentId", assignment.assignmentId,
 		"BonusAmount.1.Amount", amount,
 		"BonusAmount.1.CurrencyCode", "USD",
-		"Reason", reason))
+		"Reason", reason)))
     if (x..Request.IsValid.toString() != "True") throw "GrantBonus failed: " + x
 	verbosePrint("granted bonus of " + amount + " for assignment "
 			+ assignment.assignmentId)
@@ -638,7 +932,7 @@ MTurk.prototype.approveAssignmentRaw = function(assignment, reason) {
 		params.push("RequesterFeedback")
 		params.push(reason)
 	}
-	var x = new XML(javaTurKit.soapRequest("ApproveAssignment", params))
+	var x = new XML(javaTurKit.soapRequest("ApproveAssignment", XMLtags(params)))
     if (x..Request.IsValid.toString() != "True") throw "ApproveAssignment failed: " + x
 	verbosePrint("approved assignment " + assignmentId)
 }
@@ -674,7 +968,7 @@ MTurk.prototype.rejectAssignmentRaw = function(assignment, reason) {
 		params.push("RequesterFeedback")
 		params.push(reason)
 	}
-	var x = new XML(javaTurKit.soapRequest("RejectAssignment", params))
+	var x = new XML(javaTurKit.soapRequest("RejectAssignment", XMLtags(params)))
     if (x..Request.IsValid.toString() != "True") throw "RejectAssignment failed: " + x
 	verbosePrint("rejected assignment " + assignmentId)
 }
@@ -708,11 +1002,12 @@ MTurk.prototype.getHITs = function(maxPages) {
     var processedResults = 0
     var totalNumResults = 0
     while (!maxPages || (page <= maxPages)) {
-        var x = new XML(javaTurKit.soapRequest("SearchHITs",
+        var x = new XML(javaTurKit.soapRequest("SearchHITs",XMLtags(
             "SortProperty", "CreationTime",
             "SortDirection", "Descending",
             "PageSize", "100",
-            "PageNumber", "" + page))
+            "PageNumber", "" + page)
+        ))
         if (x..Request.IsValid.toString() != "True") throw "SearchHITs failed: " + x
         foreach(x..HIT, function (hit) {
             all.push(self.parseHIT(hit))

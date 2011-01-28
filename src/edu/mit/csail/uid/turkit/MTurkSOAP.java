@@ -67,7 +67,7 @@ public class MTurkSOAP implements Serializable {
 	 * parameters have suitable default values, namely: Version, Timestamp,
 	 * Query, and Signature.
 	 */
-	public String soapRequest(String operation, String... paramsList)
+	public String soapRequest(String operation, String XMLstring)
 			throws Exception {
 
 		URL url = new URL(
@@ -95,60 +95,7 @@ public class MTurkSOAP implements Serializable {
 		x.append("</Signature>");
 		x.append("<Request>");
 
-		String prevGroupKey = "";
-		String prevGroup = "";
-		for (int i = 0; i < paramsList.length; i += 2) {
-			if (paramsList[i + 1] == null)
-				continue;
-
-			String key = paramsList[i];
-
-			String groupKey = "";
-			String group = "";
-			int dotIndex = key.indexOf(".");
-			if (dotIndex >= 0) {
-				int secondDotIndex = key.indexOf(".", dotIndex + 1);
-				if (secondDotIndex >= 0) {
-					groupKey = key.substring(0, secondDotIndex);
-					group = key.substring(0, dotIndex);
-					key = key.substring(secondDotIndex + 1);
-				} else {
-					key = key.substring(0, dotIndex);
-				}
-			}
-			if (!groupKey.equals(prevGroupKey)) {
-				if (prevGroup.length() > 0) {
-					x.append("</");
-					x.append(prevGroup);
-					x.append(">");
-				}
-
-				if (group.length() > 0) {
-					x.append("<");
-					x.append(group);
-					x.append(">");
-				}
-			}
-			prevGroup = group;
-			prevGroupKey = groupKey;
-
-			String value = paramsList[i + 1];
-
-			x.append("<");
-			x.append(key);
-			x.append(">");
-
-			x.append(U.escapeXML(value));
-
-			x.append("</");
-			x.append(key);
-			x.append(">");
-		}
-		if (prevGroup.length() > 0) {
-			x.append("</");
-			x.append(prevGroup);
-			x.append(">");
-		}
+		x.append(XMLstring);
 
 		x.append("</Request>");
 		x.append("</");

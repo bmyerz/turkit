@@ -168,7 +168,7 @@ public class TurKit {
 	 * This is a replacement for the deprecated
 	 * {@link MTurk#restRequest(String, String, boolean, String, String...)}
 	 */
-	public String soapRequest(String operation, String... paramsList)
+	public String soapRequest(String operation, String XMLstring)
 			throws Exception {
 		if (mode.equals("offline"))
 			throw new Exception(
@@ -176,7 +176,7 @@ public class TurKit {
 		
 		MTurkSOAP m = new MTurkSOAP(awsAccessKeyID, awsSecretAccessKey, mode
 				.equals("sandbox"));
-		return m.soapRequest(operation, paramsList);
+		return m.soapRequest(operation, XMLstring);
 	}
 
 	/**
