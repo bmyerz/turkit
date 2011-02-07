@@ -1,0 +1,49 @@
+
+function displayError(e) {
+	if (e.match(/and was still executing at/)) return
+	
+	var m = e.match(/<h2>\s*HTTP ERROR: 500\s*<\/h2>\s*<pre>(.*)<\/pre>/)
+	if (m) {
+		alert(m[1])
+	} else {
+		alert(e)
+	}
+}
+
+function ajaxCont(url, params, success, cont, error) {
+	$.ajax({
+		type : "POST",
+		url : url,
+		data : params,
+		success : function (e) {
+			success(e)
+			cont()
+		},
+		error : error ? function (x, e) {
+			var ret = error(x.responseText)
+			if (ret === undefined) {
+				displayError(e + "\n\n" + x.responseText)
+			} else if (ret) {
+				cont()
+			} 
+		} : function (x, e) {
+			displayError(e + "\n\n" + x.responseText)
+		}
+	})
+}
+
+function positionButtons() {
+    var leftMost = $(window).width()
+    
+    var viewer = $('#viewer').get(0)    
+	var isVerticalScrollbar = viewer.scrollHeight > viewer.clientHeight;
+	if (isVerticalScrollbar) {
+		leftMost -= 16
+	}
+    
+    $('.reloadButton').css("left", (leftMost - 16) + "px")
+}
+
+function onResize() {
+	positionButtons()
+}

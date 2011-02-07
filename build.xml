@@ -1,0 +1,14 @@
+<project name="turkit" default="build" basedir=".">
+
+	<target name="jsdocs" description="build JavaScript documentation">
+		<exec executable="java">
+			<arg value="-cp" />
+			<arg value="war/WEB-INF/classes" />
+			<arg value="turkit.js_docs.Main" />
+		</exec>
+	</target>
+
+	<target name="build" depends="jsdocs" description="build everything">
+	</target>
+
+</project>

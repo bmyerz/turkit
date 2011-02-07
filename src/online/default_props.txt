@@ -1,0 +1,10 @@
+props = {
+	mode : "sandbox", // "sandbox" or "real" or "offline"
+	maxMoney : 10.0,
+	maxHITs : 100,
+	
+	verbose : false, // turn this on to see internal debug print-lines
+	
+	awsId : "", // defaults to your access key id
+	awsKey : "", // defaults to your secret access key
+}

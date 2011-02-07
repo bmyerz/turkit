@@ -1,0 +1,3 @@
+ensure(db, 'hello', 1)
+print("Hello World: " + db.hello)
+db.hello++

@@ -1,0 +1,109 @@
+<html>
+<head>
+<title>TurKit Editor</title>
+<style type="text/css">
+body {
+	margin: 0;
+	padding: 0;
+}
+
+iframe.editor {
+	width: 100%;
+	height: 100%;
+}
+
+.iconButton {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	cursor: pointer;
+	width: 16px;
+	height: 16px;
+	z-index: 100;
+}
+
+.reloadButton {
+	background-image: url('icons/reload_grey.png');
+}
+
+div.reloadButton:hover {
+	background-image: url('icons/reload.png');
+}
+</style>
+</head>
+<body>
+<script src="jquery.js"> </script>
+<script src="tab.js"> </script>
+<script src="myutil.js"> </script>
+<script>
+
+___COMMON___
+
+function positionButtons() {
+    var leftMost = $(window).width()
+    
+    var viewer = $('#viewer').get(0)    
+	var isVerticalScrollbar = viewer.scrollHeight > viewer.clientHeight;
+	if (isVerticalScrollbar) {
+		leftMost -= 16
+	}
+    
+    $('.reloadButton').css("left", (leftMost - 16) + "px")
+}
+
+function onResize() {
+	positionButtons()
+}
+
+var oldValue = null
+function reload(val) {
+	if ((typeof val) == "string") {
+		if (oldValue == null || val != oldValue) {
+			oldValue = val
+
+			$('#viewerHolder').empty().append(
+					'<iframe id="viewer" class="viewer" style="width:100%;height:100%" frameBorder="0" src="/editor?file=' +
+							file.key + '&rawView&random=' + randomId(8) + '"></iframe>')
+			onResize()
+		}
+	} else {
+		cont = val
+		if ((typeof cont) != "function") cont = function () {}
+
+	    ajaxCont('/api', {
+	        "method" : "getFile",
+	        "file" : file.key
+	    }, function (e) {
+		    file = eval(e)
+		    reload(file.contents)
+		}, cont)
+	}
+}
+
+function reloadPoll() {
+	setTimeout(function () {
+		reload(reloadPoll)
+	}, 5000)
+}
+
+$(function () {
+	file = eval($('#file').val())
+	
+    reload(file.contents)
+	reloadPoll()
+
+	$(window).resize(onResize)
+    $('.reloadButton').click(function () {
+    	oldValue = null
+        reload()
+    })
+})
+
+</script>
+
+<textarea style="display:none" id="file">___FILE___</textarea>
+<div class="reloadButton iconButton"></div>
+<div id="viewerHolder" style="width: 100%; height: 100%"></div>
+
+</body>
+</html>

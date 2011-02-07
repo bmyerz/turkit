@@ -1,0 +1,145 @@
+<html>
+<head>
+<title>TurKit Editor</title>
+<style type="text/css">
+body {
+	margin: 0;
+	padding: 0;
+}
+
+iframe.editor {
+	width: 100%;
+	height: 100%;
+}
+
+.iconButton {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	cursor: pointer;
+	width: 16px;
+	height: 16px;
+	z-index: 100;
+}
+
+.reloadButton {
+	background-image: url('icons/reload_grey.png');
+}
+
+div.reloadButton:hover {
+	background-image: url('icons/reload.png');
+}
+</style>
+</head>
+<body>
+<script src="jquery.js"> </script>
+<script src="tab.js"> </script>
+<script src="myutil.js"> </script>
+<script>
+
+___COMMON___
+
+function positionButtons() {
+    var leftMost = $(window).width()
+    
+    var viewer = $('#contents').get(0)    
+	var isVerticalScrollbar = viewer.scrollHeight > viewer.clientHeight;
+	if (isVerticalScrollbar) {
+		leftMost -= 16
+	}
+    
+    $('.reloadButton').css("left", (leftMost - 16) + "px")
+}
+
+function onResize() {
+	positionButtons()
+}
+
+var oldValue = null
+function reload(val) {
+	if ((typeof val) == "string") {
+		if (oldValue == null || val != oldValue) {
+			oldValue = val
+			$('#contents').empty().append(renderDB(val))
+			onResize()
+		}
+	} else {
+		cont = val
+		if ((typeof cont) != "function") cont = function () {}
+
+	    ajaxCont('/api', {
+	        "method" : "getFile",
+	        "file" : file.key
+	    }, function (e) {
+		    file = eval(e)
+		    reload(file.contents)
+		}, cont)
+	}
+}
+
+function reloadPoll() {
+	setTimeout(function () {
+		reload(reloadPoll)
+	}, 5000)
+}
+
+function renderDB(dbString) {
+	var db
+	var __db
+	eval(dbString)
+	var hitGroups = group(__db.hits, function (e) {return e.url})
+	
+	var div = $('<div/>')
+	
+	// display HITs
+	var hitsDiv = $('<div/>')
+	if (keys(hitGroups).length > 0) {
+		hitsDiv.append('HITs')
+		foreach(hitGroups, function (hits, url) {
+			var num = ""
+			if (hits.length > 1) {
+				num = '(' + hits.length + ') '
+			}
+			hitsDiv.append('<li>' + num + '<a target="_blank" href="' + escapeXml(url) + '">' + escapeXml(url) + '</a></li>')
+		})
+	} else {
+		hitsDiv.append('no HITs to display')
+	}
+	div.append(hitsDiv)
+	
+	// display Webpages
+	var webDiv = $('<div/>')
+	if (keys(__db.webpages).length > 0) {
+		webDiv.append('webpages')
+		foreach(__db.webpages, function (w) {
+			webDiv.append('<li><a target="_blank" href="' + escapeXml(w.url) + '">' + escapeXml(w.url) + '</a></li>')
+		})
+	} else {
+		webDiv.append('no webpages to display')
+	}
+	div.append(webDiv)
+	
+	return div
+}
+
+$(function () {
+	file = eval($('#file').val())
+	
+    reload(file.contents)
+	reloadPoll()
+
+	$(window).resize(onResize)
+    $('.reloadButton').click(function () {
+    	oldValue = null
+        reload()
+    })
+})
+
+</script>
+
+<textarea style="display:none" id="file">___FILE___</textarea>
+<div class="reloadButton iconButton"></div>
+<div id="contents" style="width: 100%; height: 100%"></div>
+
+</body>
+</html>
