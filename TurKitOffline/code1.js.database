@@ -1,6 +1,0 @@
-// begin:5861
-java_WireTap = "[JavaClass util.WireTap]"
-java_U = "[JavaClass util.U]"
-java_S3 = "[JavaClass turkitOffline.S3]"
-java_RhinoUtil = "[JavaClass turkitOffline.RhinoUtil]"
-// end:5861
