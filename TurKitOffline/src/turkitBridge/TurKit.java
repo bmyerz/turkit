@@ -14,10 +14,10 @@ import org.mozilla.javascript.Scriptable;
 import turkitOffline.MTurk;
 import turkitOffline.MTurkSOAP;
 import turkitOffline.RhinoUtil;
+import turkitOffline.TurKitPlaceholder;
 import util.U;
 
-public class TurKit {
-    public static String js_libs_path = "/turkitOffline/js_libs";
+public class TurKit extends TurKitPlaceholder {
 
     /**
      * The version number for this release of TurKit.

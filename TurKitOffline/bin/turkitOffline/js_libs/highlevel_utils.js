@@ -3,7 +3,7 @@
  * Use this instead of <code>Math.random()</code>. This is not just a
  * shorthand. It is important that TurKit programs run the same way each time
  * they are executed. This function wraps <code>Math.random()</code> inside a
- * call to {@link TraceManager#once}.
+ * call to {@link traceManager.once}.
  */
 function random() {
 	return once(function() {
@@ -39,7 +39,7 @@ function shuffle(a) {
 	This is good for randomizing the choices in voting tasks.</p>
 	
 	<p><code>bucketName</code> is optional.
-	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
+	If you do not provide it, the name {@link s3.defaultBucketName} will be used.</p>
 	*/
 function createWebpageFromTemplate(html, blockWorkers, bucketName) {
 	if (!bucketName) {

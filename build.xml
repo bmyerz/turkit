@@ -3,8 +3,8 @@
 	<target name="jsdocs" description="build JavaScript documentation">
 		<exec executable="java">
 			<arg value="-cp" />
-			<arg value="war/WEB-INF/classes" />
-			<arg value="turkit.js_docs.Main" />
+			<arg value="war/WEB-INF/classes;war/WEB-INF/lib/js.jar" />
+			<arg value="js_docs.Main" />
 		</exec>
 	</target>
 

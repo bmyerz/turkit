@@ -165,7 +165,7 @@ body {
 <div class="clear"></div>
 </div>
 
-<a name="once"><div class="func">once(<span class="param">func</span>,<span class="param"> name</span>)</div></a>
+<a name="once"><div class="func">once</div></a>
 <div class="doc">
 Calls the function func only once;
 subsequent runs of the program will not call func
@@ -175,7 +175,7 @@ If func crashes, then it will be called again when the program is rerun.
 The name parameter is used for error checking.
 Subsequent runs of the program will make sure that name is the same.
 </div>
-<a name="fork"><div class="func">fork(<span class="param">func</span>,<span class="param"> name</span>)</div></a>
+<a name="fork"><div class="func">fork</div></a>
 <div class="doc">
 Executes func in a pseudo-thread;
 if func crashes with a call to crash,
@@ -184,12 +184,12 @@ the program will keep running after this call to fork.
 Returns true iff func finishes successfully.
 
 </div>
-<a name="join"><div class="func">join()</div></a>
+<a name="join"><div class="func">join</div></a>
 <div class="doc">
 Makes sure all the forks have finished, otherwise we crash.
 
 </div>
-<a name="crash"><div class="func">crash(<span class="param">msg</span>)</div></a>
+<a name="crash"><div class="func">crash</div></a>
 <div class="doc">
 Throws a "crash" exception.
 This is the preferred way of ending execution
@@ -200,7 +200,7 @@ Note that the "crash" exception is caught by fork.
 
 Prints out the given <code>msg</code> too.
 </div>
-<a name="stop"><div class="func">stop(<span class="param">msg</span>)</div></a>
+<a name="stop"><div class="func">stop</div></a>
 <div class="doc">
 Throws a "crash" exception.
 This is a pseudonym for crash.
@@ -218,61 +218,61 @@ You probably want this, so that your HITs are only created once,
 even though your script will probably crash and rerun many times.
 
 </div>
-<a name="mturk.createHIT"><div class="func"><span class="prefix">mturk.</span>createHIT(<span class="param">params</span>)</div></a>
+<a name="mturk.createHIT"><div class="func"><span class="prefix">mturk.</span>createHIT</div></a>
 <div class="doc">
 Calls <a href="#mturkBase.createHIT">mturkBase.createHIT</a> inside of <a href="#once">once</a>.
 </div>
-<a name="mturk.extendHIT"><div class="func"><span class="prefix">mturk.</span>extendHIT(<span class="param">hit</span>,<span class="param"> moreAssignments</span>,<span class="param"> moreSeconds</span>)</div></a>
+<a name="mturk.extendHIT"><div class="func"><span class="prefix">mturk.</span>extendHIT</div></a>
 <div class="doc">
 Calls <a href="#mturkBase.extendHIT">mturkBase.extendHIT</a> inside of <a href="#once">once</a>.
 </div>
-<a name="mturk.deleteHIT"><div class="func"><span class="prefix">mturk.</span>deleteHIT(<span class="param">hit</span>)</div></a>
+<a name="mturk.deleteHIT"><div class="func"><span class="prefix">mturk.</span>deleteHIT</div></a>
 <div class="doc">
 Calls <a href="#mturkBase.deleteHIT">mturkBase.deleteHIT</a> inside of <a href="#once">once</a>.
 </div>
-<a name="mturk.deleteHITs"><div class="func"><span class="prefix">mturk.</span>deleteHITs(<span class="param">hits</span>)</div></a>
+<a name="mturk.deleteHITs"><div class="func"><span class="prefix">mturk.</span>deleteHITs</div></a>
 <div class="doc">
 Calls <a href="#mturk.deleteHIT">mturk.deleteHIT</a> for each HIT in the given hits array.
 </div>
-<a name="mturk.grantBonus"><div class="func"><span class="prefix">mturk.</span>grantBonus(<span class="param">assignment</span>,<span class="param"> amount</span>,<span class="param"> reason</span>)</div></a>
+<a name="mturk.grantBonus"><div class="func"><span class="prefix">mturk.</span>grantBonus</div></a>
 <div class="doc">
 Calls <a href="#mturkBase.grantBonus">mturkBase.grantBonus</a> inside of <a href="#once">once</a>.
 </div>
-<a name="mturk.approveAssignment"><div class="func"><span class="prefix">mturk.</span>approveAssignment(<span class="param">assignment</span>,<span class="param"> reason</span>)</div></a>
+<a name="mturk.approveAssignment"><div class="func"><span class="prefix">mturk.</span>approveAssignment</div></a>
 <div class="doc">
 Calls <a href="#mturkBase.approveAssignment">mturkBase.approveAssignment</a> inside of <a href="#once">once</a>.
 </div>
-<a name="mturk.approveAssignments"><div class="func"><span class="prefix">mturk.</span>approveAssignments(<span class="param">assignments</span>,<span class="param"> reason</span>)</div></a>
+<a name="mturk.approveAssignments"><div class="func"><span class="prefix">mturk.</span>approveAssignments</div></a>
 <div class="doc">
 Calls <a href="#mturk.approveAssignment">mturk.approveAssignment</a> for each assignment in the given
 assignments array.
 </div>
-<a name="mturk.rejectAssignment"><div class="func"><span class="prefix">mturk.</span>rejectAssignment(<span class="param">assignment</span>,<span class="param"> reason</span>)</div></a>
+<a name="mturk.rejectAssignment"><div class="func"><span class="prefix">mturk.</span>rejectAssignment</div></a>
 <div class="doc">
 Calls <a href="#mturkBase.rejectAssignment">mturkBase.rejectAssignment</a> inside of <a href="#once">once</a>.
 </div>
-<a name="mturk.rejectAssignments"><div class="func"><span class="prefix">mturk.</span>rejectAssignments(<span class="param">assignments</span>,<span class="param"> reason</span>)</div></a>
+<a name="mturk.rejectAssignments"><div class="func"><span class="prefix">mturk.</span>rejectAssignments</div></a>
 <div class="doc">
 Calls <a href="#mturk.rejectAssignment">mturk.rejectAssignment</a> for each assignment in the given
 assignments array.
 </div>
-<a name="mturk.waitForHIT"><div class="func"><span class="prefix">mturk.</span>waitForHIT(<span class="param">hit</span>)</div></a>
+<a name="mturk.waitForHIT"><div class="func"><span class="prefix">mturk.</span>waitForHIT</div></a>
 <div class="doc">
 Returns information about the hit if it is done (see <a href="#mturkBase.getHIT">mturkBase.getHIT</a>),
 otherwise it crashes.
 </div>
-<a name="mturk.createHITAndWait"><div class="func"><span class="prefix">mturk.</span>createHITAndWait(<span class="param">params</span>)</div></a>
+<a name="mturk.createHITAndWait"><div class="func"><span class="prefix">mturk.</span>createHITAndWait</div></a>
 <div class="doc">
 Calls <a href="#mturk.createHIT">mturk.createHIT</a> and then <a href="#mturk.waitForHIT">mturk.waitForHIT</a>,
 and returns the results of the completed HIT.
 </div>
-<a name="mturk.prompt"><div class="func"><span class="prefix">mturk.</span>prompt(<span class="param">message</span>,<span class="param"> params</span>)</div></a>
+<a name="mturk.prompt"><div class="func"><span class="prefix">mturk.</span>prompt</div></a>
 <div class="doc">
 Creates a HIT with the given prompt,
 waits for someone to answer it,
 and returns the result.
 </div>
-<a name="mturk.vote"><div class="func"><span class="prefix">mturk.</span>vote(<span class="param">message</span>,<span class="param"> options</span>,<span class="param"> votesNeeded</span>,<span class="param"> params</span>)</div></a>
+<a name="mturk.vote"><div class="func"><span class="prefix">mturk.</span>vote</div></a>
 <div class="doc">
 Creates a voting HIT with the given prompt,
 waits for people to answer it,
@@ -288,7 +288,7 @@ return assignment.answer.response
 }
 </pre>
 </div>
-<a name="mturk.survey"><div class="func"><span class="prefix">mturk.</span>survey(<span class="param">message</span>,<span class="param"> options</span>,<span class="param"> count</span>,<span class="param"> params</span>)</div></a>
+<a name="mturk.survey"><div class="func"><span class="prefix">mturk.</span>survey</div></a>
 <div class="doc">
 Creates a survey HIT with the given prompt,
 waits for people to answer it,
@@ -302,11 +302,11 @@ This module contains helper functions for making REST requests to Mechanical Tur
 Note that it uses the AWS access keys supplied in props,
 as well as the mode (either "real" or "sandbox").
 </div>
-<a name="mturkBase.getAccountBalance"><div class="func"><span class="prefix">mturkBase.</span>getAccountBalance()</div></a>
+<a name="mturkBase.getAccountBalance"><div class="func"><span class="prefix">mturkBase.</span>getAccountBalance</div></a>
 <div class="doc">
 Returns the number of dollars in the user's MTurk account.
 </div>
-<a name="mturkBase.createHIT"><div class="func"><span class="prefix">mturkBase.</span>createHIT(<span class="param">params</span>)</div></a>
+<a name="mturkBase.createHIT"><div class="func"><span class="prefix">mturkBase.</span>createHIT</div></a>
 <div class="doc">
 Creates a HIT. params is an object with the following properties:
 <ul>
@@ -337,7 +337,7 @@ The following properties are optional:
 The appropriate requirement will be added if you supply a percentage here.</li>
 </ul>
 </div>
-<a name="mturkBase.getReviewableHITs"><div class="func"><span class="prefix">mturkBase.</span>getReviewableHITs(<span class="param">maxPages</span>)</div></a>
+<a name="mturkBase.getReviewableHITs"><div class="func"><span class="prefix">mturkBase.</span>getReviewableHITs</div></a>
 <div class="doc">
 Returns a list of HIT Ids of HITs that are ready to be reviewed.
 You may optionally specify <code>maxPages</code>,
@@ -347,7 +347,7 @@ If <code>maxPages</code> is specified,
 then the return value will have a property called <code>totalNumResults</code>,
 which indicates how many HITs are reviewable.
 </div>
-<a name="mturkBase.getHIT"><div class="func"><span class="prefix">mturkBase.</span>getHIT(<span class="param">hit</span>,<span class="param"> getAssignments</span>)</div></a>
+<a name="mturkBase.getHIT"><div class="func"><span class="prefix">mturkBase.</span>getHIT</div></a>
 <div class="doc">
 Returns an object representing all of the information MTurk has on the given
 HIT, including the assignments, and the associated answer data. The returned
@@ -360,31 +360,31 @@ Note that the answer data structure associated with each assignment is
 simplified. It is recommended that you print out the result of this function
 using json, in order to know what it looks like for your specific situation.
 </div>
-<a name="mturkBase.extendHIT"><div class="func"><span class="prefix">mturkBase.</span>extendHIT(<span class="param">hit</span>,<span class="param"> moreAssignments</span>,<span class="param"> moreSeconds</span>)</div></a>
+<a name="mturkBase.extendHIT"><div class="func"><span class="prefix">mturkBase.</span>extendHIT</div></a>
 <div class="doc">
 Extends the hit by the given number of assignments (moreAssignments),
 and the given number of seconds (moreSeconds).
 </div>
-<a name="mturkBase.deleteHIT"><div class="func"><span class="prefix">mturkBase.</span>deleteHIT(<span class="param">hit</span>)</div></a>
+<a name="mturkBase.deleteHIT"><div class="func"><span class="prefix">mturkBase.</span>deleteHIT</div></a>
 <div class="doc">
 Deletes the given hit.
 If there are any completed assignments that have not been approved or rejected,
 then they are approved.
 </div>
-<a name="mturkBase.grantBonus"><div class="func"><span class="prefix">mturkBase.</span>grantBonus(<span class="param">assignment</span>,<span class="param"> amount</span>,<span class="param"> reason</span>)</div></a>
+<a name="mturkBase.grantBonus"><div class="func"><span class="prefix">mturkBase.</span>grantBonus</div></a>
 <div class="doc">
 Grants a bonus of the given amount to the given
 assignment for the stated reason.
 </div>
-<a name="mturkBase.approveAssignment"><div class="func"><span class="prefix">mturkBase.</span>approveAssignment(<span class="param">assignment</span>,<span class="param"> reason</span>)</div></a>
+<a name="mturkBase.approveAssignment"><div class="func"><span class="prefix">mturkBase.</span>approveAssignment</div></a>
 <div class="doc">
 Approves the given assignment, and provides an optional reason.
 </div>
-<a name="mturkBase.rejectAssignment"><div class="func"><span class="prefix">mturkBase.</span>rejectAssignment(<span class="param">assignment</span>,<span class="param"> reason</span>)</div></a>
+<a name="mturkBase.rejectAssignment"><div class="func"><span class="prefix">mturkBase.</span>rejectAssignment</div></a>
 <div class="doc">
 Rejects the given assignment, and provides an optional reason.
 </div>
-<a name="mturkBase.getHITs"><div class="func"><span class="prefix">mturkBase.</span>getHITs(<span class="param">maxPages</span>)</div></a>
+<a name="mturkBase.getHITs"><div class="func"><span class="prefix">mturkBase.</span>getHITs</div></a>
 <div class="doc">
 Returns an array of HIT data for all the HITs you currently have on MTurk.
 </div>
@@ -394,27 +394,27 @@ This module contains wrappers around webpageBase functions using once.
 You probably want this, so that your webpages are only created once,
 even though your script will probably crash and rerun many times.
 </div>
-<a name="webpage.create"><div class="func"><span class="prefix">webpage.</span>create(<span class="param">contents</span>,<span class="param"> blockWorkers</span>)</div></a>
+<a name="webpage.create"><div class="func"><span class="prefix">webpage.</span>create</div></a>
 <div class="doc">
 Wraps <a href="#webpageBase.create">webpageBase.create</a> in a call to <a href="#once">once</a>.
 
 You can block one or more turkers from doing this HIT by passing them as a string or array to blockWorkers.
 </div>
-<a name="webpage.remove"><div class="func"><span class="prefix">webpage.</span>remove(<span class="param">url</span>)</div></a>
+<a name="webpage.remove"><div class="func"><span class="prefix">webpage.</span>remove</div></a>
 <div class="doc">
 Wraps <a href="#webpageBase.remove">webpageBase.remove</a> in a call to <a href="#once">once</a>.
 </div>
-<a name="webpage.setData"><div class="func"><span class="prefix">webpage.</span>setData(<span class="param">url</span>,<span class="param"> data</span>)</div></a>
+<a name="webpage.setData"><div class="func"><span class="prefix">webpage.</span>setData</div></a>
 <div class="doc">
 Wraps <a href="#webpageBase.setData">webpageBase.setData</a> in a call to <a href="#once">once</a>.
 </div>
-<a name="webpage.waitForData"><div class="func"><span class="prefix">webpage.</span>waitForData(<span class="param">url</span>)</div></a>
+<a name="webpage.waitForData"><div class="func"><span class="prefix">webpage.</span>waitForData</div></a>
 <div class="doc">
 If there is data available from the client, this data is returned and remembered
 in a call to <a href="#once">once</a>.
 If there is no data available, this method calls <a href="#crash">crash</a>.
 </div>
-<a name="webpage.createHITTemplate"><div class="func"><span class="prefix">webpage.</span>createHITTemplate(<span class="param">html</span>,<span class="param"> blockWorkers</span>)</div></a>
+<a name="webpage.createHITTemplate"><div class="func"><span class="prefix">webpage.</span>createHITTemplate</div></a>
 <div class="doc">
 Returns a webpage that can be used as a HIT.
 The html passed to this function will be pasted into a DIV inside a template file.
@@ -426,24 +426,24 @@ You can block one or more turkers from doing this HIT by passing them as a strin
 This module contains functions for creating and communicating with webpages
 that will be servered from the TurKit server.
 </div>
-<a name="webpageBase.create"><div class="func"><span class="prefix">webpageBase.</span>create(<span class="param">contents</span>,<span class="param"> blockWorkers</span>)</div></a>
+<a name="webpageBase.create"><div class="func"><span class="prefix">webpageBase.</span>create</div></a>
 <div class="doc">
 Creates a publicly accessible webpage with the given contents.
 Returns the URL to the webpage.
 
 You can block one or more turkers from doing this HIT by passing them as a string or array to blockWorkers.
 </div>
-<a name="webpageBase.remove"><div class="func"><span class="prefix">webpageBase.</span>remove(<span class="param">url</span>)</div></a>
+<a name="webpageBase.remove"><div class="func"><span class="prefix">webpageBase.</span>remove</div></a>
 <div class="doc">
 Removes the webpage at the specified URL.
 </div>
-<a name="webpageBase.setData"><div class="func"><span class="prefix">webpageBase.</span>setData(<span class="param">url</span>,<span class="param"> data</span>)</div></a>
+<a name="webpageBase.setData"><div class="func"><span class="prefix">webpageBase.</span>setData</div></a>
 <div class="doc">
 Webpages have a little bit of data associated with them
 allowing the server and client to communicate.
 This method sets that data.
 </div>
-<a name="webpageBase.getData"><div class="func"><span class="prefix">webpageBase.</span>getData(<span class="param">url</span>)</div></a>
+<a name="webpageBase.getData"><div class="func"><span class="prefix">webpageBase.</span>getData</div></a>
 <div class="doc">
 Webpages have a little bit of data associated with them
 allowing the server and client to communicate.
@@ -650,11 +650,11 @@ Returns the max element.
 <div class="doc">
 Returns the index of the max element
 </div>
-<a name="escapeXml"><div class="func">escapeXml(<span class="param">s</span>)</div></a>
+<a name="escapeXml"><div class="func">escapeXml</div></a>
 <div class="doc">
 Escape the string for use inside XML, e.g., convert characters like &amp; into &amp;amp;.
 </div>
-<a name="unescapeXml"><div class="func">unescapeXml(<span class="param">s</span>)</div></a>
+<a name="unescapeXml"><div class="func">unescapeXml</div></a>
 <div class="doc">
 Unescape a string with XML escape codes, e.g., convert sequences like &amp;amp; into &amp;.
 </div>
@@ -665,11 +665,11 @@ If <code>a</code> is a set, add it's elements to this set.
 If <code>a</code> is an object, add it's values to this set.
 If <code>a</code> is an element, add it to this set.
 </div>
-<a name="Set.prototype.clone"><div class="func"><span class="prefix">Set.prototype.</span>clone()</div></a>
+<a name="Set.prototype.clone"><div class="func"><span class="prefix">Set.prototype.</span>clone</div></a>
 <div class="doc">
 Returns a clone of the Set.
 </div>
-<a name="Set.prototype.remove"><div class="func"><span class="prefix">Set.prototype.</span>remove(<span class="param">a</span>)</div></a>
+<a name="Set.prototype.remove"><div class="func"><span class="prefix">Set.prototype.</span>remove</div></a>
 <div class="doc">
 If <code>a</code> is a set, remove it's elements from this set.
 If <code>a</code> is an object, remove it's values from this set.
@@ -678,7 +678,7 @@ If <code>a</code> is an element, remove it from this set.
 Returns this Set, after the removal.
 If removing a single element, returns <code>true</code> iff the element existed before.
 </div>
-<a name="Set.prototype.add"><div class="func"><span class="prefix">Set.prototype.</span>add(<span class="param">a</span>)</div></a>
+<a name="Set.prototype.add"><div class="func"><span class="prefix">Set.prototype.</span>add</div></a>
 <div class="doc">
 If <code>a</code> is a set, add it's elements to this set.
 If <code>a</code> is an object, add it's values to this set.
@@ -687,7 +687,7 @@ If <code>a</code> is an element, add it to this set.
 Returns this Set, after the addition.
 If adding a single element, returns <code>true</code> iff the element didn't exist before.
 </div>
-<a name="Set.prototype.intersect"><div class="func"><span class="prefix">Set.prototype.</span>intersect(<span class="param">b</span>)</div></a>
+<a name="Set.prototype.intersect"><div class="func"><span class="prefix">Set.prototype.</span>intersect</div></a>
 <div class="doc">
 Returns a new Set representing the intersection of this Set with <code>a</code>.
 If <code>a</code> is an object, a set is created from its values, and the intersection is done with that.
@@ -706,11 +706,11 @@ If <code>a</code> is a bag, add it's elements to this bag.
 If <code>a</code> is an object, add it's values to this bag.
 If <code>a</code> is an element, add it to this bag.
 </div>
-<a name="Bag.prototype.clone"><div class="func"><span class="prefix">Bag.prototype.</span>clone()</div></a>
+<a name="Bag.prototype.clone"><div class="func"><span class="prefix">Bag.prototype.</span>clone</div></a>
 <div class="doc">
 Returns a clone of the bag.
 </div>
-<a name="Bag.prototype.add"><div class="func"><span class="prefix">Bag.prototype.</span>add(<span class="param">a</span>,<span class="param"> count</span>)</div></a>
+<a name="Bag.prototype.add"><div class="func"><span class="prefix">Bag.prototype.</span>add</div></a>
 <div class="doc">
 If <code>a</code> is a bag, add it's elements to this bag, and returns the new bag.
 If <code>a</code> is an object, add it's values to this bag, and returns the new bag.
@@ -719,7 +719,7 @@ If <code>a</code> is an element, add it to this bag, and return the new number o
 The parameter <code>count</code> defaults to 1,
 but can be changed to add multiple copies of <code>a</code> to the bag.
 </div>
-<a name="Bag.prototype.get"><div class="func"><span class="prefix">Bag.prototype.</span>get(<span class="param">a</span>)</div></a>
+<a name="Bag.prototype.get"><div class="func"><span class="prefix">Bag.prototype.</span>get</div></a>
 <div class="doc">
 Get's the number of <code>a</code>'s in the bag.
 
@@ -742,26 +742,26 @@ Licensed under the MIT (MIT-LICENSE.txt) licence.
 <div class="doc">
 Utility methods for doing statistics. More to come here in the future.
 </div>
-<a name="stats.sum"><div class="func"><span class="prefix">stats.</span>sum(<span class="param">a</span>)</div></a>
+<a name="stats.sum"><div class="func"><span class="prefix">stats.</span>sum</div></a>
 <div class="doc">
 Calculate the sum of an array
 </div>
-<a name="stats.mean"><div class="func"><span class="prefix">stats.</span>mean(<span class="param">a</span>,<span class="param"> sum</span>)</div></a>
+<a name="stats.mean"><div class="func"><span class="prefix">stats.</span>mean</div></a>
 <div class="doc">
 Calculate the mean of an array.
 <code>sum</code> is optional -- it will be calculated if not supplied. 
 </div>
-<a name="stats.variance"><div class="func"><span class="prefix">stats.</span>variance(<span class="param">a</span>,<span class="param"> mean</span>)</div></a>
+<a name="stats.variance"><div class="func"><span class="prefix">stats.</span>variance</div></a>
 <div class="doc">
 Calculate the variance of an array.
 <code>mean</code> is optional -- it will be calculated if not supplied. 
 </div>
-<a name="stats.sd"><div class="func"><span class="prefix">stats.</span>sd(<span class="param">a</span>,<span class="param"> mean</span>)</div></a>
+<a name="stats.sd"><div class="func"><span class="prefix">stats.</span>sd</div></a>
 <div class="doc">
 Calculate the standard deviation of an array.
 <code>mean</code> is optional -- it will be calculated if not supplied. 
 </div>
-<a name="stats.all"><div class="func"><span class="prefix">stats.</span>all(<span class="param">a</span>)</div></a>
+<a name="stats.all"><div class="func"><span class="prefix">stats.</span>all</div></a>
 <div class="doc">
 Calculate the sum, mean, variance and standard deviation of <code>a</code>.
 </div>

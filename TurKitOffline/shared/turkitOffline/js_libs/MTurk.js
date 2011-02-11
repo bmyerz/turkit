@@ -1,16 +1,13 @@
 
-/**
- * You probably want to use the global variable <code>mturk</code>.
- * 
- * @class MTurk contains wrappers around the Java API for accessing Mechanical
- *        Turk.
- * 
- * <p>
- * <code>mturk</code> is a global instance of the MTurk class.
- * </p>
- */
 function MTurk() {
 }
+
+
+/**
+ * MTurk contains wrappers around the Java API for accessing Mechanical
+ *        Turk.
+ */
+mturk = new MTurk()
 
 /*
  * Throw an exception if we cannot spend the given amount of <i>money</i>, or
@@ -352,191 +349,7 @@ function typeOf(obj) {
 }
 
 /**
- * Creates a HIT. <i>params</i> is an object with the following properties:
- * <ul>
- * <li><b>title</b>: displayed in the list of HITs on MTurk.</li>
- * <li><b>description</b>: <b>desc</b> is also accepted. A slightly longer
- * description of the HIT, also shown in the list of HITs on MTurk</li>
- * <li><b>question</b>: a string of XML specifying what will be shown. <a
- * href="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/index.html?ApiReference_QuestionFormDataStructureArticle.html">See
- * documentation here</a>. Instead of <i>question</i>, you may use the following special parameters:
- <ul>
- <li><b>url</b>: creates an external question pointing to this URL</li>
- <li><b>height</b>: (optional) height of the iFrame embedded in MTurk, in pixels (default is 600).</li>
- </ul>
- 
- </li>
- * <li><b>reward</b>: how many dollars you want to pay per assignment for this
- * HIT.
- * </ul>
- * The following properties are optional:
- * <ul>
- * <li><b>keywords</b>: keywords to help people search for your HIT.</li>
- * <li><b>assignmentDurationInSeconds</b>: default is 1 hour's worth of
- * seconds.</li>
- * <li><b>autoApprovalDelayInSeconds</b>: default is 1 month's worth of
- * seconds.</li>
- * <li><b>lifetimeInSeconds</b>: default is 1 week's worth of seconds.</li>
- * <li><b>maxAssignments</b>: <b>assignments</b> is also accepted. default is 1.</li>
- * <li><b>requesterAnnotation</b>: default is no annotation.</li>
- * <li><b>qualificationRequirements</b>: default is no requirements.</li>
- * <li><b>minApproval</b>: minimum approval percentage. The appropriate
- * requirement will be added if you supply a percentage here.</li>
- * </ul>
- */
- 
- /*
-MTurk.prototype.createHITRaw = function(params) {
-	if (!params)
-		params = {}
-		
-	// let them know if they provide param names that are not on the list
-	var badKeys = keys(new Set(keys(params)).remove([
-		"title",
-		"desc",
-		"description",
-		"reward",
-		"assignmentDurationInSeconds",
-		"minApproval",
-		"html",
-		"bucket",
-		"url",
-		"blockWorkers",
-		"height",
-		"question",
-		"lifetimeInSeconds",
-		"assignments",
-		"maxAssignments",
-		"numAssignments",
-		"autoApprovalDelayInSeconds",
-		"requesterAnnotation",
-		"keywords",
-		"qualificationRequirements",
-	]))
-	if (badKeys.length > 0) {
-		throw new java.lang.Exception("some parameters to createHIT are not understood: " + badKeys.join(', '))
-	}
-
-	if (!params.title)
-		throw new java.lang.Exception("createHIT requires a title")
-
-	if (params.desc)
-		params.description = params.desc
-	if (!params.description)
-		throw new java.lang.Exception("createHIT requires a description")
-
-	if (params.reward == null)
-		throw new java.lang.Exception("createHIT requires a reward")
-
-	if (!params.assignmentDurationInSeconds)
-		params.assignmentDurationInSeconds = 60 * 60 // one hour
-
-	if (params.minApproval) {
-		var q = ensure(params, "qualificationRequirements", [])
-		var i = (q.length / 3) + 1
-		q.push("QualificationRequirement." + i + ".QualificationTypeId")
-		q.push("000000000000000000L0")
-		q.push("QualificationRequirement." + i + ".Comparator")
-		q.push("GreaterThanOrEqualTo")
-		q.push("QualificationRequirement." + i + ".IntegerValue")
-		q.push(params.minApproval)
-	}
-
-	if (params.html) {
-		if (!params.bucket) {
-			params.bucket = javaTurKit.awsAccessKeyID.toLowerCase() + "-turkit"
-		}
-		var s = ("" + javaTurKit.taskTemplate).replace(/\[\[\[CONTENT\]\]\]/, params.html)
-		var key = java_U.md5(s) + ".html"
-		params.url = s3.putString(params.bucket, key, s)
-		
-		if (params.blockWorkers) {
-			if ((typeof params.blockWorkers) != "string") {
-				params.blockWorkers = params.blockWorkers.join(",")
-			}
-			params.url += "?blockWorkers=" + params.blockWorkers
-		}
-	}
-	
-	if (params.url) {
-		if (!params.height)
-			params.height = 600
-
-		params.question = '<ExternalQuestion xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2006-07-14/ExternalQuestion.xsd">'
-				+ '<ExternalURL>'
-				+ escapeXml(params.url)
-				+ '</ExternalURL>'
-				+ '<FrameHeight>'
-				+ params.height
-				+ '</FrameHeight>'
-				+ '</ExternalQuestion>'
-	}
-
-	if (!params.question)
-		throw new java.lang.Exception("createHIT requires a question (or a url, or html)")
-
-	if (!params.lifetimeInSeconds)
-		params.lifetimeInSeconds = 60 * 60 * 24 * 7 // one week
-		
-	if (params.assignments)
-		params.maxAssignments = params.assignments
-	if (params.numAssignments)
-		params.maxAssignments = params.numAssignments 
-	if (!params.maxAssignments)
-		params.maxAssignments = 1
-
-	if (!params.autoApprovalDelayInSeconds)
-		params.autoApprovalDelayInSeconds = null
-
-	if (javaTurKit.safety) {
-		if (params.hitTypeId) {
-			ensure(params, 'responseGroup', []).push('HITDetail')
-		} else {
-			this.assertWeCanSpend(params.reward * params.maxAssignments, 1)
-		}
-	}
-
-	if (!params.requesterAnnotation)
-		params.requesterAnnotation = null
-
-	if (!params.responseGroup)
-		params.responseGroup = null
-
-	if (!params.qualificationRequirements)
-		params.qualificationRequirements = null
-
-	var x = new XML(javaTurKit.soapRequest("CreateHIT",
-			["Title", params.title,
-			"Description", params.description,
-			"Question", params.question,
-			"Reward.1.Amount", params.reward,
-			"Reward.1.CurrencyCode", "USD",
-			"AssignmentDurationInSeconds", params.assignmentDurationInSeconds,
-			"LifetimeInSeconds", params.lifetimeInSeconds,
-			"Keywords", params.keywords,
-			"MaxAssignments", params.maxAssignments,
-			"AutoApprovalDelayInSeconds", params.autoApprovalDelayInSeconds,
-			"RequesterAnnotation", params.requesterAnnotation].
-			concat(params.qualificationRequirements ? params.qualificationRequirements : [])
-		))
-	if ('' + x..Request.IsValid != "True") throw "Failed to create HIT: " + x
-	var hit = x..HIT
-
-	var hitId = this.tryToGetHITId(hit)
-	
-	verbosePrint("created HIT: " + hitId)
-	var url = (javaTurKit.mode == "sandbox"
-					? "https://workersandbox.mturk.com/mturk/preview?groupId="
-					: "https://www.mturk.com/mturk/preview?groupId=")
-			+ hit.HITTypeId
-	verbosePrint("        url: " + url)
-	database.query("ensure(null, ['__HITs', " + json(javaTurKit.mode + ":" + hitId) + "], " + json({url : url}) + ")")
-	return hitId
-}
-*/
-
-/**
- * Calls {@link MTurk#createHITRaw} inside of {@link TraceManager#once}.
+ * Calls {@link mturk.createHITRaw} inside of {@link traceManager.once}.
  */
 MTurk.prototype.createHIT = function(params) {
 	return once(function() {
@@ -830,7 +643,7 @@ MTurk.prototype.extendHITRaw = function(hit, moreAssignments, moreSeconds) {
 }
 
 /**
- * Calls {@link MTurk#extendHITRaw} inside of {@link TraceManager#once}.
+ * Calls {@link mturk.extendHITRaw} inside of {@link traceManager.once}.
  */
 MTurk.prototype.extendHIT = function(hit, moreAssignments, moreSeconds) {
 	return once(function() {
@@ -882,7 +695,7 @@ MTurk.prototype.deleteHITRaw = function(hit) {
 }
 
 /**
- * Calls {@link MTurk#deleteHITRaw} inside of {@link TraceManager#once}.
+ * Calls {@link mturk.deleteHITRaw} inside of {@link traceManager.once}.
  */
 MTurk.prototype.deleteHIT = function(hit) {
 	once(function() {
@@ -891,7 +704,7 @@ MTurk.prototype.deleteHIT = function(hit) {
 }
 
 /**
- * Calls {@link MTurk#deleteHITRaw} on the array of <code>hits</code>.
+ * Calls {@link mturk.deleteHITRaw} on the array of <code>hits</code>.
  */
 MTurk.prototype.deleteHITsRaw = function(hits) {
 	if (!(hits instanceof Array)) {
@@ -903,7 +716,7 @@ MTurk.prototype.deleteHITsRaw = function(hits) {
 }
 
 /**
- * Calls {@link MTurk#deleteHITsRaw} inside of {@link TraceManager#once}.
+ * Calls {@link mturk.deleteHITsRaw} inside of {@link traceManager.once}.
  */
 MTurk.prototype.deleteHITs = function(hits) {
 	once(function() {
@@ -928,7 +741,7 @@ MTurk.prototype.grantBonusRaw = function(assignment, amount, reason) {
 }
 
 /**
- * Calls {@link MTurk#grantBonusRaw} inside of {@link TraceManager#once}.
+ * Calls {@link mturk.grantBonusRaw} inside of {@link traceManager.once}.
  */
 MTurk.prototype.grantBonus = function(assignment, amount, reason) {
 	return once(function() {
@@ -954,7 +767,7 @@ MTurk.prototype.approveAssignmentRaw = function(assignment, reason) {
 }
 
 /**
- * Calls {@link MTurk#approveAssignmentRaw} inside of {@link TraceManager#once}.
+ * Calls {@link mturk.approveAssignmentRaw} inside of {@link traceManager.once}.
  */
 MTurk.prototype.approveAssignment = function(assignment, reason) {
 	return once(function() {
@@ -963,7 +776,7 @@ MTurk.prototype.approveAssignment = function(assignment, reason) {
 }
 
 /**
- * Calls {@link MTurk#approveAssignment} for each assignment in the given
+ * Calls {@link mturk.approveAssignment} for each assignment in the given
  * <code>assignments</code> array.
  */
 MTurk.prototype.approveAssignments = function(assignments, reason) {
@@ -990,7 +803,7 @@ MTurk.prototype.rejectAssignmentRaw = function(assignment, reason) {
 }
 
 /**
- * Calls {@link MTurk#rejectAssignmentRaw} inside of {@link TraceManager#once}.
+ * Calls {@link mturk.rejectAssignmentRaw} inside of {@link traceManager.once}.
  */
 MTurk.prototype.rejectAssignment = function(assignment, reason) {
 	return once(function() {
@@ -999,7 +812,7 @@ MTurk.prototype.rejectAssignment = function(assignment, reason) {
 }
 
 /**
- * Calls {@link MTurk#rejectAssignment} for each assignment in the given
+ * Calls {@link mturk.rejectAssignment} for each assignment in the given
  * <code>assignments</code> array.
  */
 MTurk.prototype.rejectAssignments = function(assignments, reason) {
@@ -1043,7 +856,7 @@ MTurk.prototype.getHITs = function(maxPages) {
 
 /**
  * Returns information about the <code>hit</code> if it is done (see
- * {@link MTurk#getHIT}), and throwing the "stop" exception if it is still in
+ * {@link mturk.getHIT}), and throwing the "stop" exception if it is still in
  * progress.
  */
 MTurk.prototype.waitForHIT = function(hit) {
@@ -1110,7 +923,7 @@ MTurk.prototype.waitForHIT = function(hit) {
  * necessary for a single choice. This function will add assignments if
  * necessary. This function relies on <code>extractVoteFromAnswer</code> to
  * extract a String representing the choice given an answer data structure (see
- * {@link MTurk#getHIT}).
+ * {@link mturk.getHIT}).
  * 
  * <p>
  * The return value is an object with the following entries:
@@ -1162,7 +975,7 @@ MTurk.prototype.vote = function(hit, extractVoteFromAnswer) {
 /**
  * Works just like the JavaScript array sort function, except that this one can
  * perform comparisons in parallel on MTurk by catching the "stop" exception
- * which is thrown when waiting on an MTurk HIT using {@link MTurk#waitForHIT}.
+ * which is thrown when waiting on an MTurk HIT using {@link mturk.waitForHIT}.
  */
 MTurk.prototype.sort = function(a, comparator) {
 	traceManager.pushFrame()
@@ -1211,10 +1024,3 @@ MTurk.prototype.sort = function(a, comparator) {
 		traceManager.popFrame()
 	}
 }
-
-/**
- * A reference to an {@link MTurk} object.
- * 
- * @return {MTurk}
- */
-mturk = new MTurk()

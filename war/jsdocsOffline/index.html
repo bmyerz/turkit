@@ -1,0 +1,877 @@
+<html>
+<head>
+<title>TurKit JavaScript API</title>
+<style>
+
+img {
+	border-style: none;
+}
+
+body {
+    font-family:"Trebuchet MS",Arial,Sans-Serif;
+}
+
+.func {
+    margin-top : 50px;
+    border-top : 1px solid #e0e0e0;
+	font-weight : bold;
+}
+
+.doc {
+    margin-top : 25px;
+	padding-left : 100px;
+}
+
+.param {
+	font-family:"Courier New", Courier, Sans-Serif;
+	font-weight : normal;
+}
+
+.prefix {
+	color: #a0a0a0;
+	font-weight : normal;
+}
+
+.main {
+    width:900px;
+    margin-left: auto ;
+    margin-right: auto ;
+}
+
+.index {
+    border-top : 1px solid #e0e0e0;
+}
+
+.index-list {
+    float: left;
+    margin-right: 50px;
+}
+
+.indent {
+	padding-left: 25px;
+}
+
+.clear {
+    clear: both;
+}
+
+</style>
+</head>
+<body>
+
+<div class="main">
+
+<div style="float:left"><a href="/"><img src="/logos/logo-140.png"></a></div>
+<div style="float:right;vertical-align:bottom">Offline JavaScript API</div>
+<div style="clear:both"></div>
+<div class="index">
+
+<div class="index-list"><div class="index-func"><a href="#once">once</a></div>
+<div class="index-func"><a href="#attempt">attempt</a></div>
+<div class="index-func"><a href="#setTrace">setTrace</a></div>
+<div class="index-func"><a href="#resetTrace">resetTrace</a></div>
+<div class="index-func"><a href="#stop">stop</a></div>
+<div class="index-func"><a href="#traceManager">traceManager</a></div>
+<div class="index-func indent"><a href="#traceManager.pushFrame">pushFrame</a></div>
+<div class="index-func indent"><a href="#traceManager.peekFrame">peekFrame</a></div>
+<div class="index-func indent"><a href="#traceManager.setFrameValue">setFrameValue</a></div>
+<div class="index-func indent"><a href="#traceManager.getFrameValue">getFrameValue</a></div>
+<div class="index-func indent"><a href="#traceManager.popFrame">popFrame</a></div>
+<div class="index-func indent"><a href="#traceManager.once">once</a></div>
+<div class="index-func indent"><a href="#traceManager.attempt">attempt</a></div>
+<div class="index-func indent"><a href="#traceManager.setTrace">setTrace</a></div>
+<div class="index-func indent"><a href="#traceManager.resetTrace">resetTrace</a></div>
+<div class="index-func indent"><a href="#traceManager.stop">stop</a></div>
+<div class="index-func"><a href="#database">database</a></div>
+<div class="index-func indent"><a href="#database.query">query</a></div>
+<div class="index-func indent"><a href="#database.queryRaw">queryRaw</a></div>
+</div><div class="index-list"><div class="index-func"><a href="#mturk">mturk</a></div>
+<div class="index-func indent"><a href="#mturk.getAccountBalance">getAccountBalance</a></div>
+<div class="index-func indent"><a href="#mturk.createHITRaw">createHITRaw</a></div>
+<div class="index-func indent"><a href="#mturk.createHIT">createHIT</a></div>
+<div class="index-func indent"><a href="#mturk.getReviewableHITs">getReviewableHITs</a></div>
+<div class="index-func indent"><a href="#mturk.tryToGetHITId">tryToGetHITId</a></div>
+<div class="index-func indent"><a href="#mturk.tryToGetAssignmentId">tryToGetAssignmentId</a></div>
+<div class="index-func indent"><a href="#mturk.getHIT">getHIT</a></div>
+<div class="index-func indent"><a href="#mturk.extendHITRaw">extendHITRaw</a></div>
+<div class="index-func indent"><a href="#mturk.extendHIT">extendHIT</a></div>
+<div class="index-func indent"><a href="#mturk.deleteHITRaw">deleteHITRaw</a></div>
+<div class="index-func indent"><a href="#mturk.deleteHIT">deleteHIT</a></div>
+<div class="index-func indent"><a href="#mturk.deleteHITsRaw">deleteHITsRaw</a></div>
+<div class="index-func indent"><a href="#mturk.deleteHITs">deleteHITs</a></div>
+<div class="index-func indent"><a href="#mturk.grantBonusRaw">grantBonusRaw</a></div>
+<div class="index-func indent"><a href="#mturk.grantBonus">grantBonus</a></div>
+<div class="index-func indent"><a href="#mturk.approveAssignmentRaw">approveAssignmentRaw</a></div>
+<div class="index-func indent"><a href="#mturk.approveAssignment">approveAssignment</a></div>
+<div class="index-func indent"><a href="#mturk.approveAssignments">approveAssignments</a></div>
+<div class="index-func indent"><a href="#mturk.rejectAssignmentRaw">rejectAssignmentRaw</a></div>
+<div class="index-func indent"><a href="#mturk.rejectAssignment">rejectAssignment</a></div>
+<div class="index-func indent"><a href="#mturk.rejectAssignments">rejectAssignments</a></div>
+<div class="index-func indent"><a href="#mturk.getHITs">getHITs</a></div>
+<div class="index-func indent"><a href="#mturk.waitForHIT">waitForHIT</a></div>
+<div class="index-func indent"><a href="#mturk.vote">vote</a></div>
+<div class="index-func indent"><a href="#mturk.sort">sort</a></div>
+</div><div class="index-list"><div class="index-func"><a href="#s3">s3</a></div>
+<div class="index-func indent"><a href="#s3.defaultBucketName">defaultBucketName</a></div>
+<div class="index-func indent"><a href="#s3.getURL">getURL</a></div>
+<div class="index-func indent"><a href="#s3.getBucketAndKey">getBucketAndKey</a></div>
+<div class="index-func indent"><a href="#s3.deleteObjectRaw">deleteObjectRaw</a></div>
+<div class="index-func indent"><a href="#s3.deleteObject">deleteObject</a></div>
+<div class="index-func indent"><a href="#s3.putObjectRaw">putObjectRaw</a></div>
+<div class="index-func indent"><a href="#s3.putObject">putObject</a></div>
+<div class="index-func indent"><a href="#s3.putStringRaw">putStringRaw</a></div>
+<div class="index-func indent"><a href="#s3.putString">putString</a></div>
+<div class="index-func indent"><a href="#s3.putFileRaw">putFileRaw</a></div>
+<div class="index-func indent"><a href="#s3.putFile">putFile</a></div>
+</div><div class="index-list"><div class="index-func"><a href="#verbosePrint">verbosePrint</a></div>
+<div class="index-func"><a href="#javaTurKit">javaTurKit</a></div>
+<div class="index-func"><a href="#baseDir">baseDir</a></div>
+<div class="index-func"><a href="#getFile">getFile</a></div>
+<div class="index-func"><a href="#read">read</a></div>
+<div class="index-func"><a href="#slurp">slurp</a></div>
+<div class="index-func"><a href="#write">write</a></div>
+<div class="index-func"><a href="#rethrow">rethrow</a></div>
+<div class="index-func"><a href="#group">group</a></div>
+<div class="index-func"><a href="#print">print</a></div>
+<div class="index-func"><a href="#sleep">sleep</a></div>
+<div class="index-func"><a href="#time">time</a></div>
+<div class="index-func"><a href="#md5">md5</a></div>
+<div class="index-func"><a href="#json">json</a></div>
+<div class="index-func"><a href="#safeJson">safeJson</a></div>
+<div class="index-func"><a href="#ensure">ensure</a></div>
+<div class="index-func"><a href="#values">values</a></div>
+<div class="index-func"><a href="#keys">keys</a></div>
+<div class="index-func"><a href="#filter">filter</a></div>
+<div class="index-func"><a href="#foreach">foreach</a></div>
+<div class="index-func"><a href="#map">map</a></div>
+<div class="index-func"><a href="#mapToSelf">mapToSelf</a></div>
+<div class="index-func"><a href="#fold">fold</a></div>
+<div class="index-func"><a href="#trim">trim</a></div>
+<div class="index-func indent"><a href="#String.prototype.trim">trim</a></div>
+<div class="index-func"><a href="#last">last</a></div>
+<div class="index-func indent"><a href="#Array.prototype.last">last</a></div>
+<div class="index-func"><a href="#prune">prune</a></div>
+<div class="index-func"><a href="#merge">merge</a></div>
+<div class="index-func"><a href="#getMax">getMax</a></div>
+<div class="index-func"><a href="#convertJavaArray">convertJavaArray</a></div>
+<div class="index-func"><a href="#escapeXml">escapeXml</a></div>
+<div class="index-func"><a href="#unescapeXml">unescapeXml</a></div>
+<div class="index-func"><a href="#highlightDiff">highlightDiff</a></div>
+<div class="index-func"><a href="#Set">Set</a></div>
+<div class="index-func indent"><a href="#Set.prototype.clone">clone</a></div>
+<div class="index-func indent"><a href="#Set.prototype.remove">remove</a></div>
+<div class="index-func indent"><a href="#Set.prototype.add">add</a></div>
+<div class="index-func indent"><a href="#Set.prototype.intersect">intersect</a></div>
+<div class="index-func"><a href="#Bag">Bag</a></div>
+<div class="index-func indent"><a href="#Bag.prototype.clone">clone</a></div>
+<div class="index-func indent"><a href="#Bag.prototype.add">add</a></div>
+<div class="index-func"><a href="#jsonPath">jsonPath</a></div>
+<div class="index-func"><a href="#Stats">Stats</a></div>
+<div class="index-func indent"><a href="#Stats.sum">sum</a></div>
+<div class="index-func indent"><a href="#Stats.mean">mean</a></div>
+<div class="index-func indent"><a href="#Stats.variance">variance</a></div>
+<div class="index-func indent"><a href="#Stats.sd">sd</a></div>
+<div class="index-func indent"><a href="#Stats.all">all</a></div>
+</div>
+
+<div class="clear"></div>
+</div>
+
+<a name="once"><div class="func">once(<span class="param">func</span>,<span class="param"> frameName</span>)</div></a>
+<div class="doc">
+This is a wrapper around <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="attempt"><div class="func">attempt(<span class="param">func</span>,<span class="param"> frameName</span>)</div></a>
+<div class="doc">
+This is a wrapper around <a href="#traceManager.attempt">traceManager.attempt</a>.
+</div>
+<a name="setTrace"><div class="func">setTrace(<span class="param">traceName</span>)</div></a>
+<div class="doc">
+Wrapper around <a href="#traceManager.setTrace">traceManager.setTrace</a>
+</div>
+<a name="resetTrace"><div class="func">resetTrace(<span class="param">traceName</span>)</div></a>
+<div class="doc">
+Wrapper around <a href="#traceManager.resetTrace">traceManager.resetTrace</a>.
+</div>
+<a name="stop"><div class="func">stop()</div></a>
+<div class="doc">
+Wrapper around <a href="#traceManager.stop">traceManager.stop</a>.
+</div>
+<a name="traceManager"><div class="func">traceManager</div></a>
+<div class="doc">
+The TraceManager manages a sort of stack frame that is memoized on
+disk (using the JavaScript database associated with the current file).
+All stack frames are memoized, so the result is a sort of stack tree.
+</div>
+<a name="traceManager.pushFrame"><div class="func"><span class="prefix">traceManager.</span>pushFrame</div></a>
+<div class="doc">
+Pushes a new stack frame onto the memoized stack.
+</div>
+<a name="traceManager.peekFrame"><div class="func"><span class="prefix">traceManager.</span>peekFrame</div></a>
+<div class="doc">
+Returns the frame we would see if we called pushFrame.
+</div>
+<a name="traceManager.setFrameValue"><div class="func"><span class="prefix">traceManager.</span>setFrameValue</div></a>
+<div class="doc">
+Sets the value of a "local variable" in the current memoized stack frame.
+This value is persisted in the memoized stack.
+</div>
+<a name="traceManager.getFrameValue"><div class="func"><span class="prefix">traceManager.</span>getFrameValue</div></a>
+<div class="doc">
+Gets the value of a "local variable" in the current memoized stack frame.
+</div>
+<a name="traceManager.popFrame"><div class="func"><span class="prefix">traceManager.</span>popFrame</div></a>
+<div class="doc">
+Pops the top stack frame off of the memoized stack. Note that this does not
+remove anything from the memoized stack. The memoized stack is a tree which
+stores a trace of every stack frame that ever went onto the stack.
+</div>
+<a name="traceManager.once"><div class="func"><span class="prefix">traceManager.</span>once</div></a>
+<div class="doc">
+Calls the function <i>func</i> only once; subsequent runs of the program
+will not call <i>func</i> if it returns successfully this time. If <i>func</i>
+throws an exception, then it will be called again when the program is
+re-executed.
+
+<p>
+This function creates a new memoized stack frame before calling <i>func</i>.
+You can give this stack frame a name as an optional second parameter
+<i>frameName</i>.
+</p>
+</div>
+<a name="traceManager.attempt"><div class="func"><span class="prefix">traceManager.</span>attempt</div></a>
+<div class="doc">
+Calls the function <i>func</i> in a new memoized stack frame, and catches
+the "stop" exception. Returns <code>true</code> if the call succeeds.
+Returns <code>false</code> if <i>func</i> throws a "stop" exception (see
+<a href="#traceManager.stop">traceManager.stop</a>).
+</div>
+<a name="traceManager.setTrace"><div class="func"><span class="prefix">traceManager.</span>setTrace</div></a>
+<div class="doc">
+Sets the root of the memoized stack frame tree. Calling this method with a
+new value for <i>traceName</i> has the effect of reseting all calls to
+<a href="#traceManager.once">traceManager.once</a>, so that they re-execute their functions.
+</div>
+<a name="traceManager.resetTrace"><div class="func"><span class="prefix">traceManager.</span>resetTrace</div></a>
+<div class="doc">
+Similar to <a href="#traceManager.setTrace">traceManager.setTrace</a>, except that it clears the memoized
+stack frame data for all other trace versions.
+</div>
+<a name="traceManager.stop"><div class="func"><span class="prefix">traceManager.</span>stop</div></a>
+<div class="doc">
+Throws a "stop" exception. This is the preferred way of stopping execution in
+order to wait on HITs on Mechanical Turk. Note that the "stop" exception is
+caught by <a href="#traceManager.attempt">traceManager.attempt</a>.
+</div>
+<a name="database"><div class="func">database</div></a>
+<div class="doc">
+Each TurKit script file has a JavaScript database associated with it.
+You may think of a JavaScript Database as a JavaScript environment that is
+persisted on disk. Any query you make to the
+database is evaluated in the context of the database, the new state of the database
+is written to disk, and then the result is returned.
+</div>
+<a name="database.query"><div class="func"><span class="prefix">database.</span>query</div></a>
+<div class="doc">
+Evaluates <i>s</i> in the context of the JavaScript database, and returns a
+deep clone of the result. Note that this function evaluates the string of
+JSON returned from the JavaScript database, and returns the result.
+</div>
+<a name="database.queryRaw"><div class="func"><span class="prefix">database.</span>queryRaw</div></a>
+<div class="doc">
+Evaluates <i>s</i> in the context of the JavaScript database, without change.
+This version does not wrap your code in a function body.
+It also does not guarantee that the results will be persisted on disk before the function returns,
+so you should only use this for calls that read from the database.
+Note that this version still evaluates the string of
+JSON returned from the JavaScript database, and returns the result.
+</div>
+<a name="mturk"><div class="func">mturk</div></a>
+<div class="doc">
+MTurk contains wrappers around the Java API for accessing Mechanical
+Turk.
+</div>
+<a name="mturk.getAccountBalance"><div class="func"><span class="prefix">mturk.</span>getAccountBalance</div></a>
+<div class="doc">
+Returns the number of dollars in the user's MTurk account.
+</div>
+<a name="mturk.createHITRaw"><div class="func"><span class="prefix">mturk.</span>createHITRaw</div></a>
+<div class="doc">
+Creates a HIT. <i>params</i> is an object with the following properties:
+<ul>
+<li><b>title</b>: displayed in the list of HITs on MTurk.</li>
+<li><b>description</b>: <b>desc</b> is also accepted. A slightly longer
+description of the HIT, also shown in the list of HITs on MTurk</li>
+<li><b>question</b>: a string of XML specifying what will be shown. <a
+href="http://docs.amazonwebservices.com/AWSMechanicalTurkRequester/2008-08-02/index.html?ApiReference_QuestionFormDataStructureArticle.html">See
+documentation here</a>. Instead of <i>question</i>, you may use the following special parameters:
+<ul>
+<li><b>url</b>: creates an external question pointing to this URL</li>
+<li><b>height</b>: (optional) height of the iFrame embedded in MTurk, in pixels (default is 600).</li>
+</ul>
+
+</li>
+<li><b>reward</b>: how many dollars you want to pay per assignment for this
+HIT.
+</ul>
+The following properties are optional:
+<ul>
+<li><b>keywords</b>: keywords to help people search for your HIT.</li>
+<li><b>assignmentDurationInSeconds</b>: default is 1 hour's worth of
+seconds.</li>
+<li><b>autoApprovalDelayInSeconds</b>: default is 1 month's worth of
+seconds.</li>
+<li><b>lifetimeInSeconds</b>: default is 1 week's worth of seconds.</li>
+<li><b>maxAssignments</b>: <b>assignments</b> is also accepted. default is 1.</li>
+<li><b>requesterAnnotation</b>: default is no annotation.</li>
+<li><b>qualificationRequirements</b>: an array of objects representing the XML structure of SOAP requirements for including qualification requirements (default is no requirements).</li>
+<li><b>minApproval</b>: minimum approval percentage. The appropriate
+requirement will be added if you supply a percentage here.</li>
+</ul>
+</div>
+<a name="mturk.createHIT"><div class="func"><span class="prefix">mturk.</span>createHIT</div></a>
+<div class="doc">
+Calls <a href="#mturk.createHITRaw">mturk.createHITRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="mturk.getReviewableHITs"><div class="func"><span class="prefix">mturk.</span>getReviewableHITs</div></a>
+<div class="doc">
+Returns a list of HIT Ids of HITs that are ready to be reviewed.
+You may optionally specify <code>maxPages</code>,
+to limit the number of pages of results returned.
+Each page will have up to 100 reviewable HIT Ids.
+If <code>maxPages</code> is specified,
+then the return value will have a property called <code>totalNumResults</code>,
+which indicates how many HITs are reviewable.
+</div>
+<a name="mturk.tryToGetHITId"><div class="func"><span class="prefix">mturk.</span>tryToGetHITId</div></a>
+<div class="doc">
+Tries to determine the type of <code>hit</code>, and return the HIT Id.
+</div>
+<a name="mturk.tryToGetAssignmentId"><div class="func"><span class="prefix">mturk.</span>tryToGetAssignmentId</div></a>
+<div class="doc">
+Tries to determine the type of <code>assignment</code> and return the
+assignment Id.
+</div>
+<a name="mturk.getHIT"><div class="func"><span class="prefix">mturk.</span>getHIT</div></a>
+<div class="doc">
+Returns an object representing all of the information MTurk has on the given
+HIT, including the assigments, and the associated answer data. The returned
+object will have a value called <i>done</i> set to true iff all the pending
+assigments for this HIT have been completed (unless <code>getAssignments</code> is false).
+
+<p>
+Note that the <i>answer</i> data structure associated with each assigment is
+simplified. It is recommended that you print out the result of this function
+using <a href="#json">json</a>, in order to know what it looks like for your specific
+situation.
+</p>
+</div>
+<a name="mturk.extendHITRaw"><div class="func"><span class="prefix">mturk.</span>extendHITRaw</div></a>
+<div class="doc">
+Extends the <code>hit</code> by the given number of assignments (<code>moreAssignments</code>),
+and the given number of seconds (<code>moreSeconds</code>).
+</div>
+<a name="mturk.extendHIT"><div class="func"><span class="prefix">mturk.</span>extendHIT</div></a>
+<div class="doc">
+Calls <a href="#mturk.extendHITRaw">mturk.extendHITRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="mturk.deleteHITRaw"><div class="func"><span class="prefix">mturk.</span>deleteHITRaw</div></a>
+<div class="doc">
+Deletes the given <code>hit</code>.
+If there are any completed assignments that have not been approved or rejected, then they are approved.
+</div>
+<a name="mturk.deleteHIT"><div class="func"><span class="prefix">mturk.</span>deleteHIT</div></a>
+<div class="doc">
+Calls <a href="#mturk.deleteHITRaw">mturk.deleteHITRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="mturk.deleteHITsRaw"><div class="func"><span class="prefix">mturk.</span>deleteHITsRaw</div></a>
+<div class="doc">
+Calls <a href="#mturk.deleteHITRaw">mturk.deleteHITRaw</a> on the array of <code>hits</code>.
+</div>
+<a name="mturk.deleteHITs"><div class="func"><span class="prefix">mturk.</span>deleteHITs</div></a>
+<div class="doc">
+Calls <a href="#mturk.deleteHITsRaw">mturk.deleteHITsRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="mturk.grantBonusRaw"><div class="func"><span class="prefix">mturk.</span>grantBonusRaw</div></a>
+<div class="doc">
+Grants a bonus of the given <code>amount</code> to the given
+<code>assignment</code> for the stated <code>reason</code>.
+</div>
+<a name="mturk.grantBonus"><div class="func"><span class="prefix">mturk.</span>grantBonus</div></a>
+<div class="doc">
+Calls <a href="#mturk.grantBonusRaw">mturk.grantBonusRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="mturk.approveAssignmentRaw"><div class="func"><span class="prefix">mturk.</span>approveAssignmentRaw</div></a>
+<div class="doc">
+Approves the given <code>assignment</code>, and provides an optional
+<code>reason</code>.
+</div>
+<a name="mturk.approveAssignment"><div class="func"><span class="prefix">mturk.</span>approveAssignment</div></a>
+<div class="doc">
+Calls <a href="#mturk.approveAssignmentRaw">mturk.approveAssignmentRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="mturk.approveAssignments"><div class="func"><span class="prefix">mturk.</span>approveAssignments</div></a>
+<div class="doc">
+Calls <a href="#mturk.approveAssignment">mturk.approveAssignment</a> for each assignment in the given
+<code>assignments</code> array.
+</div>
+<a name="mturk.rejectAssignmentRaw"><div class="func"><span class="prefix">mturk.</span>rejectAssignmentRaw</div></a>
+<div class="doc">
+Rejects the given <code>assignment</code>, and provides an optional
+<code>reason</code>.
+</div>
+<a name="mturk.rejectAssignment"><div class="func"><span class="prefix">mturk.</span>rejectAssignment</div></a>
+<div class="doc">
+Calls <a href="#mturk.rejectAssignmentRaw">mturk.rejectAssignmentRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="mturk.rejectAssignments"><div class="func"><span class="prefix">mturk.</span>rejectAssignments</div></a>
+<div class="doc">
+Calls <a href="#mturk.rejectAssignment">mturk.rejectAssignment</a> for each assignment in the given
+<code>assignments</code> array.
+</div>
+<a name="mturk.getHITs"><div class="func"><span class="prefix">mturk.</span>getHITs</div></a>
+<div class="doc">
+Returns an array of HIT data for all the HITs you currently have on MTurk.
+</div>
+<a name="mturk.waitForHIT"><div class="func"><span class="prefix">mturk.</span>waitForHIT</div></a>
+<div class="doc">
+Returns information about the <code>hit</code> if it is done (see
+<a href="#mturk.getHIT">mturk.getHIT</a>), and throwing the "stop" exception if it is still in
+progress.
+</div>
+<a name="mturk.vote"><div class="func"><span class="prefix">mturk.</span>vote</div></a>
+<div class="doc">
+Collects multiple votes until a minimum number of necessary votes for a
+single choice is achieved. The <code>hit</code> supplied to this function
+must have its <i>maxAssignments</i> set to the minimum number of votes
+necessary for a single choice. This function will add assignments if
+necessary. This function relies on <code>extractVoteFromAnswer</code> to
+extract a String representing the choice given an answer data structure (see
+<a href="#mturk.getHIT">mturk.getHIT</a>).
+
+<p>
+The return value is an object with the following entries:
+</p>
+<ul>
+<li><b>bestOption</b>: the String representing the choice with the most
+votes.</li>
+<li><b>totalVoteCount</b>: the number of votes received from turkers.</li>
+<li><b>voteCounts</b>: an object with key/value pairs representing
+choice/voteCounts.</li>
+<li><b>hit</b>: the HIT data structure representing the HIT on the final iteration of the voting process.</li>
+</ul>
+</div>
+<a name="mturk.sort"><div class="func"><span class="prefix">mturk.</span>sort</div></a>
+<div class="doc">
+Works just like the JavaScript array sort function, except that this one can
+perform comparisons in parallel on MTurk by catching the "stop" exception
+which is thrown when waiting on an MTurk HIT using <a href="#mturk.waitForHIT">mturk.waitForHIT</a>.
+</div>
+<a name="s3"><div class="func">s3</div></a>
+<div class="doc">
+S3 contains wrappers around the JetS3t API for accessing Amazon's S3 storage service.
+</div>
+<a name="s3.defaultBucketName"><div class="func"><span class="prefix">s3.</span>defaultBucketName</div></a>
+<div class="doc">
+The default name used for buckets: <code>your-aws-access-key-id.TurKit</code>.
+</div>
+<a name="s3.getURL"><div class="func"><span class="prefix">s3.</span>getURL</div></a>
+<div class="doc">
+Creates an S3 URL given a <code>bucket</code> and a <code>key</code>.
+</div>
+<a name="s3.getBucketAndKey"><div class="func"><span class="prefix">s3.</span>getBucketAndKey</div></a>
+<div class="doc">
+Extracts the bucket name and key from an S3 URL. For instance, given <code>http://s3.amazonaws.com/hello/hi.txt</code>,
+returns <code>{bucket:"hello", key:"hi.txt"}</code>.
+</div>
+<a name="s3.deleteObjectRaw"><div class="func"><span class="prefix">s3.</span>deleteObjectRaw</div></a>
+<div class="doc">
+Remove the object with the given <code>key</code> from the bucket with the given <code>bucketName</code>.
+If only one parameter is supplied, it assumes it is an S3 URL, and attempts to extract the bucket name and key from that.
+
+<p><code>bucketName</code> is optional.
+If you do not provide it, the name <a href="#s3.defaultBucketName">s3.defaultBucketName</a> will be used.</p>
+</div>
+<a name="s3.deleteObject"><div class="func"><span class="prefix">s3.</span>deleteObject</div></a>
+<div class="doc">
+Calls <a href="#s3.deleteObjectRaw">s3.deleteObjectRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="s3.putObjectRaw"><div class="func"><span class="prefix">s3.</span>putObjectRaw</div></a>
+<div class="doc">
+Create a public object in S3 based on the suplied data.
+Returns the URL for the object.
+
+This function will create the bucket if it doesn't exist.
+
+<p><code>bucketName</code> is optional.
+If you do not provide it, the name <a href="#s3.defaultBucketName">s3.defaultBucketName</a> will be used.</p>
+
+<p><code>key</code> is optional.
+If you do not provide it, the key will be a random string of characters
+with an .html extension.</p>
+
+<p>If there is only 1 parameter, it will be interpreted as <code>stringData</code>.</p>
+</div>
+<a name="s3.putObject"><div class="func"><span class="prefix">s3.</span>putObject</div></a>
+<div class="doc">
+Calls <a href="#s3.putObjectRaw">s3.putObjectRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="s3.putStringRaw"><div class="func"><span class="prefix">s3.</span>putStringRaw</div></a>
+<div class="doc">
+Create a public object in S3 based on a string.
+Returns the URL for the object.
+
+<p><code>bucketName</code> is optional.
+If you do not provide it, the name <a href="#s3.defaultBucketName">s3.defaultBucketName</a> will be used.</p>
+
+<p><code>key</code> is optional.
+If you do not provide it, the key will be a random string of characters
+with an .html extension.</p>
+
+<p>If there is only 1 parameter, it will be interpreted as <code>stringData</code>.</p>
+</div>
+<a name="s3.putString"><div class="func"><span class="prefix">s3.</span>putString</div></a>
+<div class="doc">
+Calls <a href="#s3.putStringRaw">s3.putStringRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="s3.putFileRaw"><div class="func"><span class="prefix">s3.</span>putFileRaw</div></a>
+<div class="doc">
+Create a public object in S3 based on a file.
+The name given to this object will be randomly generated.
+Returns the URL for the object.
+
+<p><code>bucketName</code> is optional.
+If you do not provide it, the name <a href="#s3.defaultBucketName">s3.defaultBucketName</a> will be used.</p>
+
+<p>If there is only 1 parameter, it will be interpreted as <code>file</code>.</p>
+</div>
+<a name="s3.putFile"><div class="func"><span class="prefix">s3.</span>putFile</div></a>
+<div class="doc">
+Calls <a href="#s3.putFileRaw">s3.putFileRaw</a> inside of <a href="#traceManager.once">traceManager.once</a>.
+</div>
+<a name="verbosePrint"><div class="func">verbosePrint(<span class="param">s</span>)</div></a>
+<div class="doc">
+This function prints <i>s</i> if and only if TurKit is in "verbose" mode.
+</div>
+<a name="javaTurKit"><div class="func">javaTurKit</div></a>
+<div class="doc">
+This is a reference to the TurKit object in Java running this JavaScript
+file.
+</div>
+<a name="baseDir"><div class="func">baseDir</div></a>
+<div class="doc">
+This is the directory that the currently running TurKit JavaScript file is in.
+</div>
+<a name="getFile"><div class="func">getFile(<span class="param">relPath</span>)</div></a>
+<div class="doc">
+Get a Java File object given a path relative to the <a href="#baseDir">baseDir</a>.
+</div>
+<a name="read"><div class="func">read(<span class="param">src</span>)</div></a>
+<div class="doc">
+Reads the contents of the file or url indicated by <code>src</code> into a string.
+</div>
+<a name="slurp"><div class="func">slurp(<span class="param">src</span>)</div></a>
+<div class="doc">
+Reads the contents of the file or url indicated by <code>src</code> into a string,
+same as <a href="#read">read</a>.
+</div>
+<a name="write"><div class="func">write(<span class="param">dest</span>,<span class="param"> s</span>)</div></a>
+<div class="doc">
+Writes the contents of the string <code>s</code> to the file indicated by <code>dest</code>.
+</div>
+<a name="rethrow"><div class="func">rethrow(<span class="param">e</span>)</div></a>
+<div class="doc">
+Re-throws the given exception, with an attempt to preserve the original stack trace.
+</div>
+<a name="group"><div class="func">group(<span class="param">a</span>,<span class="param"> func</span>)</div></a>
+<div class="doc">
+Groups the values in the object or array <code>a</code>
+by the key defined for each value by running <code>func</code> on that value.
+The result is a map of keys to arrays, where each array holds all the values associated with that key.	
+</div>
+<a name="print"><div class="func">print(<span class="param">s</span>)</div></a>
+<div class="doc">
+A thin wrapper around Java's System.out.println(s).
+If <code>s</code> is an object, then it is converted into a string using <a href="#json">json</a>.
+</div>
+<a name="sleep"><div class="func">sleep(<span class="param">seconds</span>)</div></a>
+<div class="doc">
+Sleep for the specified number of seconds using Java's Thread.sleep
+</div>
+<a name="time"><div class="func">time()</div></a>
+<div class="doc">
+Wraps Java's System.currentTimeMillis(). Returns the current time in milliseconds.
+</div>
+<a name="md5"><div class="func">md5(<span class="param">s</span>)</div></a>
+<div class="doc">
+Return the md5 hash of the given string.
+</div>
+<a name="json"><div class="func">json(<span class="param">o</span>)</div></a>
+<div class="doc">
+Returns a JSON-like representation of the JavaScript data value. You may call "eval" on the result and get back the original data structure. This works even if the structure contains nested or even circular references. It does not handle functions.
+@param o The data value to convert. May be a number, string, array or object.
+@returns A JSON-like representation of o.
+@type String
+</div>
+<a name="safeJson"><div class="func">safeJson(<span class="param">s</span>)</div></a>
+<div class="doc">
+Returns true if it is safe to call eval on s, i.e., calling eval on s will not have any side effects aside from creating a data structure.
+</div>
+<a name="ensure"><div class="func">ensure(<span class="param">obj</span>,<span class="param"> path</span>,<span class="param"> defaultValue</span>)</div></a>
+<div class="doc">
+Ensures that a JavaScript path exists, assigns a default value to the path if it doesn't exist yet, and returns the value in either case. There are multiple ways to call this function. All of the following are equivalent:<br>
+<code>
+ensure("a.b[2].c", 5)<br>
+ensure(null, "a.b[2].c", 5)<br>
+ensure(a, "b[2].c", 5)<br>
+ensure(a, ".b[2].c", 5)<br>
+ensure(a, ["b", 2, "c"], 5)<br>
+<br>
+print(a.b[2].c)<br>
+<br>
+</code>
+The last line prints "5". Note that the last 3 versions only work if <code>a</code> is already an object.
+</div>
+<a name="values"><div class="func">values(<span class="param">obj</span>)</div></a>
+<div class="doc">
+Returns an array of the values in an object.
+@type Array
+</div>
+<a name="keys"><div class="func">keys(<span class="param">obj</span>)</div></a>
+<div class="doc">
+Returns the keys of an object as an array.
+@type Array
+</div>
+<a name="filter"><div class="func">filter(<span class="param">a</span>,<span class="param"> test</span>)</div></a>
+<div class="doc">
+Filters values of an array or object using the <i>test</i> function; the original object is not affected.<br>
+For example:<br>
+<code>filter({a:5,b:7,c:3}, function (e) {return e >= 5})</code><br>
+returns <code>{a:5,b:7}</code>.<br>
+You may also use a string for <i>test</i> like so:<br>
+<code>filter({a:5,b:7,c:3}, "e >= 5")</code>.<br>
+Note that <i>e</i> is a special value in the string.
+</div>
+<a name="foreach"><div class="func">foreach(<span class="param">a</span>,<span class="param"> test</span>)</div></a>
+<div class="doc">
+Processes values of an array or object using the <i>test</i> function; the original object is not affected.<br>
+For example:<br>
+<code>foreach({a:5,b:7,c:3}, function (e) {print(e)})</code><br>
+prints 5, 7, 3<br>
+You may also use a string for <i>test</i> like so:<br>
+<code>foreach({a:5,b:7,c:3}, "print(e)")</code>.<br>
+Note that <i>e</i> is a special value in the string. Another special value is <i>i</i>, which is the index or key of the current element.
+</div>
+<a name="map"><div class="func">map(<span class="param">a</span>,<span class="param"> test</span>)</div></a>
+<div class="doc">
+Maps values of an array or object using the <i>test</i> function; the original object is not affected.<br>
+For example:<br>
+<code>map({a:5,b:7,c:3}, function (e) {return e + 1})</code><br>
+returns <code>{a:6,b:8,c:4}</code>.<br>
+You may also use a string for <i>test</i> like so:<br>
+<code>map({a:5,b:7,c:3}, "e + 1")</code>.<br>
+Note that <i>e</i> is a special value in the string. Another special value is <i>i</i>, which is the index or key of the current element.
+</div>
+<a name="mapToSelf"><div class="func">mapToSelf(<span class="param">a</span>,<span class="param"> test</span>)</div></a>
+<div class="doc">
+Maps values of an array or object using the <i>test</i> function, overriding the values in the original object.<br>
+For example:<br>
+<code>mapToSelf({a:5,b:7,c:3}, function (e) {return e + 1})</code><br>
+returns <code>{a:6,b:8,c:4}</code>.<br>
+You may also use a string for <i>test</i> like so:<br>
+<code>mapToSelf({a:5,b:7,c:3}, "e + 1")</code>.<br>
+Note that <i>e</i> is a special value in the string. Another special value is <i>i</i>, which is the index or key of the current element.
+</div>
+<a name="fold"><div class="func">fold(<span class="param">a</span>,<span class="param"> func</span>,<span class="param"> def</span>)</div></a>
+<div class="doc">
+<p>Here is an example of <code>fold</code>:<br>
+<code>fold([1, 1, 1, 1], function (x, y) { return x + y }, 0)</code><br>
+returns <code>4</code>.</p>
+
+<p>The value of <code>x</code> in the function will always come from
+an element of <code>a</code>.</p>
+
+<p>If the parameter <code>def</code> is used,
+then the value of <code>y</code> in the function
+will always come from <code>def</code>,
+or from a return value of <code>func</code>.
+If <code>a</code> has no elements, then <code>def</code> will be returned.</p>
+
+<p>If <code>def</code> is not supplied,
+then both <code>x</code> and <code>y</code> will come from <code>a</code>.
+If <code>a</code> has only 1 element,
+then <code>func</code> will not be called,
+and that one element will be returned.
+If <code>a</code> has no elements, then <code>null</code> will be returned.</p> 
+</div>
+<a name="trim"><div class="func">trim(<span class="param">s</span>)</div></a>
+<div class="doc">
+Removes whitespace from the front and back of the string.
+</div>
+<a name="String.prototype.trim"><div class="func"><span class="prefix">String.prototype.</span>trim</div></a>
+<div class="doc">
+Removes whitespace from the front and back of the string.
+</div>
+<a name="last"><div class="func">last(<span class="param">a</span>)</div></a>
+<div class="doc">
+Returns the last element of this array.
+</div>
+<a name="Array.prototype.last"><div class="func"><span class="prefix">Array.prototype.</span>last</div></a>
+<div class="doc">
+Returns the last element of this array.
+</div>
+<a name="prune"><div class="func">prune(<span class="param">o</span>,<span class="param"> depth</span>)</div></a>
+<div class="doc">
+Returns a deep clone of <i>o</i> up to the specified <i>depth</i>.<br>
+For example:<br>
+<code>
+prune({a:{b:5},c:[1,2,3]}, 1)
+</code><br>
+Returns <code>{a:{},c:[]}</code>
+</div>
+<a name="merge"><div class="func">merge(<span class="param">objA</span>,<span class="param"> objB</span>)</div></a>
+<div class="doc">
+Adds the key/value pairs found in <i>objB</i> to <i>objA</i>.<br>
+For example:<br>
+<code>
+merge({a:1, b:2}, {c:3, d:4})
+</code><br>
+returns <code>{a:1, b:2, c:3, d:4}</code>
+</div>
+<a name="getMax"><div class="func">getMax(<span class="param">a</span>,<span class="param"> test</span>)</div></a>
+<div class="doc">
+Passes each value of an array or object through the <i>test</i> function, and returns the maximum value found, along with the index it was found at, in an array.<br>
+For example:<br>
+<code>getMax({a:5,b:7,c:3}, function (e) {return e})</code><br>
+returns [7, "b"]<br>
+You may also use a string for <i>test</i> like so:<br>
+<code>getMax({a:5,b:7,c:3}, "e")</code>.<br>
+Note that <i>e</i> is a special value in the string. Another special value is <i>i</i>, which is the index or key of the current element. If you omit a value for <i>test</i>, the default is "e".
+@param a An array or object.
+@param test Each element in <i>a</i> is passed through this. The default is the identity function.    
+</div>
+<a name="convertJavaArray"><div class="func">convertJavaArray(<span class="param">ja</span>)</div></a>
+<div class="doc">
+Returns a JavaScript array given a Java array.
+</div>
+<a name="escapeXml"><div class="func">escapeXml</div></a>
+<div class="doc">
+Escape the string for use inside XML, e.g., convert characters like &amp; into &amp;amp;.
+</div>
+<a name="unescapeXml"><div class="func">unescapeXml</div></a>
+<div class="doc">
+Unescape a string with XML escape codes, e.g., convert sequences like &amp;amp; into &amp;.
+</div>
+<a name="highlightDiff"><div class="func">highlightDiff(<span class="param">a</span>,<span class="param"> b</span>)</div></a>
+<div class="doc">
+<p>Takes two strings <code>a</code> and <code>b</code>, and calculates their differences.
+The differences are highlighted in each result using HTML span tags with yellow backgrounds.
+There are two resulting strings of HTML, returned in an object with two properties, <code>a</code> and <code>b</code>.</p>
+</div>
+<a name="Set"><div class="func">Set(<span class="param">a</span>)</div></a>
+<div class="doc">
+Returns a new Set. A set is represented as an object where the values are true for keys in the set.
+If <code>a</code> is a set, add it's elements to this set.
+If <code>a</code> is an object, add it's values to this set.
+If <code>a</code> is an element, add it to this set.
+</div>
+<a name="Set.prototype.clone"><div class="func"><span class="prefix">Set.prototype.</span>clone</div></a>
+<div class="doc">
+Returns a clone of the Set.
+</div>
+<a name="Set.prototype.remove"><div class="func"><span class="prefix">Set.prototype.</span>remove</div></a>
+<div class="doc">
+If <code>a</code> is a set, remove it's elements from this set.
+If <code>a</code> is an object, remove it's values from this set.
+If <code>a</code> is an element, remove it from this set.
+
+Returns this Set, after the removal.
+If removing a single element, returns <code>true</code> iff the element existed before.
+</div>
+<a name="Set.prototype.add"><div class="func"><span class="prefix">Set.prototype.</span>add</div></a>
+<div class="doc">
+If <code>a</code> is a set, add it's elements to this set.
+If <code>a</code> is an object, add it's values to this set.
+If <code>a</code> is an element, add it to this set.
+
+Returns this Set, after the addition.
+If adding a single element, returns <code>true</code> iff the element didn't exist before.
+</div>
+<a name="Set.prototype.intersect"><div class="func"><span class="prefix">Set.prototype.</span>intersect</div></a>
+<div class="doc">
+Returns a new Set representing the intersection of this Set with <code>a</code>.
+If <code>a</code> is an object, a set is created from its values, and the intersection is done with that.
+If <code>a</code> is an element, a set is created containing this element, and the intersection is done with that.
+</div>
+<a name="Bag"><div class="func">Bag(<span class="param">a</span>)</div></a>
+<div class="doc">
+Returns a new Bag data structure,
+which is an unordered collection of objects,
+where objects can appear multiple times.
+The bag is really a map of keys,
+where the value associated with each key
+represents the number of times that key appears in the bag.
+
+If <code>a</code> is a bag, add it's elements to this bag.
+If <code>a</code> is an object, add it's values to this bag.
+If <code>a</code> is an element, add it to this bag.
+</div>
+<a name="Bag.prototype.clone"><div class="func"><span class="prefix">Bag.prototype.</span>clone</div></a>
+<div class="doc">
+Returns a clone of the bag.
+</div>
+<a name="Bag.prototype.add"><div class="func"><span class="prefix">Bag.prototype.</span>add</div></a>
+<div class="doc">
+If <code>a</code> is a bag, add it's elements to this bag, and returns the new bag.
+If <code>a</code> is an object, add it's values to this bag, and returns the new bag.
+If <code>a</code> is an element, add it to this bag, and return the new number of times it appears.
+
+The parameter <code>count</code> defaults to 1,
+but can be changed to add multiple copies of <code>a</code> to the bag.
+</div>
+<a name="jsonPath"><div class="func">jsonPath(<span class="param">obj</span>,<span class="param"> expr</span>,<span class="param"> arg</span>)</div></a>
+<div class="doc">
+see documentation here: <a href="http://goessner.net/articles/JsonPath/">http://goessner.net/articles/JsonPath/</a>
+
+from: http://code.google.com/p/jsonpath/
+
+JSONPath 0.8.0 - XPath for JSON
+
+Copyright (c) 2007 Stefan Goessner (goessner.net)
+Licensed under the MIT (MIT-LICENSE.txt) licence.
+</div>
+<a name="Stats"><div class="func">Stats</div></a>
+<div class="doc">
+Utility methods for doing statistics. More to come here in the future.
+</div>
+<a name="Stats.sum"><div class="func"><span class="prefix">Stats.</span>sum</div></a>
+<div class="doc">
+Calculate the sum of an array
+</div>
+<a name="Stats.mean"><div class="func"><span class="prefix">Stats.</span>mean</div></a>
+<div class="doc">
+Calculate the mean of an array.
+<code>sum</code> is optional -- it will be calculated if not supplied. 
+</div>
+<a name="Stats.variance"><div class="func"><span class="prefix">Stats.</span>variance</div></a>
+<div class="doc">
+Calculate the variance of an array.
+<code>mean</code> is optional -- it will be calculated if not supplied. 
+</div>
+<a name="Stats.sd"><div class="func"><span class="prefix">Stats.</span>sd</div></a>
+<div class="doc">
+Calculate the standard deviation of an array.
+<code>mean</code> is optional -- it will be calculated if not supplied. 
+</div>
+<a name="Stats.all"><div class="func"><span class="prefix">Stats.</span>all</div></a>
+<div class="doc">
+Calculate the sum, mean, variance and standard deviation of <code>a</code>.
+</div>
+
+
+</div>
+
+</div>
+
+</body>
+</html>

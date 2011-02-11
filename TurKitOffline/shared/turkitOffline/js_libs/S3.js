@@ -1,16 +1,12 @@
 
-/**
- * You probably want to use the global variable <code>s3</code>.
- * 
- * @class S3 contains wrappers around the JetS3t API for accessing Amazon's S3 storage service.
- * 
- * <p>
- * <code>s3</code> is a global instance of the S3 class.
- * </p>
- */
 function S3() {
 	this.defaultBucketName = javaTurKit.awsAccessKeyID + ".TurKit"
 }
+
+/**
+ * S3 contains wrappers around the JetS3t API for accessing Amazon's S3 storage service.
+ */
+s3 = new S3()
 
 /**
  * The default name used for buckets: <code>your-aws-access-key-id.TurKit</code>.
@@ -42,7 +38,7 @@ S3.prototype.getBucketAndKey = function(url) {
 	If only one parameter is supplied, it assumes it is an S3 URL, and attempts to extract the bucket name and key from that.
 	
 	<p><code>bucketName</code> is optional.
-	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
+	If you do not provide it, the name {@link s3.defaultBucketName} will be used.</p>
  */
 S3.prototype.deleteObjectRaw = function(bucketName, key) {
 
@@ -67,7 +63,7 @@ S3.prototype.deleteObjectRaw = function(bucketName, key) {
 }
 
 /**
- * Calls {@link S3#deleteObjectRaw} inside of {@link TraceManager#once}.
+ * Calls {@link s3.deleteObjectRaw} inside of {@link traceManager.once}.
  */
 S3.prototype.deleteObject = function(bucketName, key) {
 	return once(function() {
@@ -82,7 +78,7 @@ S3.prototype.deleteObject = function(bucketName, key) {
 	This function will create the bucket if it doesn't exist.
 	
 	<p><code>bucketName</code> is optional.
-	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
+	If you do not provide it, the name {@link s3.defaultBucketName} will be used.</p>
 	
 	<p><code>key</code> is optional.
 	If you do not provide it, the key will be a random string of characters
@@ -117,7 +113,7 @@ S3.prototype.putObjectRaw = function(bucketName, key, data) {
 }
 
 /**
- * Calls {@link S3#putObjectRaw} inside of {@link TraceManager#once}.
+ * Calls {@link s3.putObjectRaw} inside of {@link traceManager.once}.
  */
 S3.prototype.putObject = function(bucketName, s3Object) {
 	return once(function() {
@@ -130,7 +126,7 @@ S3.prototype.putObject = function(bucketName, s3Object) {
 	Returns the URL for the object.
 	
 	<p><code>bucketName</code> is optional.
-	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
+	If you do not provide it, the name {@link s3.defaultBucketName} will be used.</p>
 	
 	<p><code>key</code> is optional.
 	If you do not provide it, the key will be a random string of characters
@@ -143,7 +139,7 @@ S3.prototype.putStringRaw = function(bucketName, key, stringData) {
 }
 
 /**
- * Calls {@link S3#putStringRaw} inside of {@link TraceManager#once}.
+ * Calls {@link s3.putStringRaw} inside of {@link traceManager.once}.
  */
 S3.prototype.putString = function(bucketName, key, stringData) {
 	return once(function() {
@@ -157,7 +153,7 @@ S3.prototype.putString = function(bucketName, key, stringData) {
 	Returns the URL for the object.
 	
 	<p><code>bucketName</code> is optional.
-	If you do not provide it, the name {@link S3#defaultBucketName} will be used.</p>
+	If you do not provide it, the name {@link s3.defaultBucketName} will be used.</p>
 	
 	<p>If there is only 1 parameter, it will be interpreted as <code>file</code>.</p>
  */
@@ -186,17 +182,10 @@ S3.prototype.putFileRaw = function(bucketName, file) {
 }
 
 /**
- * Calls {@link S3#putFileRaw} inside of {@link TraceManager#once}.
+ * Calls {@link s3.putFileRaw} inside of {@link traceManager.once}.
  */
 S3.prototype.putFile = function(bucketName, file) {
 	return once(function() {
 				return s3.putFileRaw(bucketName, file)
 			})
 }
-
-/**
- * A reference to an {@link S3} object.
- * 
- * @return {S3}
- */
-s3 = new S3()

@@ -1,24 +1,17 @@
 
-/**
- * You probably want to use the global variable <code>database</code>.
- * 
- * @class Each TurKit script file has a JavaScript database associated with it.
- *        This JavaScriptDatabase instance is called <code>database</code>.
- * 
- * <p>
- * You may think of a JavaScript Database as a JavaScript environment that is
- * persisted on disk. Any query you make to the
- * database is evaluated in the context of the database, the new state of the database
- * is written to disk, and then the result is returned.
- */
 function Database() {
 	this.database = javaTurKit.database
 }
 
 /**
- * A reference to the Java JavaScriptDatabase object associated with this TurKit
- * file.
+ * Each TurKit script file has a JavaScript database associated with it.
+ * You may think of a JavaScript Database as a JavaScript environment that is
+ * persisted on disk. Any query you make to the
+ * database is evaluated in the context of the database, the new state of the database
+ * is written to disk, and then the result is returned.
  */
+database = new Database()
+
 Database.prototype.database = null
 
 /**
@@ -41,8 +34,3 @@ Database.prototype.query = function(s) {
 Database.prototype.queryRaw = function(s) {
 	return eval("" + java_RhinoUtil.json(this.database.queryRaw(s)))
 }
-
-/**
- * This is a reference to the {@link Database} associated with this TurKit file.
- */
-var database = new Database()

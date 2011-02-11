@@ -1,21 +1,52 @@
 
 /**
- * You probably want to just use the global variable <code>traceManager</code>.
- * 
- * @class The TraceManager manages a sort of stack frame that is memoized on
- *        disk (using the JavaScript database associated with the current file).
- *        All stack frames are memoized, so the result is a sort of stack tree.
- * 
- * <p>
- * <code>traceManager</code> is a global instance of this class.
- * </p>
+ * This is a wrapper around {@link traceManager.once}.
  */
+function once(func, frameName) {
+	return traceManager.once(func, frameName)
+}
+
+/**
+ * This is a wrapper around {@link traceManager.attempt}.
+ */
+function attempt(func, frameName) {
+	return traceManager.attempt(func, frameName)
+}
+
+/**
+ * Wrapper around {@link traceManager.setTrace}
+ */
+function setTrace(traceName) {
+	return traceManager.setTrace(traceName)
+}
+
+/**
+ * Wrapper around {@link traceManager.resetTrace}.
+ */
+function resetTrace(traceName) {
+	return traceManager.resetTrace(traceName)
+}
+
+/**
+ * Wrapper around {@link traceManager.stop}.
+ */
+function stop() {
+	return traceManager.stop()
+}
+
 function TraceManager() {
 	this.stackFramePath = ["__stackFrames", "for-real"]
 	this.stackIndexes = [0]
 	this.visitedStackFrames = {}
 	this.beforePushFrame = true
 }
+
+/**
+ * The TraceManager manages a sort of stack frame that is memoized on
+ *        disk (using the JavaScript database associated with the current file).
+ *        All stack frames are memoized, so the result is a sort of stack tree.
+ */
+traceManager = new TraceManager()
 
 /**
  * Pushes a new stack frame onto the memoized stack.
@@ -149,17 +180,10 @@ TraceManager.prototype.once = function(func, frameName) {
 }
 
 /**
- * This is a wrapper around {@link TraceManager#once}.
- */
-function once(func, frameName) {
-	return traceManager.once(func, frameName)
-}
-
-/**
  * Calls the function <i>func</i> in a new memoized stack frame, and catches
  * the "stop" exception. Returns <code>true</code> if the call succeeds.
  * Returns <code>false</code> if <i>func</i> throws a "stop" exception (see
- * {@link TraceManager#stop}).
+ * {@link traceManager.stop}).
  */
 TraceManager.prototype.attempt = function(func, frameName) {
 	this.pushFrame(frameName)
@@ -178,16 +202,9 @@ TraceManager.prototype.attempt = function(func, frameName) {
 }
 
 /**
- * This is a wrapper around {@link TraceManager#attempt}.
- */
-function attempt(func, frameName) {
-	return traceManager.attempt(func, frameName)
-}
-
-/**
  * Sets the root of the memoized stack frame tree. Calling this method with a
  * new value for <i>traceName</i> has the effect of reseting all calls to
- * {@link TraceManager#once}, so that they re-execute their functions.
+ * {@link traceManager.once}, so that they re-execute their functions.
  */
 TraceManager.prototype.setTrace = function(traceName) {
 	if (!this.beforePushFrame) {
@@ -200,14 +217,7 @@ TraceManager.prototype.setTrace = function(traceName) {
 }
 
 /**
- * Wrapper around {@link TraceManager#setTrace}
- */
-function setTrace(traceName) {
-	return traceManager.setTrace(traceName)
-}
-
-/**
- * Similar to {@link TraceManager#setTrace}, except that it clears the memoized
+ * Similar to {@link traceManager.setTrace}, except that it clears the memoized
  * stack frame data for all other trace versions.
  */
 TraceManager.prototype.resetTrace = function(traceName) {
@@ -224,31 +234,11 @@ TraceManager.prototype.resetTrace = function(traceName) {
 }
 
 /**
- * Wrapper around {@link TraceManager#resetTrace}.
- */
-function resetTrace(traceName) {
-	return traceManager.resetTrace(traceName)
-}
-
-/**
  * Throws a "stop" exception. This is the preferred way of stopping execution in
  * order to wait on HITs on Mechanical Turk. Note that the "stop" exception is
- * caught by {@link TraceManager#attempt}.
+ * caught by {@link traceManager.attempt}.
  */
 TraceManager.prototype.stop = function() {
 	javaTurKit.stopped = true
 	throw "stop"
 }
-
-/**
- * Wrapper around {@link TraceManager#stop}.
- */
-function stop() {
-	return traceManager.stop()
-}
-
-/**
- * This is a pointer to the {@link TraceManager}. You probably want to use
- * this, and not create another TraceManager.
- */
-var traceManager = new TraceManager()

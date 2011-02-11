@@ -2,8 +2,7 @@
 /**
  * Utility methods for doing statistics. More to come here in the future.
  */
-function Stats() {
-}
+Stats = {}
 
 /**
  * Calculate the sum of an array
