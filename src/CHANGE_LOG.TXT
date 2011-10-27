@@ -1,5 +1,11 @@
 
 -------------------------------
+version 0.2.6
+
+- bug fix: qualifications should work now
+- soap arguments are now packaged up as XML in JavaScript, rather than Java
+
+-------------------------------
 version 0.2.5
 
 - bug fix -- MTurk REST API craps out for HITs with a very long "question" field, so we use SOAP API instead,

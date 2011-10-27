@@ -243,8 +243,10 @@ public class TurKit {
 			scope.put("javaTurKit", scope, this);
 
 			for (String s : U.getResourceListing(this.getClass(), "js_libs")) {
-				RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
+			    if (!s.startsWith(".")) {
+			        RhinoUtil.evaluateURL(cx, scope, this.getClass().getResource(
 						"js_libs/" + s));
+			    }
 			}
 
 			stopped = false;
