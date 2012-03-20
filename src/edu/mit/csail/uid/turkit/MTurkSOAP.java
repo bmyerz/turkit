@@ -71,8 +71,8 @@ public class MTurkSOAP implements Serializable {
 			throws Exception {
 
 		URL url = new URL(
-				sandbox ? "http://mechanicalturk.sandbox.amazonaws.com/"
-						: "http://mechanicalturk.amazonaws.com/");
+				sandbox ? "https://mechanicalturk.sandbox.amazonaws.com/"
+						: "https://mechanicalturk.amazonaws.com/");
 
 		String timestamp = getTimestamp();
 		String sig = getSignature("AWSMechanicalTurkRequester", operation,

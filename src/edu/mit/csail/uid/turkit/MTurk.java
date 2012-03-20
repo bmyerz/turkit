@@ -74,8 +74,8 @@ public class MTurk {
 					.get("Operation"), params.get("Timestamp"), secretKey));
 		}
 
-		String url = sandbox ? "http://mechanicalturk.sandbox.amazonaws.com/?"
-				: "http://mechanicalturk.amazonaws.com/?";
+		String url = sandbox ? "https://mechanicalturk.sandbox.amazonaws.com/?"
+				: "https://mechanicalturk.amazonaws.com/?";
 		boolean first = true;
 		for (Map.Entry<String, String> e : params.entrySet()) {
 			if (e.getValue() == null)
