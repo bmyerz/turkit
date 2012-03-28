@@ -1,5 +1,10 @@
 
 -------------------------------
+version 0.2.7
+
+- bug fix: uses https now instead to talk to MTurk (which MTurk now requires)
+
+-------------------------------
 version 0.2.6
 
 - bug fix: qualifications should work now
