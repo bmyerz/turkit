@@ -255,7 +255,8 @@ var XMLtags = function(paramsList){
     
 		var x = ""	
 		for (var i = 0; i < arguments.length; i += 2) {
-			x= x+ XMLtag(arguments[i], arguments[i + 1]);
+			if (arguments[i + 1] != null)
+				x= x+ XMLtag(arguments[i], arguments[i + 1]);
 		}
 		return x	
 }

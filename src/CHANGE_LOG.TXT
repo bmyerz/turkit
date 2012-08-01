@@ -1,5 +1,10 @@
 
 -------------------------------
+version 0.2.8
+
+- bug fix: it was creating bad XML for HITs, with elements containing things like "null" or "undefined".. now it doesn't do that, which will hopefully fix some errors people have been having.
+
+-------------------------------
 version 0.2.7
 
 - bug fix: uses https now instead to talk to MTurk (which MTurk now requires)
