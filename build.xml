@@ -4,6 +4,12 @@
 	<property name="run_jar_file" value="TurKit-${version.value}.jar" />
 	<property name="output_dir" value="build" />
 
+    <path id="master-classpath">
+        <fileset dir="libs">
+            <include name="**/*.jar"/>
+        </fileset>
+    </path>
+
 	<target name="jsdocs" description="build JavaScript documentation">
 		<echo file="jsdoc-toolkit/templates/jsdoc/static/header.html">&lt;div id=&quot;header&quot; style=&quot;width:100%;text-align:right&quot;&gt;&lt;h3&gt;&lt;i&gt;TurKit JavaScript API v${version.value}&lt;/i&gt;&lt;/h3&gt;&lt;/div&gt;</echo>
 		<exec executable="java" dir="jsdoc-toolkit">
@@ -32,13 +38,20 @@
 		</exec>
 	</target>
 
+    <target name="compile">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="src" includeantruntime="false" destdir="build/classes">
+            <classpath refid="master-classpath"/>
+        </javac>
+    </target>
+
 	<target name="create_run_jar">
 		<mkdir dir="${output_dir}"/>
 		<jar destfile="${output_dir}/${run_jar_file}" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="Main-Class" value="edu.mit.csail.uid.turkit.gui.Main" />
-				<attribute name="Class-Path" value="." />
+				<attribute name="Class-Path" value="src" />
 			</manifest>
 			<fileset dir="bin" />
 			<zipfileset excludes="META-INF/*.SF" src="libs/commons-cli-1.2.0/commons-cli-1.2.jar" />
@@ -47,7 +60,13 @@
 		</jar>
 	</target>
 
-	<target name="build" depends="jsdocs,javadoc,create_run_jar" description="build everything">
+    <target name="clean">
+      <delete>
+         <fileset dir="src" includes="**/*.class"/>
+      </delete>
+   </target>
+
+	<target name="build" depends="jsdocs,javadoc,create_run_jar,compile" description="build everything">
 	</target>
 
 </project>
